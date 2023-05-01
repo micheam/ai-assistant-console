@@ -87,7 +87,6 @@ func main() {
 			continue
 
 		case ":quit", ":q", ":exit":
-			fmt.Println(info("Bye!"))
 			return
 
 		case ":send":
@@ -101,6 +100,8 @@ func main() {
 			logger.Printf("ChatCompletion request: %+v\n", req)
 
 			if *stream {
+				logger.Printf("Handling ChatCompletion [Stream] request\n")
+
 				req.Stream = true
 				st, err := client.CreateChatCompletionStream(ctx, req)
 				if err != nil {
@@ -120,6 +121,7 @@ func main() {
 								Role:    openai.ChatMessageRoleAssistant,
 								Content: strings.Join(chunks, ""),
 							})
+							fmt.Println()
 							break
 						}
 
@@ -132,6 +134,7 @@ func main() {
 
 					fmt.Print(reply(delta))
 				}
+				fmt.Println()
 				continue
 			}
 
@@ -151,6 +154,7 @@ func main() {
 			})
 
 			fmt.Println(reply(content))
+			fmt.Println()
 		}
 	}
 }
