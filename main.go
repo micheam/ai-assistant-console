@@ -107,3 +107,21 @@ func defaultTemperature() float64 {
 	}
 	return 0.9
 }
+
+// datadir returns default data directory
+//
+// We determin data directory by the rules below:
+// 1. If CHATGPT_DATA_DIR environment variable is set, use it
+// 2. If XDG_DATA_HOME environment variable is set, use it
+// 3. otherwise, use $HOME/.local/share
+func datadir() string {
+	if os.Getenv("CHATGPT_DATA_DIR") != "" {
+		return os.Getenv("CHATGPT_DATA_DIR")
+	}
+
+	if os.Getenv("XDG_DATA_HOME") != "" {
+		return os.Getenv("XDG_DATA_HOME")
+	}
+
+	return fmt.Sprintf("%s/.local/share", os.Getenv("HOME"))
+}
