@@ -20,7 +20,7 @@ func main() {
 
 		model       = flag.String("m", defaultModel(), "model to use")
 		prompt      = flag.String("p", defaultPrompt(), "prompt to use")
-		temperature = flag.Float64("t", 0.9, "temperature to use")
+		temperature = flag.Float64("t", defaultTemperature(), "temperature to use")
 	)
 
 	flag.Parse()
@@ -98,4 +98,12 @@ func defaultPrompt() string {
 		return os.Getenv("CHATGPT_PROMPT")
 	}
 	return "> "
+}
+
+// defaultTemperature returns default temperature to use
+func defaultTemperature() float64 {
+	if os.Getenv("CHATGPT_TEMPERATURE") != "" {
+		return 0.9
+	}
+	return 0.9
 }
