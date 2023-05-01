@@ -9,10 +9,17 @@ import (
 	"os"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/sashabaranov/go-openai"
 )
 
 const authEnvKey = "CHATGPT_API_KEY"
+
+var (
+	red    = color.New(color.FgRed).SprintFunc()
+	green  = color.New(color.FgGreen).SprintFunc()
+	yellow = color.New(color.FgYellow).SprintFunc()
+)
 
 func main() {
 	var (
@@ -58,6 +65,7 @@ func main() {
 		text = strings.ReplaceAll(text, "\n", "") // convert CRLF to LF
 
 		switch text {
+
 		default: // store user input
 			logger.Printf("User input: %s\n", text)
 			messages = append(messages, openai.ChatCompletionMessage{
@@ -73,6 +81,7 @@ func main() {
 			return
 
 		case ":send":
+			fmt.Println()
 			req := openai.ChatCompletionRequest{
 				Model:       *model,
 				Messages:    messages,
@@ -93,8 +102,8 @@ func main() {
 				Role:    openai.ChatMessageRoleAssistant,
 				Content: content,
 			})
-			fmt.Println()
-			fmt.Println(content)
+
+			fmt.Println(green(content))
 		}
 	}
 }
