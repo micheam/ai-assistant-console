@@ -55,8 +55,7 @@ func main() {
 	for {
 		fmt.Print(*prompt)
 		text, _ := reader.ReadString('\n')
-		// convert CRLF to LF
-		text = strings.ReplaceAll(text, "\n", "")
+		text = strings.ReplaceAll(text, "\n", "") // convert CRLF to LF
 
 		switch text {
 		default: // store user input
