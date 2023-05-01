@@ -58,7 +58,19 @@ func main() {
 		// convert CRLF to LF
 		text = strings.ReplaceAll(text, "\n", "")
 
-		if text == ":send" { // send messages with :send command
+		switch text {
+		default: // store user input
+			logger.Printf("User input: %s\n", text)
+			messages = append(messages, openai.ChatCompletionMessage{
+				Role:    openai.ChatMessageRoleUser,
+				Content: text,
+			})
+
+		case ":quit", ":q", ":exit":
+			fmt.Println("Bye!")
+			return
+
+		case ":send":
 			req := openai.ChatCompletionRequest{
 				Model:       *model,
 				Messages:    messages,
@@ -81,16 +93,7 @@ func main() {
 			})
 			fmt.Println()
 			fmt.Println(content)
-
-			continue
 		}
-
-		// store user input
-		logger.Printf("User input: %s\n", text)
-		messages = append(messages, openai.ChatCompletionMessage{
-			Role:    openai.ChatMessageRoleUser,
-			Content: text,
-		})
 	}
 }
 
