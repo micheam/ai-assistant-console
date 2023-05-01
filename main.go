@@ -21,10 +21,11 @@ var availableModels = []string{
 func main() {
 	var (
 		ctx     = context.Background()
-		model   = flag.String("m", availableModels[0], "model to use")
 		cmdList = flag.Bool("L", false, "list available models")
-		// var prompt = flag.String("prompt", "", "prompt to use")
-		temperature = flag.Float64("temperature", 0.9, "temperature to use")
+
+		model       = flag.String("m", availableModels[0], "model to use")
+		prompt      = flag.String("p", "> ", "prompt to use")
+		temperature = flag.Float64("t", 0.9, "temperature to use")
 	)
 
 	flag.Parse()
@@ -51,7 +52,7 @@ func main() {
 	fmt.Println("------------------------------")
 
 	for {
-		fmt.Print("-> ")
+		fmt.Print(*prompt)
 		text, _ := reader.ReadString('\n')
 		// convert CRLF to LF
 		text = strings.Replace(text, "\n", "", -1)
