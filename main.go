@@ -5,6 +5,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -25,6 +26,10 @@ func main() {
 
 	flag.Parse()
 
+	lfile := logfile()
+	defer lfile.Close()
+	logger := log.New(lfile, "", log.LstdFlags|log.Lshortfile)
+
 	authToken := os.Getenv(authEnvKey)
 	if authToken == "" {
 		fmt.Printf("%s is not set", authEnvKey)
@@ -44,6 +49,7 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Printf("Conversation with %s\n", *model)
+	logger.Printf("Conversation Starts with %s\n", *model)
 	fmt.Println("------------------------------")
 
 	for {
@@ -64,12 +70,15 @@ func main() {
 				Temperature: float32(*temperature),
 			},
 		)
+		logger.Printf("ChatCompletion request: %+v\n", messages)
 
 		if err != nil {
+			logger.Printf("ChatCompletion error: %v\n", err)
 			fmt.Printf("ChatCompletion error: %v\n", err)
 			continue
 		}
 
+		logger.Printf("ChatCompletion response: %+v\n", resp)
 		content := resp.Choices[0].Message.Content
 		messages = append(messages, openai.ChatCompletionMessage{
 			Role:    openai.ChatMessageRoleAssistant,
@@ -124,4 +133,17 @@ func datadir() string {
 	}
 
 	return fmt.Sprintf("%s/.local/share", os.Getenv("HOME"))
+}
+
+// logfile returns logfile with location based on datadir.
+func logfile() *os.File {
+	logfile, err := os.OpenFile(
+		fmt.Sprintf("%s/chatgpt.log", datadir()),
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY,
+		0644,
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return logfile
 }
