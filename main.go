@@ -56,35 +56,41 @@ func main() {
 		fmt.Print(*prompt)
 		text, _ := reader.ReadString('\n')
 		// convert CRLF to LF
-		text = strings.Replace(text, "\n", "", -1)
+		text = strings.ReplaceAll(text, "\n", "")
+
+		if text == ":send" { // send messages with :send command
+			req := openai.ChatCompletionRequest{
+				Model:       *model,
+				Messages:    messages,
+				Temperature: float32(*temperature),
+			}
+			logger.Printf("ChatCompletion request: %+v\n", req)
+			resp, err := client.CreateChatCompletion(ctx, req)
+
+			if err != nil {
+				logger.Printf("ChatCompletion error: %v\n", err)
+				fmt.Printf("ChatCompletion error: %v\n", err)
+				continue
+			}
+			logger.Printf("ChatCompletion response: %+v\n", resp)
+
+			content := resp.Choices[0].Message.Content
+			messages = append(messages, openai.ChatCompletionMessage{
+				Role:    openai.ChatMessageRoleAssistant,
+				Content: content,
+			})
+			fmt.Println()
+			fmt.Println(content)
+
+			continue
+		}
+
+		// store user input
+		logger.Printf("User input: %s\n", text)
 		messages = append(messages, openai.ChatCompletionMessage{
 			Role:    openai.ChatMessageRoleUser,
 			Content: text,
 		})
-
-		resp, err := client.CreateChatCompletion(
-			ctx,
-			openai.ChatCompletionRequest{
-				Model:       *model,
-				Messages:    messages,
-				Temperature: float32(*temperature),
-			},
-		)
-		logger.Printf("ChatCompletion request: %+v\n", messages)
-
-		if err != nil {
-			logger.Printf("ChatCompletion error: %v\n", err)
-			fmt.Printf("ChatCompletion error: %v\n", err)
-			continue
-		}
-
-		logger.Printf("ChatCompletion response: %+v\n", resp)
-		content := resp.Choices[0].Message.Content
-		messages = append(messages, openai.ChatCompletionMessage{
-			Role:    openai.ChatMessageRoleAssistant,
-			Content: content,
-		})
-		fmt.Println(content)
 	}
 }
 
