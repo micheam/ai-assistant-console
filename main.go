@@ -19,6 +19,7 @@ const authEnvKey = "CHATGPT_API_KEY"
 
 var (
 	white  = color.New(color.FgWhite).SprintFunc()
+	gray   = color.New(color.FgHiBlack).SprintFunc()
 	red    = color.New(color.FgRed).SprintFunc()
 	green  = color.New(color.FgGreen).SprintFunc()
 	blue   = color.New(color.FgBlue).SprintFunc()
@@ -39,13 +40,20 @@ func main() {
 		temperature = flag.Float64("t", defaultTemperature(), "temperature to use")
 
 		stream = flag.Bool("s", false, "streaming mode")
+		debug  = flag.Bool("debug", false, "debug mode")
 	)
 
 	flag.Parse()
 
-	lfile := logfile()
-	defer lfile.Close()
-	logger := log.New(lfile, "", log.LstdFlags|log.Lshortfile)
+	logger := log.New(io.Discard, "", log.LstdFlags|log.Lshortfile)
+	if *debug {
+		lfile := logfile()
+		defer lfile.Close()
+		logger.SetOutput(lfile)
+		fmt.Println(info("Debug mode is on"))
+		fmt.Printf(info("You can find logs in %q\n"), lfile.Name())
+		fmt.Println()
+	}
 
 	authToken := os.Getenv(authEnvKey)
 	if authToken == "" {
