@@ -3,8 +3,10 @@ package main
 import (
 	"bufio"
 	"context"
+	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strings"
@@ -16,9 +18,15 @@ import (
 const authEnvKey = "CHATGPT_API_KEY"
 
 var (
+	white  = color.New(color.FgWhite).SprintFunc()
 	red    = color.New(color.FgRed).SprintFunc()
 	green  = color.New(color.FgGreen).SprintFunc()
+	blue   = color.New(color.FgBlue).SprintFunc()
 	yellow = color.New(color.FgYellow).SprintFunc()
+
+	info  = white
+	reply = blue
+	error = red
 )
 
 func main() {
@@ -29,6 +37,8 @@ func main() {
 		model       = flag.String("m", defaultModel(), "model to use")
 		prompt      = flag.String("p", defaultPrompt(), "prompt to use")
 		temperature = flag.Float64("t", defaultTemperature(), "temperature to use")
+
+		stream = flag.Bool("s", false, "streaming mode")
 	)
 
 	flag.Parse()
@@ -39,7 +49,7 @@ func main() {
 
 	authToken := os.Getenv(authEnvKey)
 	if authToken == "" {
-		fmt.Printf("%s is not set", authEnvKey)
+		fmt.Printf(error("%s is not set"), authEnvKey)
 		os.Exit(1)
 	}
 
@@ -47,7 +57,7 @@ func main() {
 
 	if *cmdList {
 		for _, m := range availableModels {
-			fmt.Printf("%s\n", m)
+			fmt.Printf(error("%s\n"), m)
 		}
 		os.Exit(0)
 	}
@@ -55,12 +65,12 @@ func main() {
 	messages := make([]openai.ChatCompletionMessage, 0)
 	reader := bufio.NewReader(os.Stdin)
 
-	fmt.Printf("Conversation with %s\n", *model)
+	fmt.Printf(info("Conversation with %s\n"), *model)
 	logger.Printf("Conversation Starts with %s\n", *model)
-	fmt.Println("------------------------------")
+	fmt.Println(info("------------------------------"))
 
 	for {
-		fmt.Print(*prompt)
+		fmt.Print(info(*prompt))
 		text, _ := reader.ReadString('\n')
 		text = strings.ReplaceAll(text, "\n", "") // convert CRLF to LF
 
@@ -77,22 +87,59 @@ func main() {
 			continue
 
 		case ":quit", ":q", ":exit":
-			fmt.Println("Bye!")
+			fmt.Println(info("Bye!"))
 			return
 
 		case ":send":
 			fmt.Println()
+
 			req := openai.ChatCompletionRequest{
 				Model:       *model,
 				Messages:    messages,
 				Temperature: float32(*temperature),
 			}
 			logger.Printf("ChatCompletion request: %+v\n", req)
+
+			if *stream {
+				req.Stream = true
+				st, err := client.CreateChatCompletionStream(ctx, req)
+				if err != nil {
+					logger.Printf("ChatCompletion [Stream] error: %v\n", err)
+					fmt.Printf(error("ChatCompletion [Stream] error: %v\n"), err)
+					continue
+				}
+				defer st.Close()
+
+				chunks := []string{}
+				for {
+					resp, err := st.Recv()
+					if err != nil {
+
+						if errors.Is(err, io.EOF) {
+							messages = append(messages, openai.ChatCompletionMessage{
+								Role:    openai.ChatMessageRoleAssistant,
+								Content: strings.Join(chunks, ""),
+							})
+							break
+						}
+
+						logger.Printf("ChatCompletion [Stream] error: %v\n", err)
+						fmt.Printf(error("ChatCompletion [Stream] error: %v\n"), err)
+						break
+					}
+					delta := resp.Choices[0].Delta.Content
+					chunks = append(chunks, delta)
+
+					fmt.Print(reply(delta))
+				}
+				continue
+			}
+
 			resp, err := client.CreateChatCompletion(ctx, req)
 
 			if err != nil {
 				logger.Printf("ChatCompletion error: %v\n", err)
-				fmt.Printf("ChatCompletion error: %v\n", err)
+				fmt.Printf(error("ChatCompletion error: %v\n"), err)
 				continue
 			}
 			logger.Printf("ChatCompletion response: %+v\n", resp)
@@ -103,7 +150,7 @@ func main() {
 				Content: content,
 			})
 
-			fmt.Println(green(content))
+			fmt.Println(reply(content))
 		}
 	}
 }
