@@ -66,6 +66,9 @@ func main() {
 				Content: text,
 			})
 
+		case "": // empty input
+			continue
+
 		case ":quit", ":q", ":exit":
 			fmt.Println("Bye!")
 			return
