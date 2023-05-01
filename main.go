@@ -13,18 +13,13 @@ import (
 
 const authEnvKey = "CHATGPT_API_KEY"
 
-var availableModels = []string{
-	openai.GPT3Dot5Turbo,
-	openai.GPT4,
-}
-
 func main() {
 	var (
 		ctx     = context.Background()
-		cmdList = flag.Bool("L", false, "list available models")
+		cmdList = flag.Bool("M", false, "list available models")
 
-		model       = flag.String("m", availableModels[0], "model to use")
-		prompt      = flag.String("p", "> ", "prompt to use")
+		model       = flag.String("m", defaultModel(), "model to use")
+		prompt      = flag.String("p", defaultPrompt(), "prompt to use")
 		temperature = flag.Float64("t", 0.9, "temperature to use")
 	)
 
@@ -84,10 +79,23 @@ func main() {
 	}
 }
 
+var availableModels = []string{
+	openai.GPT3Dot5Turbo,
+	openai.GPT4,
+}
+
 // defaultModel returns default model to use
 func defaultModel() string {
 	if os.Getenv("CHATGPT_MODEL") != "" {
 		return os.Getenv("CHATGPT_MODEL")
 	}
-	return openai.GPT3Dot5Turbo
+	return availableModels[0]
+}
+
+// defaultPrompt returns default prompt to use
+func defaultPrompt() string {
+	if os.Getenv("CHATGPT_PROMPT") != "" {
+		return os.Getenv("CHATGPT_PROMPT")
+	}
+	return "> "
 }
