@@ -99,7 +99,7 @@ func main() {
 		case ":quit", ":q", ":exit":
 			return
 
-		case ":send":
+		case ":send", ";;":
 			fmt.Println()
 
 			if *stream {
