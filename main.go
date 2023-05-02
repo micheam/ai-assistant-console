@@ -13,6 +13,8 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/sashabaranov/go-openai"
+
+	"github.com/nsf/termbox-go"
 )
 
 const authEnvKey = "CHATGPT_API_KEY"
@@ -100,17 +102,15 @@ func main() {
 		case ":send":
 			fmt.Println()
 
-			req := openai.ChatCompletionRequest{
-				Model:       *model,
-				Messages:    messages,
-				Temperature: float32(*temperature),
-			}
-			logger.Printf("ChatCompletion request: %+v\n", req)
-
 			if *stream {
 				logger.Printf("Handling ChatCompletion [Stream] request\n")
-
-				req.Stream = true
+				req := openai.ChatCompletionRequest{
+					Model:       *model,
+					Messages:    messages,
+					Temperature: float32(*temperature),
+					Stream:      true, // Stream Mode
+				}
+				logger.Printf("ChatCompletion request: %+v\n", req)
 				st, err := client.CreateChatCompletionStream(ctx, req)
 				if err != nil {
 					logger.Printf("ChatCompletion [Stream] error: %v\n", err)
@@ -123,7 +123,6 @@ func main() {
 				for {
 					resp, err := st.Recv()
 					if err != nil {
-
 						if errors.Is(err, io.EOF) {
 							messages = append(messages, openai.ChatCompletionMessage{
 								Role:    openai.ChatMessageRoleAssistant,
@@ -139,13 +138,18 @@ func main() {
 					}
 					delta := resp.Choices[0].Delta.Content
 					chunks = append(chunks, delta)
-
 					fmt.Print(reply(delta))
 				}
-				fmt.Println()
 				continue
 			}
 
+			req := openai.ChatCompletionRequest{
+				Model:       *model,
+				Messages:    messages,
+				Temperature: float32(*temperature),
+				Stream:      false, // Batch Mode
+			}
+			logger.Printf("ChatCompletion request: %+v\n", req)
 			resp, err := client.CreateChatCompletion(ctx, req)
 
 			if err != nil {
@@ -165,6 +169,15 @@ func main() {
 			fmt.Println()
 		}
 	}
+}
+
+func getTerminalWidth() int {
+	if err := termbox.Init(); err != nil {
+		panic(err)
+	}
+	w, _ := termbox.Size()
+	termbox.Close()
+	return w
 }
 
 var availableModels = []string{
