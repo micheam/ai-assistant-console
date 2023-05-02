@@ -119,14 +119,16 @@ func main() {
 				}
 				defer st.Close()
 
-				chunks := []string{}
+				contents := []string{}
+				buf := []string{}
 				for {
 					resp, err := st.Recv()
 					if err != nil {
 						if errors.Is(err, io.EOF) {
+							fmt.Print(reply(strings.Join(buf, "")))
 							messages = append(messages, openai.ChatCompletionMessage{
 								Role:    openai.ChatMessageRoleAssistant,
-								Content: strings.Join(chunks, ""),
+								Content: strings.Join(contents, ""),
 							})
 							fmt.Println()
 							break
@@ -137,8 +139,15 @@ func main() {
 						break
 					}
 					delta := resp.Choices[0].Delta.Content
-					chunks = append(chunks, delta)
-					fmt.Print(reply(delta))
+					contents = append(contents, delta)
+
+					buf = append(buf, delta)
+					logger.Printf("[stream]: %+v\n", delta)
+
+					if strings.Contains(delta, "\n") {
+						fmt.Print(reply(strings.Join(buf, "")))
+						buf = []string{}
+					}
 				}
 				continue
 			}
