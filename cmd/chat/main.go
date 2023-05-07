@@ -17,7 +17,7 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-const authEnvKey = "CHATGPT_API_KEY"
+const authEnvKey = "OPENAI_API_KEY"
 
 var (
 	white  = color.New(color.FgWhite).SprintFunc()
