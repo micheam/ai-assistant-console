@@ -7,13 +7,13 @@ import (
 	"os"
 	"testing"
 
-	"micheam.com/chatgpt/openai"
+	"micheam.com/aico/openai"
 )
 
 func TestChat_Do_EndToEnd(t *testing.T) {
-	apikey := os.Getenv("CHATGPT_API_KEY")
+	apikey := os.Getenv("OPENAI_API_KEY")
 	if apikey == "" {
-		t.Fatal("CHATGPT_API_KEY is not set")
+		t.Fatal("OPENAI_API_KEY is not set")
 	}
 	client := openai.NewClient(apikey)
 	chat := openai.NewChatClient(client)
