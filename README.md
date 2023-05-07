@@ -23,7 +23,7 @@ Once you have Go installed, follow these steps to install AICO:
 3. Use the `go.mod` file to manage dependencies. You don't need to do anything manually since Go will handle this for you.
 4. Build the executable binary by running `make`:
    ```bash
-   make install
+   make
    ```
    This will create a binary executable in the `bin/` directory.
 
