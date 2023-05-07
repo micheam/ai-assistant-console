@@ -1,10 +1,11 @@
-TARGET = bin/chatgpt
+.PHONY : clean test install
+TARGET = ./bin/chat
+ENTRYPOINT = ./cmd/chat/main.go
 SOURCE = $(shell find . -name '*.go')
 TEST_OPTS = -v -tags e2e
-.PHONY : clean test install
 
 $(TARGET) : test $(SOURCE)
-	go build -o $(TARGET) .
+	go build -o $(TARGET) $(ENTRYPOINT)
 
 test :
 	go test $(TEST_OPTS) ./...
