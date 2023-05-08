@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
@@ -18,6 +19,7 @@ import (
 const authEnvKey = "OPENAI_API_KEY"
 
 var (
+	// Basic colors
 	white  = color.New(color.FgWhite).SprintFunc()
 	gray   = color.New(color.FgHiBlack).SprintFunc()
 	red    = color.New(color.FgRed).SprintFunc()
@@ -25,13 +27,18 @@ var (
 	blue   = color.New(color.FgBlue).SprintFunc()
 	yellow = color.New(color.FgYellow).SprintFunc()
 
+	// Color themes
 	Info  = white
 	Reply = blue
 	Error = red
-)
 
-//go:embed version.txt
-var version string
+	//go:embed version.txt
+	version string
+
+	// Spinner settings
+	spinnerFrames   = []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
+	spinnerInterval = 100 * time.Millisecond
+)
 
 func main() {
 	if err := app().Run(os.Args); err != nil {
@@ -59,7 +66,7 @@ func app() *cli.App {
 			{
 				Name:  "version",
 				Usage: "Show version",
-				Action: func(c *cli.Context) error {
+				Action: func(_ *cli.Context) error {
 					fmt.Println(version)
 					return nil
 				},
@@ -92,6 +99,9 @@ func chat(c *cli.Context) error {
 		fmt.Printf(Info("You can find logs in %q\n"), lfile.Name())
 		fmt.Println()
 	}
+
+	// Spinner settings
+	spinner := NewSpinner(spinnerInterval, spinnerFrames)
 
 	ctx := c.Context
 	model := c.String("model")
@@ -135,6 +145,7 @@ func chat(c *cli.Context) error {
 
 		case ".send", ";;":
 			fmt.Println()
+			spinner.Start()
 
 			req := openai.NewChatRequest(model, messages)
 			logger.Printf("ChatCompletion request: %+v\n", req)
@@ -143,6 +154,7 @@ func chat(c *cli.Context) error {
 			if err != nil {
 				logger.Printf("ChatCompletion error: %v\n", err)
 				fmt.Printf(Error("ChatCompletion error: %v\n"), err)
+				spinner.Stop()
 				continue
 			}
 			logger.Printf("ChatCompletion response: %+v\n", resp)
@@ -153,6 +165,7 @@ func chat(c *cli.Context) error {
 				Content: content,
 			})
 
+			spinner.Stop()
 			fmt.Println(Reply(content))
 			fmt.Println()
 		}
