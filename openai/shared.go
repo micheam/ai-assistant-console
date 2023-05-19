@@ -18,6 +18,13 @@ type Message struct {
 	Name string `json:"name,omitempty"`
 }
 
+type DeltaMessage struct {
+	// content string Required
+	//
+	// The contents of the message.
+	Content string `json:"content"`
+}
+
 // The role of the author of this message.
 // One of system, user, or assistant.
 type Role int
@@ -69,7 +76,8 @@ type Usage struct {
 
 // Choice is the choice of the Chat API
 type Choice struct {
-	Message      Message `json:"message"`
-	FinishReason string  `json:"finish_reason"`
-	Index        int     `json:"index"`
+	Message      *Message      `json:"message,omitempty"`
+	Delta        *DeltaMessage `json:"delta,omitempty"`
+	FinishReason string        `json:"finish_reason"`
+	Index        int           `json:"index"`
 }

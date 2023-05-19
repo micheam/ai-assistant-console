@@ -146,28 +146,36 @@ func chat(c *cli.Context) error {
 		case ".send", ";;":
 			fmt.Println()
 			spinner.Start()
+			defer spinner.Stop()
 
 			req := openai.NewChatRequest(model, messages)
+			req.Stream = true
 			logger.Printf("ChatCompletion request: %+v\n", req)
-			resp, err := chat.Do(ctx, req)
 
+			content := new(strings.Builder)
+			err := chat.DoStream(ctx, req, func(resp *openai.ChatResponse) error { // Block until completion DONE
+				spinner.Stop()
+				delta := resp.Choices[0].Delta
+				if delta == nil {
+					return nil
+				}
+				fmt.Printf(Reply("%s"), delta.Content)
+				_, err := content.WriteString(delta.Content)
+				return err
+			})
 			if err != nil {
 				logger.Printf("ChatCompletion error: %v\n", err)
 				fmt.Printf(Error("ChatCompletion error: %v\n"), err)
 				spinner.Stop()
 				continue
 			}
-			logger.Printf("ChatCompletion response: %+v\n", resp)
+			fmt.Printf("\n\n")
 
-			content := resp.Choices[0].Message.Content
 			messages = append(messages, openai.Message{
 				Role:    openai.RoleAssistant,
-				Content: content,
+				Content: content.String(),
 			})
 
-			spinner.Stop()
-			fmt.Println(Reply(content))
-			fmt.Println()
 		}
 	}
 }

@@ -57,6 +57,18 @@ func (c *ChatClient) Do(ctx context.Context, req *ChatRequest) (*ChatResponse, e
 	return resp, nil
 }
 
+func (c *ChatClient) DoStream(ctx context.Context, req *ChatRequest, onReceive func(resp *ChatResponse) error) error {
+	if !req.Stream {
+		req.Stream = true
+	}
+
+	if req.Model == "" {
+		req.Model = defaultChatModel
+	}
+
+	return c.client.ChatSubscribe(ctx, chatEndpoint, req, onReceive)
+}
+
 // ChatRequest is used to make a request to the Chat API
 type ChatRequest struct {
 	// model string Required
