@@ -120,8 +120,8 @@ func chat(c *cli.Context) error {
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Printf(Info("Conversation with %s\n"), model)
-	logger.Printf("Conversation Starts with %s\n", model)
 	fmt.Println(Info("------------------------------"))
+	logger.Printf("Conversation Starts with %s\n", model)
 
 	for {
 		fmt.Print(Info(prompt))
@@ -149,11 +149,10 @@ func chat(c *cli.Context) error {
 			defer spinner.Stop()
 
 			req := openai.NewChatRequest(model, messages)
-			req.Stream = true
 			logger.Printf("ChatCompletion request: %+v\n", req)
 
 			content := new(strings.Builder)
-			err := chat.DoStream(ctx, req, func(resp *openai.ChatResponse) error { // Block until completion DONE
+			if err := chat.DoStream(ctx, req, func(resp *openai.ChatResponse) error { // Block until completion DONE
 				spinner.Stop()
 				delta := resp.Choices[0].Delta
 				if delta == nil {
@@ -162,8 +161,7 @@ func chat(c *cli.Context) error {
 				fmt.Printf(Reply("%s"), delta.Content)
 				_, err := content.WriteString(delta.Content)
 				return err
-			})
-			if err != nil {
+			}); err != nil {
 				logger.Printf("ChatCompletion error: %v\n", err)
 				fmt.Printf(Error("ChatCompletion error: %v\n"), err)
 				spinner.Stop()
