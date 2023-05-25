@@ -11,7 +11,9 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/mattn/go-runewidth"
 	"github.com/urfave/cli/v2"
+	"golang.org/x/term"
 
 	"micheam.com/aico/openai"
 )
@@ -151,14 +153,29 @@ func chat(c *cli.Context) error {
 			req := openai.NewChatRequest(model, messages)
 			logger.Printf("ChatCompletion request: %+v\n", req)
 
+			// width of terminal
+			width, _, err := term.GetSize(0)
+			if err != nil {
+				width = 100
+			}
+
+			var cnt int // Current width of output
 			content := new(strings.Builder)
+
 			if err := chat.DoStream(ctx, req, func(resp *openai.ChatResponse) error { // Block until completion DONE
 				spinner.Stop()
 				delta := resp.Choices[0].Delta
 				if delta == nil {
 					return nil
 				}
+
+				if cnt+runewidth.StringWidth(delta.Content) > width {
+					fmt.Printf("\n")
+					cnt = 0
+				}
 				fmt.Printf(Reply("%s"), delta.Content)
+				cnt += runewidth.StringWidth(delta.Content)
+
 				_, err := content.WriteString(delta.Content)
 				return err
 			}); err != nil {
