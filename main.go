@@ -169,14 +169,29 @@ func chat(c *cli.Context) error {
 					return nil
 				}
 
-				if cnt+runewidth.StringWidth(delta.Content) > width {
+				deltaContent := delta.Content
+				deltaContent = strings.ReplaceAll(deltaContent, "\t", "  ") // convert tab to 2 spaces
+				wrapped := strings.Contains(deltaContent, "\n")
+				deltaWidth := runewidth.StringWidth(strings.ReplaceAll(deltaContent, "\n", ""))
+
+				if wrapped {
+					logger.Printf("receive new line\n")
+					cnt = 0
+				}
+				if cnt+deltaWidth > width {
+					logger.Printf("output width reached terminal width\n")
 					fmt.Printf("\n")
 					cnt = 0
 				}
+
 				fmt.Printf(Reply("%s"), delta.Content)
 				cnt += runewidth.StringWidth(delta.Content)
 
 				_, err := content.WriteString(delta.Content)
+
+				logger.Printf("term width: %d, cnt: %d, content[%d]: %q\n",
+					width, cnt, deltaWidth, delta.Content)
+
 				return err
 			}); err != nil {
 				logger.Printf("ChatCompletion error: %v\n", err)
