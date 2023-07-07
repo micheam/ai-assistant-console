@@ -133,9 +133,13 @@ func chat(c *cli.Context) error {
 		switch text {
 
 		default: // store user input
-			logger.Printf("User input: %s\n", text)
+			logger.Printf("Input text: %s\n", text)
+			role := openai.RoleUser
+			if strings.HasPrefix(text, "SYSTEM:") {
+				role = openai.RoleSystem
+			}
 			messages = append(messages, openai.Message{
-				Role:    openai.RoleUser,
+				Role:    role,
 				Content: text,
 			})
 
