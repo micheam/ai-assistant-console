@@ -22,7 +22,7 @@ func TestChat_Do_EndToEnd(t *testing.T) {
 	defer cancel()
 
 	req := openai.NewChatRequest(
-		openai.DefaultChatModel(),
+		"",
 		[]openai.Message{
 			{Role: openai.RoleUser, Content: "Hello, How are you?"},
 		},

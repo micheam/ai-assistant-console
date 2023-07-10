@@ -15,6 +15,7 @@ import (
 	"github.com/urfave/cli/v2"
 	"golang.org/x/term"
 
+	"micheam.com/aico/internal/config"
 	"micheam.com/aico/openai"
 )
 
@@ -83,7 +84,7 @@ func app() *cli.App {
 						Name:    "model",
 						Aliases: []string{"m"},
 						Usage:   "GPT model to use",
-						Value:   openai.DefaultChatModel(),
+						Value:   config.DefaultModel,
 					},
 				},
 			},
@@ -92,6 +93,7 @@ func app() *cli.App {
 }
 
 func chat(c *cli.Context) error {
+	ctx := c.Context
 	logger := log.New(io.Discard, "", log.LstdFlags|log.LUTC)
 	if c.Bool("debug") {
 		lfile := logfile()
@@ -102,10 +104,27 @@ func chat(c *cli.Context) error {
 		fmt.Println()
 	}
 
+	// Load Config
+	cfg, err := config.InitAndLoad(ctx)
+	if err != nil {
+		return fmt.Errorf("load config: %w", err)
+	}
+
+	// Prepare message with persona
+	messages := make([]openai.Message, 0)
+	for _, msg := range cfg.Chat.Persona.Messages {
+		messages = append(messages, openai.Message{
+			Role:    openai.RoleSystem,
+			Content: msg,
+		})
+	}
+	if len(messages) == 0 {
+		logger.Println("No persona messages found")
+	}
+
 	// Spinner settings
 	spinner := NewSpinner(spinnerInterval, spinnerFrames)
 
-	ctx := c.Context
 	model := c.String("model")
 	prompt := "> "
 
@@ -118,7 +137,6 @@ func chat(c *cli.Context) error {
 	client := openai.NewClient(authToken)
 	chat := openai.NewChatClient(client)
 
-	messages := make([]openai.Message, 0)
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Printf(Info("Conversation with %s\n"), model)
@@ -155,6 +173,10 @@ func chat(c *cli.Context) error {
 			defer spinner.Stop()
 
 			req := openai.NewChatRequest(model, messages)
+			if cfg != nil {
+				req.Temperature = cfg.Chat.Temperature
+				req.Model = cfg.Chat.Model
+			}
 			logger.Printf("ChatCompletion request: %+v\n", req)
 
 			// width of terminal
@@ -220,6 +242,8 @@ func chat(c *cli.Context) error {
 // 1. If AICO_DATA_DIR environment variable is set, use it
 // 2. If XDG_DATA_HOME environment variable is set, use it
 // 3. otherwise, use $HOME/.local/share
+//
+// TODO: use internal/config instead
 func datadir() string {
 	if os.Getenv("AICO_DATA_DIR") != "" {
 		return os.Getenv("AICO_DATA_DIR")
@@ -233,6 +257,9 @@ func datadir() string {
 }
 
 // logfile returns logfile with location based on datadir.
+//
+// TODO: make log file configurable
+// TODO: use internal/config to detect log file location
 func logfile() *os.File {
 	logfile, err := os.OpenFile(
 		fmt.Sprintf("%s/chatgpt.log", datadir()),

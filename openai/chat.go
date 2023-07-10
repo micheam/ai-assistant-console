@@ -27,10 +27,6 @@ func ChatAvailableModels() []string {
 	return chatAvailableModels
 }
 
-func DefaultChatModel() string {
-	return defaultChatModel
-}
-
 // ChatClient is used to access the Chat API
 type ChatClient struct {
 	client *Client
@@ -167,9 +163,6 @@ type ChatRequest struct {
 // Use [DefaultChatModel] to get the default model.
 // Use [ChatAvailableModels] to get a list of available models.
 func NewChatRequest(model string, messages []Message) *ChatRequest {
-	if model == "" {
-		model = DefaultChatModel()
-	}
 	return &ChatRequest{
 		Model:    model,
 		Messages: messages,
