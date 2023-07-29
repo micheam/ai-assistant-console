@@ -1,4 +1,4 @@
-package main
+package spinner
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// Spinner is a simple spinner
+// spinner is a simple spinner
 //
 // Example:
 //
@@ -17,7 +17,7 @@ import (
 //	time.Sleep(5 * time.Second)
 //	spinner.Stop()
 //	fmt.Println("Done.")
-type Spinner struct {
+type spinner struct {
 	running  bool
 	interval time.Duration
 	frames   []string
@@ -26,9 +26,9 @@ type Spinner struct {
 	mu sync.Mutex
 }
 
-// NewSpinner creates a new spinner
-func NewSpinner(interval time.Duration, frames []string) *Spinner {
-	return &Spinner{
+// New creates a new spinner
+func New(interval time.Duration, frames []string) *spinner {
+	return &spinner{
 		running:  false,
 		interval: interval,
 		frames:   frames,
@@ -37,7 +37,7 @@ func NewSpinner(interval time.Duration, frames []string) *Spinner {
 }
 
 // Start starts spinner
-func (s *Spinner) Start() {
+func (s *spinner) Start() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -56,7 +56,7 @@ func (s *Spinner) Start() {
 }
 
 // Stop stops spinner
-func (s *Spinner) Stop() {
+func (s *spinner) Stop() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

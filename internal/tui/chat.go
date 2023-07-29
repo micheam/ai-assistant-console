@@ -17,7 +17,6 @@ import (
 
 	"micheam.com/aico/internal/config"
 	"micheam.com/aico/internal/openai"
-	"micheam.com/aico/internal/spinner"
 )
 
 const authEnvKey = "OPENAI_API_KEY"
@@ -124,7 +123,7 @@ func chat(c *cli.Context) error {
 	}
 
 	// Spinner settings
-	spinner := spinner.New(spinnerInterval, spinnerFrames)
+	spinner := NewSpinner(spinnerInterval, spinnerFrames)
 
 	model := c.String("model")
 	prompt := "> "
