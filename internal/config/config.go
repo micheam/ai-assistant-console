@@ -13,6 +13,9 @@ import (
 // Config is the configuration for the application
 type Config struct {
 	Chat Chat `yaml:"chat"`
+
+	// logfile is the path to the logfile
+	logfile string `yaml:"logfile"`
 }
 
 // Chat is the configuration for the chat
@@ -42,6 +45,13 @@ type Personality struct {
 var (
 	ErrConfigFileNotFound = errors.New("config file not found")
 )
+
+func (c *Config) Logfile() string {
+	if c.logfile == "" {
+		return logfilePath(context.Background())
+	}
+	return c.logfile
+}
 
 // load loads the configuration from the given path
 //
@@ -76,6 +86,17 @@ func configFilePath(_ context.Context) string {
 	return filepath.Join(confDir, ApplicationName, ConfigFileName)
 }
 
+func logfilePath(_ context.Context) string {
+	if os.Getenv("LOGFILE_PATH") != "" {
+		return os.Getenv("LOGFILE_PATH")
+	}
+	confDir, err := os.UserConfigDir()
+	if err != nil {
+		return ""
+	}
+	return filepath.Join(confDir, ApplicationName, LogFileName)
+}
+
 const (
 	// DefaultModel is the default model to use for the chat
 	DefaultModel = "gpt-3.5-turbo"
@@ -88,6 +109,9 @@ const (
 
 	// ConfigFileName is the name of the config file
 	ConfigFileName = "config.yaml"
+
+	// LogFileName is the name of the log file
+	LogFileName = "aico.log"
 )
 
 // Load loads the configuration for the application
@@ -133,6 +157,7 @@ func InitAndLoad(ctx context.Context) (*Config, error) {
 
 func DefaultConfig() *Config {
 	return &Config{
+		logfile: logfilePath(context.Background()),
 		Chat: Chat{
 			Model:       DefaultModel,
 			Temperature: DefaultTemperature,
