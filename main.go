@@ -16,7 +16,7 @@ import (
 	"golang.org/x/term"
 
 	"micheam.com/aico/internal/config"
-	"micheam.com/aico/openai"
+	"micheam.com/aico/internal/openai"
 )
 
 const authEnvKey = "OPENAI_API_KEY"
