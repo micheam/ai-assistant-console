@@ -90,6 +90,17 @@ func app() *cli.App {
 		Commands: []*cli.Command{
 
 			{
+				Name:        "config",
+				Usage:       "Show config file path",
+				Description: "Show config file path",
+				Action: func(c *cli.Context) error {
+					path := config.ConfigFilePath(c.Context)
+					fmt.Println(path)
+					return nil
+				},
+			},
+
+			{
 				Name:        "tui",
 				Usage:       "Chat with AI in TUI",
 				Description: "Start TUI application to chat with AI",

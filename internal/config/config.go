@@ -74,8 +74,8 @@ func load(path string) (*Config, error) {
 	return &config, nil
 }
 
-// configFilePath returns the path to the config file
-func configFilePath(_ context.Context) string {
+// ConfigFilePath returns the path to the config file
+func ConfigFilePath(_ context.Context) string {
 	if os.Getenv("CONFIG_PATH") != "" {
 		return os.Getenv("CONFIG_PATH")
 	}
@@ -123,7 +123,7 @@ const (
 // This may return an error if the file cannot be read or parsed.
 // If the file does not exist, this will return [ErrConfigFileNotFound].
 func Load(ctx context.Context) (*Config, error) {
-	return load(configFilePath(ctx))
+	return load(ConfigFilePath(ctx))
 }
 
 // InitAndLoad initializes the configuration for the application
@@ -135,7 +135,7 @@ func InitAndLoad(ctx context.Context) (*Config, error) {
 	if errors.Is(err, ErrConfigFileNotFound) {
 		conf := DefaultConfig()
 		// mkdir for path
-		if err := os.MkdirAll(filepath.Dir(configFilePath(ctx)), 0755); err != nil {
+		if err := os.MkdirAll(filepath.Dir(ConfigFilePath(ctx)), 0755); err != nil {
 			return nil, fmt.Errorf("mkdir: %w", err)
 		}
 
@@ -144,7 +144,7 @@ func InitAndLoad(ctx context.Context) (*Config, error) {
 		if err != nil {
 			return nil, fmt.Errorf("marshal yaml: %w", err)
 		}
-		if err := os.WriteFile(configFilePath(ctx), b, 0644); err != nil {
+		if err := os.WriteFile(ConfigFilePath(ctx), b, 0644); err != nil {
 			return nil, fmt.Errorf("write file: %w", err)
 		}
 
