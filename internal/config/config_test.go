@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,8 +26,11 @@ func TestLoadConfig(t *testing.T) {
 	}
 	got, err := load("testdata/example.yaml")
 	if assert.NoError(t, err) {
-		if diff := cmp.Diff(want, got); diff != "" {
+		if diff := cmp.Diff(want, got, cmpopts.IgnoreUnexported(*want)); diff != "" {
 			t.Errorf("LoadConfig() mismatch (-want +got):\n%s", diff)
 		}
+		assert.EqualValues(t,
+			"/Users/micheam/Library/Application Support/com.micheam.aico/aico.log",
+			got.Logfile())
 	}
 }

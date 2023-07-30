@@ -94,39 +94,3 @@ func app() *cli.App {
 		},
 	}
 }
-
-// datadir returns default data directory
-//
-// We determin data directory by the rules below:
-// 1. If AICO_DATA_DIR environment variable is set, use it
-// 2. If XDG_DATA_HOME environment variable is set, use it
-// 3. otherwise, use $HOME/.local/share
-//
-// TODO: use internal/config instead
-func datadir() string {
-	if os.Getenv("AICO_DATA_DIR") != "" {
-		return os.Getenv("AICO_DATA_DIR")
-	}
-
-	if os.Getenv("XDG_DATA_HOME") != "" {
-		return os.Getenv("XDG_DATA_HOME")
-	}
-
-	return fmt.Sprintf("%s/.local/share", os.Getenv("HOME"))
-}
-
-// logfile returns logfile with location based on datadir.
-//
-// TODO: make log file configurable
-// TODO: use internal/config to detect log file location
-func logfile() *os.File {
-	logfile, err := os.OpenFile(
-		fmt.Sprintf("%s/chatgpt.log", datadir()),
-		os.O_APPEND|os.O_CREATE|os.O_WRONLY,
-		0644,
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return logfile
-}

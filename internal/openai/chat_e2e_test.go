@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"micheam.com/aico/openai"
+	"micheam.com/aico/internal/openai"
 )
 
 func TestChat_Do_EndToEnd(t *testing.T) {
