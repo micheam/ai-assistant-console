@@ -1,18 +1,16 @@
 .PHONY : clean test install
-TARGET = ./bin/aico
-ENTRYPOINT = .
 SOURCE = $(shell find . -name '*.go')
 USER_BIN = $(shell echo $$HOME)/bin
 TEST_OPTS = -v -tags e2e
 
-$(TARGET) : test $(SOURCE)
-	go build -o $(TARGET) $(ENTRYPOINT)
+chat : test ./cmd/chat/main.go $(SOURCE)
+	go build -o ./bin/chat ./cmd/chat
 
 test :
 	go test $(TEST_OPTS) ./...
 
 clean :
-	rm -f $(TARGET)
+	rm -f ./bin/chat
 
-install : clean $(TARGET)
-	cp $(TARGET) $(USER_BIN)
+install : clean chat
+	cp ./bin/chat $(USER_BIN)/chat
