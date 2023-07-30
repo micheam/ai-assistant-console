@@ -88,7 +88,7 @@ func app() *cli.App {
 			return nil
 		},
 		Commands: []*cli.Command{
-			// Chat TUI
+
 			{
 				Name:        "tui",
 				Usage:       "Chat with AI in TUI",
@@ -103,6 +103,8 @@ func app() *cli.App {
 					return handler.Run(ctx)
 				},
 			},
+
+			SendMessageCommand,
 		},
 	}
 }
