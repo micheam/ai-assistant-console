@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	_ "embed"
 	"fmt"
 	"io"
@@ -43,12 +44,8 @@ func app() *cli.App {
 				Usage:   "GPT model to use",
 				Value:   config.DefaultModel,
 			},
-			&cli.BoolFlag{
-				Name:  "tui",
-				Usage: "Enable TUI mode",
-			},
 		},
-		Action: func(c *cli.Context) error {
+		Before: func(c *cli.Context) error {
 			ctx := c.Context
 
 			// Load Config
@@ -74,8 +71,6 @@ func app() *cli.App {
 				defer f.Close()
 
 				logger.SetOutput(f)
-				logger.SetPrefix("[CHAT] ")
-
 				fmt.Println(theme.Info("Debug mode is on")) // TODO: promote to Logger or Presenter
 				fmt.Printf(theme.Info("You can find logs in %q\n"), lfile)
 				fmt.Println()
@@ -85,12 +80,56 @@ func app() *cli.App {
 			model := c.String("model")
 			cfg.Chat.Model = model
 
-			if c.Bool("tui") {
-				logger.SetPrefix("[CHAT][TUI] ")
-				handler := tui.New(cfg, logger)
-				return handler.Run(ctx)
-			}
-			return fmt.Errorf("not implemented")
+			// Setup context
+			ctx = WithConfig(ctx, cfg)
+			ctx = WithLogger(ctx, logger)
+
+			c.Context = ctx
+			return nil
+		},
+		Commands: []*cli.Command{
+			// Chat TUI
+			{
+				Name:        "tui",
+				Usage:       "Chat with AI in TUI",
+				Description: "Start TUI application to chat with AI",
+				Action: func(c *cli.Context) error {
+					ctx := c.Context
+					cfg := ConfigFrom(ctx)
+					logger := LoggerFrom(ctx)
+					logger.SetPrefix("[CHAT][TUI] ")
+
+					handler := tui.New(cfg, logger)
+					return handler.Run(ctx)
+				},
+			},
 		},
 	}
+}
+
+// --------------------------------------------------------------------
+// Handle context
+// --------------------------------------------------------------------
+
+type contextKey int
+
+const (
+	contextKeyConfig contextKey = iota
+	contextKeyLogger
+)
+
+func WithConfig(ctx context.Context, cfg *config.Config) context.Context {
+	return context.WithValue(ctx, contextKeyConfig, cfg)
+}
+
+func ConfigFrom(ctx context.Context) *config.Config {
+	return ctx.Value(contextKeyConfig).(*config.Config)
+}
+
+func WithLogger(ctx context.Context, logger *log.Logger) context.Context {
+	return context.WithValue(ctx, contextKeyLogger, logger)
+}
+
+func LoggerFrom(ctx context.Context) *log.Logger {
+	return ctx.Value(contextKeyLogger).(*log.Logger)
 }
