@@ -40,7 +40,8 @@ func (h *Handler) Run(ctx context.Context) error {
 	// Prepare message with persona
 	messages := make([]openai.Message, 0)
 
-	for _, msg := range h.cfg.Chat.Persona.Messages {
+	persona := h.cfg.Chat.GetDefaultPersona()
+	for _, msg := range persona.Messages {
 		messages = append(messages, openai.Message{
 			Role:    openai.RoleSystem,
 			Content: msg,

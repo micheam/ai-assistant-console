@@ -30,7 +30,7 @@ type Chat struct {
 	Temperature float64 `yaml:"temperature"`
 
 	// Persona is the persona to use for the chat
-	Persona Personality `yaml:"persona"`
+	Persona map[string]Personality `yaml:"persona"`
 }
 
 // Personality is the personality to use for the chat
@@ -155,13 +155,40 @@ func InitAndLoad(ctx context.Context) (*Config, error) {
 	return nil, err
 }
 
+// GetDefaultPersona returns the default persona
+func (c *Chat) GetDefaultPersona() *Personality {
+	if p, ok := c.Persona["default"]; ok {
+		return &p
+	}
+	return &defaultPersona
+}
+
+// GetPersona returns the persona with the given name
+// If the persona does not exist, this will return nil.
+func (c *Chat) GetPersona(name string) (*Personality, bool) {
+	if p, ok := c.Persona[name]; ok {
+		return &p, true
+	}
+	return nil, false
+}
+
+var defaultPersona Personality = Personality{
+	Description: "Default",
+	Messages: []string{
+		"You're aico, my personal AI assistant.",
+		"You're here to help me with my daily tasks.",
+	},
+}
+
 func DefaultConfig() *Config {
 	return &Config{
 		logfile: logfilePath(context.Background()),
 		Chat: Chat{
 			Model:       DefaultModel,
 			Temperature: DefaultTemperature,
-			Persona:     Personality{},
+			Persona: map[string]Personality{
+				"default": defaultPersona,
+			},
 		},
 	}
 }

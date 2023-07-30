@@ -13,13 +13,15 @@ func TestLoadConfig(t *testing.T) {
 		Chat: Chat{
 			Model:       "gpt-3.5-turbo",
 			Temperature: 0.5,
-			Persona: Personality{
-				Description: "Professional",
-				Messages: []string{
-					"Message1 for Professional",
-					"Message2 for Professional",
-					"Message3 for Professional",
-					"Message4 for Professional",
+			Persona: map[string]Personality{
+				"default": {
+					Description: "Professional",
+					Messages: []string{
+						"Message1 for Professional",
+						"Message2 for Professional",
+						"Message3 for Professional",
+						"Message4 for Professional",
+					},
 				},
 			},
 		},
