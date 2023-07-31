@@ -62,5 +62,3 @@ To contribute to AICO development, clone this repository and make the desired co
 ## License
 The AICO project is released under the [MIT License](LICENSE).
 
-User:
-How do you feel this?
