@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	_ "embed"
 	"fmt"
 	"io"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/urfave/cli/v2"
 
@@ -162,12 +164,24 @@ var SendMessageCommand = &cli.Command{
 	Usage:       "Send message to AI",
 	Description: "Send message to AI and get response",
 	ArgsUsage:   "MESSAGE",
-	Action:      sendMessage,
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:      "input",
+			Aliases:   []string{"i"},
+			Usage:     "Input file path",
+			TakesFile: true,
+		},
+	},
+	Action: sendMessage,
 }
 
 func sendMessage(c *cli.Context) error {
-	ctx := c.Context
-	conf := ConfigFrom(ctx)
+	var (
+		err  error
+		ctx  = c.Context
+		conf = ConfigFrom(ctx)
+	)
+
 	logger := LoggerFrom(ctx)
 	logger.SetPrefix("[CHAT][CLI] ")
 
@@ -194,14 +208,28 @@ func sendMessage(c *cli.Context) error {
 		}
 	}
 
-	// User message
-	if c.NArg() == 0 {
-		return fmt.Errorf("message is not set")
+	// Handle user message
+	var inputMsg io.Reader
+	if c.Args().Len() > 0 {
+		inputMsg = strings.NewReader(c.Args().First())
+
+	} else if c.String("input") != "" {
+		f, err := os.Open(c.String("input"))
+		if err != nil {
+			return fmt.Errorf("open input file: %w", err)
+		}
+		defer f.Close()
+		inputMsg = f
+
+	} else if !isStdinEmpty() {
+		inputMsg = os.Stdin
+
+	} else {
+		return fmt.Errorf("no input message")
 	}
-	messages = append(messages, openai.Message{
-		Content: c.Args().First(),
-		Role:    openai.RoleUser,
-	})
+
+	msgs := ParseInputMessage(inputMsg)
+	messages = append(messages, msgs...)
 
 	// Send chat request
 	model := conf.Chat.Model
@@ -219,8 +247,74 @@ func sendMessage(c *cli.Context) error {
 	// Show response
 	if len(resp.Choices) > 0 {
 		msg := resp.Choices[0].Message
-		fmt.Println(msg.Content)
+		fmt.Println("Assistant:")
+		fmt.Println(msg.Content + "\n")
 	}
 
 	return nil
+}
+
+// --------------------------------------------------------------------
+// Helpers
+// --------------------------------------------------------------------
+
+// ParseInputMessage parses input messages.
+func ParseInputMessage(src io.Reader) []openai.Message {
+
+	var (
+		messages = make([]openai.Message, 0)
+		scanner  = bufio.NewScanner(src)
+
+		role    = openai.RoleUser
+		content = ""
+	)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		switch { // detect Role with prompt
+
+		case strings.HasPrefix(line, "User:"):
+			role = openai.RoleUser
+			line = strings.TrimPrefix(line, "User:")
+			line = strings.TrimPrefix(line, " ")
+
+		case strings.HasPrefix(line, "Assistant:"):
+			role = openai.RoleAssistant
+			line = strings.TrimPrefix(line, "Assistant:")
+			line = strings.TrimPrefix(line, " ")
+
+		case strings.HasPrefix(line, "System:"):
+			role = openai.RoleSystem
+			line = strings.TrimPrefix(line, "System:")
+			line = strings.TrimPrefix(line, " ")
+		}
+
+		if line == "" && content != "" { // empty line means end of message section
+			messages = append(messages, openai.Message{
+				Role:    role,
+				Content: content,
+			})
+			content = ""
+			continue
+		}
+		if content != "" { // soft break
+			content += "\n"
+		}
+		content += line
+	}
+
+	if content != "" {
+		messages = append(messages, openai.Message{
+			Role:    role,
+			Content: content,
+		})
+	}
+
+	return messages
+}
+
+func isStdinEmpty() bool {
+	stat, _ := os.Stdin.Stat()
+	return (stat.Mode() & os.ModeCharDevice) != 0
 }
