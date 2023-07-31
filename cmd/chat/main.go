@@ -75,7 +75,6 @@ func app() *cli.App {
 						return fmt.Errorf("prepare log file(%q): %w", lfile, err)
 					}
 				}
-				defer f.Close()
 
 				logger.SetOutput(f)
 				fmt.Println(theme.Info("Debug mode is on")) // TODO: promote to Logger or Presenter
