@@ -119,6 +119,9 @@ func app() *cli.App {
 					logger.SetPrefix("[CHAT][TUI] ")
 
 					handler := tui.New(cfg, logger)
+					if persona, ok := cfg.Chat.GetPersona(c.String("persona")); ok {
+						handler = handler.WithPersona(persona)
+					}
 					return handler.Run(ctx)
 				},
 			},

@@ -27,7 +27,9 @@ var (
 )
 
 type Handler struct {
-	cfg    *config.Config
+	cfg     *config.Config
+	persona *config.Personality
+
 	logger *log.Logger
 }
 
@@ -40,15 +42,12 @@ func (h *Handler) Run(ctx context.Context) error {
 	// Prepare message with persona
 	messages := make([]openai.Message, 0)
 
-	persona := h.cfg.Chat.GetDefaultPersona()
-	for _, msg := range persona.Messages {
+	// System messages from persona
+	for _, msg := range h.persona.Messages {
 		messages = append(messages, openai.Message{
 			Role:    openai.RoleSystem,
 			Content: msg,
 		})
-	}
-	if len(messages) == 0 {
-		h.logger.Println("No persona messages found")
 	}
 
 	// Spinner settings
@@ -161,4 +160,16 @@ func (h *Handler) Run(ctx context.Context) error {
 
 		}
 	}
+}
+
+func (h *Handler) WithPersona(p *config.Personality) *Handler {
+	h.persona = p
+	return h
+}
+
+func (h *Handler) Persona() *config.Personality {
+	if h.persona == nil {
+		return h.cfg.Chat.GetDefaultPersona()
+	}
+	return h.persona
 }
