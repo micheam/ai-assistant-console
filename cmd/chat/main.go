@@ -183,6 +183,10 @@ func sendMessage(c *cli.Context) error {
 		err  error
 		ctx  = c.Context
 		conf = ConfigFrom(ctx)
+
+		fileInput = c.String("input")
+		msg       = c.Args().First()
+		persona   = c.String("persona")
 	)
 
 	logger := LoggerFrom(ctx)
@@ -202,7 +206,7 @@ func sendMessage(c *cli.Context) error {
 	messages := make([]openai.Message, 0)
 
 	// System messages from persona
-	if persona, ok := conf.Chat.GetPersona(c.String("persona")); ok {
+	if persona, ok := conf.Chat.GetPersona(persona); ok {
 		for _, msg := range persona.Messages {
 			messages = append(messages, openai.Message{
 				Role:    openai.RoleSystem,
@@ -213,11 +217,11 @@ func sendMessage(c *cli.Context) error {
 
 	// Handle user message
 	var inputMsg io.Reader
-	if c.Args().Len() > 0 {
-		inputMsg = strings.NewReader(c.Args().First())
+	if msg != "" {
+		inputMsg = strings.NewReader(msg)
 
-	} else if c.String("input") != "" {
-		f, err := os.Open(c.String("input"))
+	} else if fileInput != "" {
+		f, err := os.Open(fileInput)
 		if err != nil {
 			return fmt.Errorf("open input file: %w", err)
 		}
