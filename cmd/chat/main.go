@@ -180,7 +180,6 @@ var SendMessageCommand = &cli.Command{
 
 func sendMessage(c *cli.Context) error {
 	var (
-		err  error
 		ctx  = c.Context
 		conf = ConfigFrom(ctx)
 
@@ -244,20 +243,31 @@ func sendMessage(c *cli.Context) error {
 	req.Temperature = conf.Chat.Temperature
 
 	logger.Printf("ChatCompletion request: %+v", req)
-	resp, err := chat.Do(ctx, req)
+
+	cnt := 0
+	err := chat.DoStream(ctx, req, func(resp *openai.ChatResponse) error {
+		logger.Printf("ChatCompletion response: %+v", resp)
+		if cnt == 0 {
+			fmt.Println("Assistant:")
+		}
+		if len(resp.Choices) == 0 {
+			return nil
+		}
+		if len(resp.Choices) > 1 {
+			logger.Printf("[WARN]: Got %d choices", len(resp.Choices))
+		}
+		if msg := resp.Choices[0].Delta; msg != nil {
+			fmt.Fprintf(os.Stdout, "%s", msg.Content)
+		}
+		cnt++
+		return nil
+	})
+	fmt.Println()
+
 	if err != nil {
 		logger.Printf("Got error: %+v", err)
 		return fmt.Errorf("chat: %w", err)
 	}
-	logger.Printf("ChatCompletion response: %+v", resp)
-
-	// Show response
-	if len(resp.Choices) > 0 {
-		msg := resp.Choices[0].Message
-		fmt.Println("Assistant:")
-		fmt.Println(msg.Content + "\n")
-	}
-
 	return nil
 }
 
