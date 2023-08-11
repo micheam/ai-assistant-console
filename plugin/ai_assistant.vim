@@ -40,7 +40,7 @@ def SendThread()
         append(line('$'), '')
     endif
 
-    echo $"Send Current Buffer as a thread to the Assistant"
+    echomsg $"Send Current Buffer as a thread to the Assistant"
 
     # Build the message to send
     #
@@ -128,7 +128,6 @@ def ShowWelcomeMessage(lnum: number = 1)
 enddef
 
 def PromptLine(prompt: string, width: number = 80): string
-    echom $"prompt: {prompt}, width: {width}"
     var line = prompt
     while len(line) < width
         line = $"{line}-"
