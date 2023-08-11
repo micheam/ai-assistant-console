@@ -99,7 +99,7 @@ func logfilePath(_ context.Context) string {
 
 const (
 	// DefaultModel is the default model to use for the chat
-	DefaultModel = "gpt-3.5-turbo"
+	DefaultModel = "gpt-4"
 
 	// DefaultTemperature is the default temperature to use for the chat
 	DefaultTemperature = 0.5
