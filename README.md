@@ -1,3 +1,6 @@
+> [!WARNING]
+> This project is still in development and is not ready for use.
+
 # AICO - AI Assistant Console 
 
 AICO is an AI-powered text generation tool using OpenAI's GPT-4.
