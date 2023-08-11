@@ -24,7 +24,6 @@ def StartChatWindow()
 
     ShowWelcomeMessage(1)
     execute 'normal! G'
-    startinsert
 enddef
 
 def SendThread()
@@ -72,7 +71,9 @@ def SendThread()
     # Note: this tempfile will create every time we send a message.
     const tempfile = $"{tempname()}.chat.message"
     writefile(messages, tempfile)
-    const cmd = $"chat send -i {tempfile}"
+    const cmd = ["chat", "send",
+        "-winwidth", winwidth(0) - 5,
+        "-i", tempfile]
 
     def JobExitCB(job: job, status: number)
         # Add a new line to the end of the buffer
@@ -82,9 +83,11 @@ def SendThread()
         endif
         setline(line('$'), [
             "",
-            "User: -----------------------------------------------",
+            PromptLine("User: ", winwidth(0) - 5),
             "",
         ])
+        # move the cursor to the last line
+        execute 'normal! G'
     enddef
 
     # Run the external command asynchronously
@@ -97,7 +100,6 @@ def SendThread()
                 })
 
     # TODO: set the buffer read-only and disable insert mode
-    # TODO: move the cursor to the last line
 enddef
 
 def ClearThread()
@@ -109,21 +111,31 @@ def ClearThread()
     execute 'normal! ggdG'
     ShowWelcomeMessage(1)
     execute 'normal! G'
-    startinsert
 enddef
 
 def ShowWelcomeMessage(lnum: number = 1)
     setline(lnum,  [
-        "Assistant: ------------------------------------------",
+        PromptLine("Assistant: ", winwidth(0) - 5),
         "",
         "Please input your message.",
         "Send a message with `:Send` command.",
         "Clear this thread with `:Clear` command.",
         "",
-        "User: -----------------------------------------------",
+        PromptLine("User: ", winwidth(0) - 5),
         "",
         "",
     ])
 enddef
+
+def PromptLine(prompt: string, width: number = 80): string
+    echom $"prompt: {prompt}, width: {width}"
+    var line = prompt
+    while len(line) < width
+        line = $"{line}-"
+    endwhile
+    return line
+enddef
+
+defcompile
 
 command! -nargs=? Assistant StartChatWindow(<f-args>)
