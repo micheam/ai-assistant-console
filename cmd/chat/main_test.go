@@ -74,13 +74,17 @@ What is the weather today?
 				},
 			},
 		},
-		"prefix with role": {
-			input: `User: Hello, I'm a human.
+		"trail characters after prompt will be ignored": {
+			input: `User: --------------------------------
+Hello, I'm a human.
 Nice to meet you.
 
-Assistant: Hello! Nice to meet you too. How can I assist you today?
+Assistant: -----------------------------------
 
-User: What is the weather today?
+Hello! Nice to meet you too. How can I assist you today?
+
+User: --------------------------------
+What is the weather today?
 `,
 			want: []openai.Message{
 				{

@@ -248,7 +248,8 @@ func sendMessage(c *cli.Context) error {
 	err := chat.DoStream(ctx, req, func(resp *openai.ChatResponse) error {
 		logger.Printf("ChatCompletion response: %+v", resp)
 		if cnt == 0 {
-			fmt.Println("Assistant:")
+			fmt.Println("Assistant: ------------------------------------------")
+			fmt.Println()
 		}
 		if len(resp.Choices) == 0 {
 			return nil
@@ -290,21 +291,17 @@ func ParseInputMessage(src io.Reader) []openai.Message {
 		line := scanner.Text()
 
 		switch { // detect Role with prompt
-
 		case strings.HasPrefix(line, "User:"):
 			role = openai.RoleUser
-			line = strings.TrimPrefix(line, "User:")
-			line = strings.TrimPrefix(line, " ")
+			continue
 
 		case strings.HasPrefix(line, "Assistant:"):
 			role = openai.RoleAssistant
-			line = strings.TrimPrefix(line, "Assistant:")
-			line = strings.TrimPrefix(line, " ")
+			continue
 
 		case strings.HasPrefix(line, "System:"):
 			role = openai.RoleSystem
-			line = strings.TrimPrefix(line, "System:")
-			line = strings.TrimPrefix(line, " ")
+			continue
 		}
 
 		if line == "" && content != "" { // empty line means end of message section
