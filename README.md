@@ -1,6 +1,6 @@
 # AICO - AI Assistant Console 
 
-AICO is an AI-powered text generation tool using OpenAI's GPT-3.
+AICO is an AI-powered text generation tool using OpenAI's GPT-4.
 
 ## Install
 
@@ -47,6 +47,11 @@ Commands include:
 
 - `version`: Show the current version of AICO
 - `chat`: Start an interactive AI chat session
+
+## Usage as a Vim Plugin
+
+AICO can be used as a Vim plugin to generate text in Vim buffers.
+Please see the [Vim plugin documentation](README.vim.md) for more information.
 
 ## Environment Variables
 
