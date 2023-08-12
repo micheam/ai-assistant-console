@@ -248,7 +248,7 @@ func sendMessage(c *cli.Context) error {
 	err := chat.DoStream(ctx, req, func(resp *openai.ChatResponse) error {
 		logger.Printf("ChatCompletion response: %+v", resp)
 		if cnt == 0 {
-			fmt.Println("Assistant: ------------------------------------------")
+			fmt.Println("Assistant:")
 			fmt.Println()
 		}
 		if len(resp.Choices) == 0 {
