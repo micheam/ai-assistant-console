@@ -85,13 +85,10 @@ def SendThread()
         "-winwidth", winwidth(0) - 5,
         "-i", tempfile]
 
+    const target_buf = bufnr('%')
+
     def JobExitCB(job: job, status: number)
         var lines = []
-        if getline('$') !~# '\n$'
-            # Add a new line to the end of the buffer
-            # if the last line is not empty
-            lines->add("")
-        endif
         if status == -1
             lines->add("")
                 ->add("> **Warning**")
@@ -101,16 +98,16 @@ def SendThread()
             ->add("")
             ->add(PromptLine("User: ", winwidth(0) - 5))
             ->add("")
-        setline('$', lines)
+        setbufline(target_buf, '$', lines)
         execute 'normal! G'
     enddef
 
     # Run the external command asynchronously
     var job = job_start(cmd, {
                 "out_io": "buffer",
-                "out_buf": bufnr('%'),
+                "out_buf": target_buf,
                 "err_io": "buffer",
-                "err_buf": bufnr('%'),
+                "err_buf": target_buf,
                 "exit_cb": JobExitCB,
                 })
 
