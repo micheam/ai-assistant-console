@@ -32,7 +32,7 @@ def StartChatWindow()
     nnoremap <buffer> <C-c> :Stop<CR>
     nnoremap <buffer> <C-l> :Clear<CR>
 
-    ShowWelcomeMessage(1)
+    ShowWelcomeMessage(bufnr('%'), 1)
     execute 'normal! G'
 enddef
 
@@ -99,7 +99,6 @@ def SendThread()
             ->add(PromptLine("User: ", winwidth(0) - 5))
             ->add("")
         setbufline(target_buf, '$', lines)
-        execute 'normal! G'
     enddef
 
     # Run the external command asynchronously
@@ -124,13 +123,14 @@ def ClearThread()
         echoerr $"The current buffer is not a chat window"
         return
     endif
-    execute 'normal! ggdG'
-    ShowWelcomeMessage(1)
+
+    deletebufline(bufnr('%'), '$')
+    ShowWelcomeMessage(bufnr('%'), 1)
     execute 'normal! G'
 enddef
 
-def ShowWelcomeMessage(lnum: number = 1)
-    setline(lnum,  [
+def ShowWelcomeMessage(buf: number, lnum: number = 1)
+    setbufline(buf, lnum,  [
         PromptLine("Assistant: ", winwidth(0) - 5),
         "",
         "Please input your message.",
