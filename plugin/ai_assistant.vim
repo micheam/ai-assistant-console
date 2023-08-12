@@ -93,9 +93,11 @@ def SendThread()
         endif
         lines
             ->add("")
-            ->add(PromptLine("User: ", winwidth(0) - 5))
+            ->add(HrLine())
             ->add("")
-        setbufline(target_buf, '$', lines)
+            ->add(PromptLine("User"))
+            ->add("")
+        appendbufline(target_buf, '$', lines)
     enddef
 
     # Run the external command asynchronously
@@ -128,14 +130,16 @@ enddef
 
 def ShowWelcomeMessage(buf: number, lnum: number = 1)
     setbufline(buf, lnum,  [
-        PromptLine("Assistant: ", winwidth(0) - 5),
+        PromptLine("Assistant"),
         "",
         "Please input your message.",
         "Send a message with `:Send` or `<CR>`.",
         "Clear this thread with `:Clear` or `<C-l>`.",
         "Stop the running job with `:Stop` or `<C-c>`.",
         "",
-        PromptLine("User: ", winwidth(0) - 5),
+        HrLine(),
+        "",
+        PromptLine("User"),
         "",
         "",
     ])
@@ -147,12 +151,13 @@ def StopJob()
     endif
 enddef
 
-def PromptLine(prompt: string, width: number = 80): string
-    var line = prompt
-    while len(line) < width
-        line = $"{line}-"
-    endwhile
-    return line
+def PromptLine(prompt: string): string
+    return $"{prompt}: "
+enddef
+
+def HrLine(): string
+    # fill the current window with `-`
+    return repeat("-", winwidth(0) - 5)
 enddef
 
 defcompile
