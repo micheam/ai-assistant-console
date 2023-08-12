@@ -19,8 +19,10 @@ def StartChatWindow()
     # Set buffer local commands
     # :Send - send the message to the Assistant
     # :Clear - clear the chat thread
+    # :Stop - stop the running job
     command! -buffer Send call SendThread()
     command! -buffer Clear call ClearThread()
+    command! -buffer Stop call StopJob()
 
     ShowWelcomeMessage(1)
     execute 'normal! G'
@@ -76,17 +78,22 @@ def SendThread()
         "-i", tempfile]
 
     def JobExitCB(job: job, status: number)
-        # Add a new line to the end of the buffer
-        # if the last line is not empty
+        var lines = []
         if getline('$') !~# '\n$'
-            append(line('$'), '')
+            # Add a new line to the end of the buffer
+            # if the last line is not empty
+            lines->add("")
         endif
-        setline(line('$'), [
-            "",
-            PromptLine("User: ", winwidth(0) - 5),
-            "",
-        ])
-        # move the cursor to the last line
+        if status == -1
+            lines->add("")
+                ->add("> **Warning**")
+                ->add("> The job is Cancelled")
+        endif
+        lines
+            ->add("")
+            ->add(PromptLine("User: ", winwidth(0) - 5))
+            ->add("")
+        setline('$', lines)
         execute 'normal! G'
     enddef
 
@@ -98,6 +105,10 @@ def SendThread()
                 "err_buf": bufnr('%'),
                 "exit_cb": JobExitCB,
                 })
+
+    # Set running job to the current buffer
+    # so that we can kill the job when we close the buffer
+    b:job = job
 
     # TODO: set the buffer read-only and disable insert mode
 enddef
@@ -125,6 +136,12 @@ def ShowWelcomeMessage(lnum: number = 1)
         "",
         "",
     ])
+enddef
+
+def StopJob()
+    if exists('b:job')
+        job_stop(b:job)
+    endif
 enddef
 
 def PromptLine(prompt: string, width: number = 80): string
