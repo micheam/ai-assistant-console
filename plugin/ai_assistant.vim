@@ -24,6 +24,14 @@ def StartChatWindow()
     command! -buffer Clear call ClearThread()
     command! -buffer Stop call StopJob()
 
+    # Set buffer local mappings
+    # <CR> - send the message to the Assistant
+    # <C-c> - stop the running job
+    # <C-l> - clear the chat thread
+    nnoremap <buffer> <CR> :Send<CR>
+    nnoremap <buffer> <C-c> :Stop<CR>
+    nnoremap <buffer> <C-l> :Clear<CR>
+
     ShowWelcomeMessage(1)
     execute 'normal! G'
 enddef
@@ -129,8 +137,9 @@ def ShowWelcomeMessage(lnum: number = 1)
         PromptLine("Assistant: ", winwidth(0) - 5),
         "",
         "Please input your message.",
-        "Send a message with `:Send` command.",
-        "Clear this thread with `:Clear` command.",
+        "Send a message with `:Send` or `<CR>`.",
+        "Clear this thread with `:Clear` or `<C-l>`.",
+        "Stop the running job with `:Stop` or `<C-c>`.",
         "",
         PromptLine("User: ", winwidth(0) - 5),
         "",
