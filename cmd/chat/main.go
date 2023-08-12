@@ -174,11 +174,6 @@ var SendMessageCommand = &cli.Command{
 			Usage:     "Input file path",
 			TakesFile: true,
 		},
-		&cli.IntFlag{
-			Name:  "winwidth",
-			Usage: "Window width to fill",
-			Value: 80,
-		},
 	},
 	Action: sendMessage,
 }
@@ -253,12 +248,8 @@ func sendMessage(c *cli.Context) error {
 	err := chat.DoStream(ctx, req, func(resp *openai.ChatResponse) error {
 		logger.Printf("ChatCompletion response: %+v", resp)
 		if cnt == 0 {
-			// Show prompt line.
-			prompt := "Assistant: "
-			for i := 0; i < c.Int("winwidth")-len(prompt); i++ {
-				prompt += "-"
-			}
-			fmt.Printf("%s\n\n", prompt)
+			fmt.Println("Assistant: ------------------------------------------")
+			fmt.Println()
 		}
 		if len(resp.Choices) == 0 {
 			return nil
