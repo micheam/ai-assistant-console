@@ -81,10 +81,7 @@ def SendThread()
     # Note: this tempfile will create every time we send a message.
     const tempfile = $"{tempname()}.chat.message"
     writefile(messages, tempfile)
-    const cmd = ["chat", "send",
-        "-winwidth", winwidth(0) - 5,
-        "-i", tempfile]
-
+    const cmd = ["chat", "send", "-i", tempfile]
     const target_buf = bufnr('%')
 
     def JobExitCB(job: job, status: number)
