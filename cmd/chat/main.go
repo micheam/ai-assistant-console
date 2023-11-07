@@ -86,7 +86,9 @@ func app() *cli.App {
 
 			// Override model if specified with flag
 			model := c.String("model")
-			cfg.Chat.Model = model
+			if model != "" {
+				cfg.Chat.Model = model
+			}
 
 			// Setup context
 			ctx = WithConfig(ctx, cfg)
