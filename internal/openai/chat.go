@@ -19,6 +19,8 @@ var chatAvailableModels = []string{
 	"gpt-4-0613",
 	"gpt-4-32k",
 	"gpt-4-32k-0613",
+	"gpt-4-1106-preview",
+	"gpt-4-vision-preview",
 }
 
 var defaultChatModel = "gpt-4"
