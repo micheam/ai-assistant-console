@@ -44,8 +44,7 @@ func app() *cli.App {
 			&cli.StringFlag{
 				Name:    "model",
 				Aliases: []string{"m"},
-				Usage:   "GPT model to use",
-				Value:   config.DefaultModel,
+				Usage:   "GPT model to use, default is set in config file",
 			},
 			&cli.StringFlag{
 				Name:    "persona",
@@ -85,9 +84,11 @@ func app() *cli.App {
 			}
 
 			// Override model if specified with flag
-			model := c.String("model")
-			if model != "" {
+			if model := c.String("model"); model != "" {
 				cfg.Chat.Model = model
+			}
+			if cfg.Chat.Model == "" {
+				cfg.Chat.Model = config.DefaultModel
 			}
 
 			// Setup context
