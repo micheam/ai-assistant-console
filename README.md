@@ -17,11 +17,11 @@ Once you have Go installed, follow these steps to install AICO:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/micheam/aico.git
+   git clone https://github.com/micheam/ai-assistant-console.git
    ```
 2. Navigate to the project directory:
    ```bash
-   cd aico
+   cd ai-assistant-console
    ```
 3. Use the `go.mod` file to manage dependencies. You don't need to do anything manually since Go will handle this for you.
 4. Build the executable binary by running `make`:
@@ -30,26 +30,37 @@ Once you have Go installed, follow these steps to install AICO:
    ```
    This will create a binary executable in the `bin/` directory.
 
-Now, you can use AICO as described in the [Usage](#usage) section.
+Now, you can use commands as described in the [Usage](#usage) section.
 
-## Usage
+## Usage of `chat` Command
 
-After building the binary, you can run AICO with the following command:
+After building the binary, you can run `chat` with the following command:
 
 ```bash
-./bin/aico [global options] command [command options] [arguments...]
+$ ./bin/chat -h
+NAME:
+   chat - Chat with AI
+
+USAGE:
+   chat [global options] command [command options] [arguments...]
+
+VERSION:
+   0.0.7
+
+
+COMMANDS:
+   config   Show config file path
+   tui      Chat with AI in TUI
+   send     Send message to AI
+   help, h  Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+   --debug                    Enable debug mode (default: false) [$AICO_DEBUG]
+   --model value, -m value    GPT model to use (default: "gpt-4")
+   --persona value, -p value  Persona to use (default: "default")
+   --help, -h                 show help
+   --version, -v              print the version
 ```
-
-Global options include:
-
-- `--debug`: Enable debug mode (default: false). Can alternatively be set with the `AICO_DEBUG` environment variable.
-- `--help, -h`: Show help information
-- `--version, -v`: Print the version number
-
-Commands include:
-
-- `version`: Show the current version of AICO
-- `chat`: Start an interactive AI chat session
 
 ## Usage as a Vim Plugin
 
@@ -62,7 +73,8 @@ Please see the [Vim plugin documentation](README.vim.md) for more information.
 
 ## Development
 
-To contribute to AICO development, clone this repository and make the desired code changes. Before submitting your changes, ensure the following:
+To contribute to AICO development, clone this repository and make the desired code changes.
+Before submitting your changes, ensure the following:
 
 - All tests pass by running `make test`
 - The code formatting is consistent and adheres to [Go standards](https://golang.org/doc/effective_go)
