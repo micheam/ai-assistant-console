@@ -34,12 +34,22 @@ Once you have Go installed, follow these steps to install AICO:
 
 Now, you can use commands as described in the [Usage](#usage) section.
 
-## Usage of `chat` Command
+## OpenAI API Key
 
-After building the binary, you can run `chat` with the following command:
+Currently, AICO requires an OpenAI API key to use the GPT-4 API.
+You can get an API key from [the OpenAI API Keys page].
+
+Once you have an API key, you can set it in the `OPENAI_API_KEY` environment variable:
 
 ```bash
-$ ./bin/chat -h
+export OPENAI_API_KEY=<your API key>
+```
+
+## Usage of `chat` Command
+
+After building the binary, you can run `chat` to start chatting with AI.
+
+```
 NAME:
    chat - Chat with AI
 
@@ -64,6 +74,37 @@ GLOBAL OPTIONS:
    --version, -v              print the version
 ```
 
+### TUI Mode
+
+To chat with AI in TUI mode, use the `tui` subcommand:
+
+```bash
+$ ./bin/chat tui
+```
+
+In TUI mode, you can send message with ';; (double semicolon)' line.
+
+```bash
+$ ./bin/chat tui
+Conversation with gpt-4-1106-preview
+------------------------------
+> Translate into English:
+> 
+> こんにちは、世界。
+> ;;
+
+Hello, world.
+```
+
+### Batch Mode
+
+To send a message to AI, use the `send` subcommand:
+
+```bash
+$ ./bin/chat send "Translate into English: こんにちは、世界。"
+Hello, world.
+```
+
 ## Usage as a Vim Plugin
 
 AICO can be used as a Vim plugin to generate text in Vim buffers.
@@ -84,3 +125,5 @@ Before submitting your changes, ensure the following:
 ## License
 The AICO project is released under the [MIT License](LICENSE).
 
+
+[the OpenAI API Keys page]: https://platform.openai.com/api-keys
