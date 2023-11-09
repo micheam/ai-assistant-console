@@ -3,6 +3,8 @@
 
 # AICO - AI Assistant Console 
 
+![screenshot](screenshot.png)
+
 AICO is an AI-powered text generation tool using OpenAI's GPT-4.
 
 ## Install
