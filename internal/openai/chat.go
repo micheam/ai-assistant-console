@@ -13,10 +13,11 @@ const chatEndpoint = "https://api.openai.com/v1/chat/completions"
 var chatAvailableModels = []string{
 	"gpt-3.5-turbo",
 	"gpt-4",
-	"gpt-4-turbo-preview",
+	"gpt-4-turbo",
+	"gpt-4o",
 }
 
-var defaultChatModel = "gpt-4"
+var defaultChatModel = "gpt-4o"
 
 func ChatAvailableModels() []string {
 	return chatAvailableModels
