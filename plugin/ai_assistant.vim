@@ -1,5 +1,16 @@
 vim9script
 
+# g:ai_assistant_model
+#
+# The model of the Assistant, e.g. `gpt-4`, `gpt-4-turbo`, `gpt-4o`, etc.
+# The default value is `gpt-4-turbo`.
+def AssistantModel(): string
+    if exists('g:ai_assistant_model')
+        return g:ai_assistant_model
+    endif
+    return 'gpt-4o'
+enddef
+
 def StartChatWindow()
     var src_buf = bufnr('%')
 
@@ -81,7 +92,13 @@ def SendThread()
     # Note: this tempfile will create every time we send a message.
     const tempfile = $"{tempname()}.chat.message"
     writefile(messages, tempfile)
-    const cmd = ["chat", "send", "-i", tempfile]
+    const cmd = [
+        "chat", 
+        "--model", AssistantModel(),
+        "send",
+        "-i",
+        tempfile
+    ]
     const target_buf = bufnr('%')
 
     def JobExitCB(job: job, status: number)
