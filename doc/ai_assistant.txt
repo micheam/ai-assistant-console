@@ -1,0 +1,96 @@
+*ai_assistant.txt*    For Vim version 9.0    Last change: 2024-06-13
+
+DESCRIPTION                                      *ai_assistant* *AI-Assistant*
+
+    This plugin integrates an AI Assistant into Vim, allowing users to interact with an AI model directly within their editor.
+    The plugin provides commands and mappings to send messages, clear chat threads, and manage context buffers.
+
+INSTALLATION                                     *ai_assistant-installation*
+    1. Place the plugin file in your Vim runtime path, typically `~/.vim/plugin/` or `~/.config/nvim/plugin/`.
+    2. Restart Vim to load the plugin.
+
+COMMANDS                                         *ai_assistant-commands*
+    :Assistant                                    *:Assistant*
+        Starts a new chat window with the AI Assistant. The current buffer is used as the primary context source.
+
+    :Send                                         *:Send*
+        Sends the current buffer content as a thread to the AI Assistant.
+
+    :Clear                                        *:Clear*
+        Clears the current chat thread.
+
+    :Stop                                         *:Stop*
+        Stops the running job associated with the chat window.
+
+    :ContextAdd <bufnr>                           *:ContextAdd*
+        Adds the specified buffer number as a context buffer for the chat.
+
+    :ContextAddAll                                *:ContextAddAll*
+        Adds all listed buffers (excluding the primary context buffer and non-file buffers) as context buffers.
+
+    :ContextList                                  *:ContextList*
+        Lists all context buffers currently associated with the chat.
+
+MAPPINGS                                          *ai_assistant-mappings*
+    <CR>                                          *<CR>*
+        Sends the message to the AI Assistant.
+
+    <C-c>                                         *<C-c>*
+        Stops the running job.
+
+    <C-l>                                         *<C-l>*
+        Clears the chat thread.
+
+VARIABLES                                         *ai_assistant-variables*
+    g:ai_assistant_model                          *g:ai_assistant_model*
+        Specifies the model of the AI Assistant. Default is `gpt-4-turbo`.
+
+FUNCTIONS                                         *ai_assistant-functions*
+    AssistantModel()                              *ai_assistant-functions*
+        Returns the model of the AI Assistant based on the global variable `g:ai_assistant_model`.
+
+    StartChatWindow()                             *ai_assistant-functions*
+        Initializes a new chat window with the AI Assistant.
+
+    AppendContextBuf(bufnr: number)               *ai_assistant-functions*
+        Appends the specified buffer number to the context buffers list.
+
+    SyncContextBufs()                             *ai_assistant-functions*
+        Synchronizes the context buffers, ensuring the primary context buffer remains unchanged.
+
+    ListContextBufs()                             *ai_assistant-functions*
+        Lists all context buffers.
+
+    SendThread()                                  *ai_assistant-functions*
+        Sends the current buffer content as a thread to the AI Assistant.
+
+    ClearThread()                                 *ai_assistant-functions*
+        Clears the current chat thread.
+
+    ShowWelcomeMessage(buf: number, lnum: number) *ai_assistant-functions*
+        Displays a welcome message in the specified buffer.
+
+    StopJob()                                     *ai_assistant-functions*
+        Stops the running job associated with the chat window.
+
+    PromptLine(prompt: string): string            *ai_assistant-functions*
+        Returns a formatted prompt line.
+
+    HrLine(): string                              *ai_assistant-functions*
+        Returns a horizontal rule line.
+
+USAGE                                             *ai_assistant-usage*
+    1. Start a new chat window with `:Assistant`.
+    2. Send messages using `<CR>` or `:Send`.
+    3. Clear the chat thread with `<C-l>` or `:Clear`.
+    4. Stop the running job with `<C-c>` or `:Stop`.
+    5. Add context buffers with `:ContextAdd <bufnr>` or `:ContextAddAll`.
+    6. List context buffers with `:ContextList`.
+
+AUTHOR                                            *ai_assistant-author*
+    Written by [Your Name]
+
+COPYRIGHT                                         *ai_assistant-copyright*
+    This plugin is released under the MIT License.
+
+vim:tw=78:ts=8:ft=help:norl:
