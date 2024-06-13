@@ -1,9 +1,29 @@
 vim9script
 
+##
+# Global variables:
+#
 # g:ai_assistant_model
 #
-# The model of the Assistant, e.g. `gpt-4`, `gpt-4-turbo`, `gpt-4o`, etc.
-# The default value is `gpt-4-turbo`.
+#   The model of the Assistant, e.g. `gpt-4`, `gpt-4-turbo`, `gpt-4o`, etc.
+#   The default value is `gpt-4-turbo`.
+#
+# g:ai_assistant_auto_sync_context
+#
+#   If this variable is set to 1, the context buffers are automatically updated
+#   when the chat window is opened or new messages are sent. The default value is 0.
+##
+
+##
+# Buffer local variables:
+#
+# b:context_bufs
+#
+#   the buffer numbers. This is used to get the context of the
+#   chat with AI-Assistant. Index 0 (primary context) is the
+#   buffer number when StartChatWindow is called.
+##
+
 def AssistantModel(): string
     if exists('g:ai_assistant_model')
         return g:ai_assistant_model
@@ -11,12 +31,13 @@ def AssistantModel(): string
     return 'gpt-4o'
 enddef
 
-# buffer local variables
-#
-# b:context_bufs - the buffer numbers. This is used to get the context of the
-#                  chat with AI-Assistant. Index 0 (primary context) is the
-#                  buffer number when StartChatWindow is called.
-#
+def ContextAutoSyncEnabled(): bool
+    if exists('g:ai_assistant_auto_sync_context')
+        return g:ai_assistant_auto_sync_context == 1
+    endif
+    return false
+enddef
+
 
 def StartChatWindow()
     const src_buf = bufnr('%') # Use current buffer as a primary context source
@@ -50,6 +71,9 @@ def StartChatWindow()
     nnoremap <buffer> <C-l> :Clear<CR>
 
     ShowWelcomeMessage(bufnr('%'), 1)
+    if ContextAutoSyncEnabled()
+        SyncContextBufs()
+    endif
     execute 'normal! G'
 enddef
 
@@ -91,6 +115,10 @@ def SendThread()
     if !exists('b:chat_window')
         echoerr $"The current buffer is not a chat window"
         return
+    endif
+
+    if ContextAutoSyncEnabled()
+        SyncContextBufs()
     endif
 
     # Add a new line to the end of the buffer
