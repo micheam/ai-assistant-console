@@ -11,14 +11,20 @@ def AssistantModel(): string
     return 'gpt-4o'
 enddef
 
-def StartChatWindow()
-    var src_buf = bufnr('%')
+# buffer local variables
+#
+# b:context_bufs - the buffer numbers. This is used to get the context of the
+#                  chat with AI-Assistant. Index 0 (primary context) is the
+#                  buffer number when StartChatWindow is called.
+#
 
-    # Create a new buffer
-    new
+def StartChatWindow()
+    const src_buf = bufnr('%') # Use current buffer as a primary context source
+
+    new # Create a new buffer
     setlocal buftype=nofile bufhidden=wipe noswapfile
     setlocal filetype=markdown
-    b:src_buf = src_buf
+    b:context_bufs = [src_buf]
     b:chat_window = true # Mark this buffer as a chat window
 
     # Set the buffer name
@@ -28,12 +34,12 @@ def StartChatWindow()
     execute $"file {bufname(src_buf)}.chat"
 
     # Set buffer local commands
-    # :Send - send the message to the Assistant
-    # :Clear - clear the chat thread
-    # :Stop - stop the running job
-    command! -buffer Send call SendThread()
-    command! -buffer Clear call ClearThread()
-    command! -buffer Stop call StopJob()
+    command! -buffer          Send          SendThread()
+    command! -buffer          Clear         ClearThread()
+    command! -buffer          Stop          StopJob()
+    command! -buffer -nargs=1 ContextAdd    AppendContextBuf(str2nr(<q-args>))
+    command! -buffer          ContextAddAll SyncContextBufs()
+    command! -buffer          ContextList   ListContextBufs()
 
     # Set buffer local mappings
     # <CR> - send the message to the Assistant
@@ -45,6 +51,38 @@ def StartChatWindow()
 
     ShowWelcomeMessage(bufnr('%'), 1)
     execute 'normal! G'
+enddef
+
+def AppendContextBuf(bufnr: number): void
+    if !exists('b:context_bufs')
+        b:context_bufs = []
+    endif
+    b:context_bufs->add(bufnr)
+enddef
+
+def SyncContextBufs(): void
+    # * b:context_bufs[0] is the primary context buffer, so we don't want to clear it.
+    # * skip chat window buffer
+    const primary_buf = b:context_bufs[0]
+    b:context_bufs = [primary_buf]
+    for bufnr in filter(range(1, bufnr('$')), 'v:val->buflisted()')
+        if bufnr == primary_buf || bufnr->getbufvar('&buftype') ==# 'nofile'
+            continue
+        endif
+        if bufnr->bufexists()
+            b:context_bufs->add(bufnr)
+        endif
+    endfor
+enddef
+
+def ListContextBufs()
+    if exists('b:context_bufs')
+       for bufnr in b:context_bufs
+           echo $"{bufnr}: {bufname(bufnr)}"
+        endfor
+    else
+        echo "No context buffers"
+    endif
 enddef
 
 def SendThread()
@@ -68,25 +106,36 @@ def SendThread()
     # The format of the message is:
     #
     #   System:
-    #   src content is below:
     #
-    #   ~~~<filetype>
+    #   Context of this chat is below:
     #
-    #   <content of the content from b:src_buf>
+    #   <for each buffer in b:context_bufs>
     #
+    #   <filename of the buffer>
+    #
+    #   ~~~<filetype of the buffer>
+    #   <content of the buffer>
     #   ~~~
+    #
+    #   </for>
     #
     #   <content of the chat thread>
     #
     var messages = []
     add(messages, "System:")
-    add(messages, "src content is below:")
+    add(messages, "Context of this chat is below:")
     add(messages, "")
-    add(messages, "~~~" .. &filetype)
-    extend(messages, getbufline(b:src_buf, 1, '$'))
-    add(messages, "~~~")
-    add(messages, "")
-    extend(messages, getline(1, '$'))
+
+    for context_buf in b:context_bufs
+        add(messages, bufname(context_buf))
+        add(messages, "")
+        add(messages, "~~~" .. getbufvar(context_buf, '&filetype'))
+        extend(messages, getbufline(context_buf, 1, '$'))
+        add(messages, "~~~")
+        add(messages, "")
+    endfor
+
+    extend(messages, getline(1, '$')) # Append existing chat thread
 
     # Create a temprary file
     # Note: this tempfile will create every time we send a message.
