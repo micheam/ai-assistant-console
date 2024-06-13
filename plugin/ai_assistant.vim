@@ -38,7 +38,11 @@ def StartChatWindow()
     command! -buffer          Clear         ClearThread()
     command! -buffer          Stop          StopJob()
     command! -buffer -nargs=1 ContextAdd    AppendContextBuf(str2nr(<q-args>))
-    command! -buffer          ContextAddAll SyncContextBufs()
+    command! -buffer          ContextAddAll {
+        SyncContextBufs()
+        echo "Context buffers are updated"
+        ListContextBufs()
+    }
     command! -buffer          ContextList   ListContextBufs()
 
     # Set buffer local mappings
