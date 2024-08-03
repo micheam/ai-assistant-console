@@ -18,6 +18,30 @@ type Message struct {
 	Name string `json:"name,omitempty"`
 }
 
+// SystemMessage creates a new system message
+func SystemMessage(content string) *Message {
+	return &Message{
+		Role:    RoleSystem,
+		Content: content,
+	}
+}
+
+// UserMessage creates a new user message
+func UserMessage(content string) *Message {
+	return &Message{
+		Role:    RoleUser,
+		Content: content,
+	}
+}
+
+// AssistantMessage creates a new assistant message
+func AssistantMessage(content string) *Message {
+	return &Message{
+		Role:    RoleAssistant,
+		Content: content,
+	}
+}
+
 type DeltaMessage struct {
 	// content string Required
 	//
