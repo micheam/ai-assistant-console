@@ -14,3 +14,6 @@ clean :
 
 install : clean chat
 	cp ./bin/chat $(USER_BIN)/chat
+
+generate :
+	go generate ./...
