@@ -9,12 +9,12 @@ const chatEndpoint = "https://api.openai.com/v1/chat/completions"
 
 // chatAvailableModels is a list of models that are compatible with the Chat API
 //
-// https://platform.openai.com/docs/models/model-endpoint-compatibility
+// https://platform.openai.com/docs/models/model-endpoint-compatibility#model-endpoint-compatibility
 var chatAvailableModels = []string{
-	"gpt-3.5-turbo",
+	"apt-4o",
+	"gpt-4o-mini",
 	"gpt-4",
-	"gpt-4-turbo",
-	"gpt-4o",
+	"gpt-3.5-turbo",
 }
 
 var defaultChatModel = "gpt-4o"
