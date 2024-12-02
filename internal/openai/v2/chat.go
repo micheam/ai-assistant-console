@@ -6,9 +6,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
-
-	"golang.org/x/tools/go/pointer"
 
 	"micheam.com/aico/internal/openai/gen"
 	"micheam.com/aico/internal/pointer"
@@ -76,28 +73,16 @@ func (c *ChatClient) DoStream(ctx context.Context, req *ChatRequest, onReceive f
 			continue
 		}
 
-		if !strings.HasPrefix(line, "data:") {
-			return fmt.Errorf("un supported event form: %s", line)
-		}
-
-		chunk := strings.SplitN(line, ":", 2)
-		if len(chunk) != 2 {
-			return fmt.Errorf("un supported event form: %s", line)
-		}
-
-		data := strings.TrimSpace(chunk[1])
-		if data == "[DONE]" { // NOTE: this based on the *OLD* sepec of the OpenAI API
-			break
-		}
-
-		// FIXME: パースして、型で判断しよう...
-
-		var resp ChatResponse
-		if err := json.Unmarshal([]byte(data), &resp); err != nil {
+		var dest gen.CreateChatCompletionResponse
+		if err := json.Unmarshal([]byte(line), &dest); err != nil {
 			return fmt.Errorf("failed to unmarshal response: %w", err)
 		}
-		if err := onReceive(&resp); err != nil {
-			return err
+		if len(dest.Choices) == 0 {
+			continue
+		}
+		chunk := dest.Choices[0]
+		if chunk.FinishReason == gen.CreateChatCompletionResponseChoicesFinishReasonStop {
+			break
 		}
 	}
 
@@ -105,6 +90,8 @@ func (c *ChatClient) DoStream(ctx context.Context, req *ChatRequest, onReceive f
 }
 
 // ChatRequest is used to make a request to the Chat API
+//
+// TODO(micheam): Devide this struct into ChatRequest and ChatStreamRequest
 type ChatRequest struct {
 	// model string Required
 	//
