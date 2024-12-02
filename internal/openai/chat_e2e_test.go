@@ -35,3 +35,30 @@ func TestChat_Do_EndToEnd(t *testing.T) {
 
 	t.Logf("Response: %+v", res)
 }
+
+func TestChat_DoStream_EndToEnd(t *testing.T) {
+	apikey := os.Getenv("OPENAI_API_KEY")
+	if apikey == "" {
+		t.Fatal("OPENAI_API_KEY is not set")
+	}
+	client := openai.NewClient(apikey)
+	chat := openai.NewChatClient(client)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	req := openai.NewChatRequest(
+		"",
+		[]openai.Message{
+			{Role: openai.RoleUser, Content: "Hello, How are you?"},
+		},
+	)
+
+	err := chat.DoStream(ctx, req, func(resp *openai.ChatResponse) error {
+		t.Logf("%s: %+v", resp.Choices[0].Delta.Content, resp.Choices[0])
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+}
