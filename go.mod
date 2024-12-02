@@ -6,11 +6,12 @@ require (
 	github.com/fatih/color v1.15.0
 	github.com/getkin/kin-openapi v0.128.0
 	github.com/google/go-cmp v0.6.0
+	github.com/gorilla/mux v1.8.0
 	github.com/mattn/go-runewidth v0.0.15
 	github.com/oapi-codegen/runtime v1.1.1
 	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.25.7
-	golang.org/x/term v0.13.0
+	golang.org/x/term v0.15.0
 )
 
 require (

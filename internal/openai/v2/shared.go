@@ -45,10 +45,7 @@ func AssistantMessage(content string) *Message {
 }
 
 type DeltaMessage struct {
-	// content string Required
-	//
-	// The contents of the message.
-	Content string `json:"content"`
+	Content string
 }
 
 // The role of the author of this message.

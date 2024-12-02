@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"micheam.com/aico/internal/openai/gen"
 	"micheam.com/aico/internal/pointer"
@@ -43,46 +44,67 @@ func (c *ChatClient) Do(ctx context.Context, req *ChatRequest) (*ChatResponse, e
 	panic("not implemented")
 }
 
+// DoStream sends a request to the Chat API and receives a stream of responses
+// Specify callback function onReceive to handle each response.
+//
+// NOTE: Currently, multiple choices are not supported. Only one choice is supported.
+// Maybe `iterators` is a better name than `onReceive` :thinking:
 func (c *ChatClient) DoStream(ctx context.Context, req *ChatRequest, onReceive func(resp *ChatResponse) error) error {
 	messages, err := req.ChatCompletionRequestMessage()
 	if err != nil {
 		return fmt.Errorf("converting messages: %w", err)
 	}
 	r := gen.CreateChatCompletionRequest{
+		Model:    gen.CreateChatCompletionRequest_Model(req.Model),
 		Messages: messages,
 		Stream:   pointer.Ptr(true),
 	}
-	jsonBody, err := json.Marshal(r)
+	jsonReq, err := json.Marshal(r)
 	if err != nil {
 		return fmt.Errorf("marshal request: %w", err)
 	}
-	resp, err := c.client.CreateChatCompletionWithBody(ctx, "application/json", bytes.NewReader(jsonBody))
+	resp, err := c.client.CreateChatCompletionWithBody(ctx, "application/json", bytes.NewReader(jsonReq))
 	if err != nil {
 		return err
 	}
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		body := new(bytes.Buffer)
+		body.ReadFrom(resp.Body)
+		return fmt.Errorf("unexpected status code: %d: %s", resp.StatusCode, body.String())
 	}
 	defer resp.Body.Close()
 
 	// Handle Server-Sent Events
 	scanner := bufio.NewScanner(resp.Body)
 	for scanner.Scan() {
-		line := scanner.Text()
-		if line == "" {
-			continue
-		}
-
-		var dest gen.CreateChatCompletionResponse
-		if err := json.Unmarshal([]byte(line), &dest); err != nil {
+		var chunkResp gen.CreateChatCompletionResponse
+		if err := json.Unmarshal(scanner.Bytes(), &chunkResp); err != nil {
 			return fmt.Errorf("failed to unmarshal response: %w", err)
 		}
-		if len(dest.Choices) == 0 {
+		if len(chunkResp.Choices) == 0 {
 			continue
 		}
-		chunk := dest.Choices[0]
-		if chunk.FinishReason == gen.CreateChatCompletionResponseChoicesFinishReasonStop {
-			break
+		chosen := chunkResp.Choices[0] // NOTE: Currently, only one choice is supported
+		switch reason := chosen.FinishReason; reason {
+		case gen.CreateChatCompletionResponseChoicesFinishReasonStop:
+			return nil // Done streaming
+		default:
+			resp := &ChatResponse{
+				ID:        chunkResp.Id,
+				CreatedAt: time.Unix(int64(chunkResp.Created), 0),
+				Model:     chunkResp.Model,
+				Usage: Usage{
+					PromptTokens:     chunkResp.Usage.PromptTokens,
+					CompletionTokens: chunkResp.Usage.CompletionTokens,
+					TotalTokens:      chunkResp.Usage.TotalTokens,
+				},
+				Delta: &DeltaMessage{
+					Content: pointer.Deref(chosen.Message.Content, ""),
+				},
+			}
+			if err := onReceive(resp); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -91,7 +113,8 @@ func (c *ChatClient) DoStream(ctx context.Context, req *ChatRequest, onReceive f
 
 // ChatRequest is used to make a request to the Chat API
 //
-// TODO(micheam): Devide this struct into ChatRequest and ChatStreamRequest
+// TODO(micheam): Abstract a bit more, because we don't need to match OpeniAI API messages exactly.
+// TODO(micheam): Divide this struct into ChatRequest and ChatStreamRequest.
 type ChatRequest struct {
 	// model string Required
 	//
@@ -199,14 +222,14 @@ func (r *ChatRequest) ChatCompletionRequestMessage() ([]gen.ChatCompletionReques
 			return nil, fmt.Errorf("message %d has no content", i)
 		}
 
-		var msg *gen.ChatCompletionRequestMessage
+		var msg = &gen.ChatCompletionRequestMessage{}
 
 		switch m.Role {
 		default:
 			return nil, fmt.Errorf("currently message role %q is not supported, sorry...", m.Role)
 
 		case RoleUser:
-			var content *gen.ChatCompletionRequestUserMessage_Content
+			content := &gen.ChatCompletionRequestUserMessage_Content{}
 			if err := content.FromChatCompletionRequestUserMessageContent0(m.Content); err != nil {
 				return nil, fmt.Errorf("user message %d to ChatCompletionRequestUserMessageContent0: %w", i, err)
 			}
@@ -214,7 +237,7 @@ func (r *ChatRequest) ChatCompletionRequestMessage() ([]gen.ChatCompletionReques
 
 			var name *string
 			if m.Name != "" {
-				name = pointer.String(m.Name)
+				name = pointer.Ptr(m.Name)
 			}
 			value := gen.ChatCompletionRequestUserMessage{
 				Content: *content,
@@ -226,7 +249,7 @@ func (r *ChatRequest) ChatCompletionRequestMessage() ([]gen.ChatCompletionReques
 			}
 
 		case RoleSystem:
-			var content *gen.ChatCompletionRequestSystemMessage_Content
+			content := &gen.ChatCompletionRequestSystemMessage_Content{}
 			if err := content.FromChatCompletionRequestSystemMessageContent0(m.Content); err != nil {
 				return nil, fmt.Errorf("system message %d to ChatCompletionRequestSystemMessageContent0: %w", i, err)
 			}
@@ -260,11 +283,15 @@ func NewChatRequest(model string, messages []Message) *ChatRequest {
 }
 
 // ChatResponse is the response from the Chat API
+// TODO(micheam): This will divide into ChatResponse and ChatStreamResponse (or ChunkResponse)
 type ChatResponse struct {
-	ID      string   `json:"id"`
-	Object  string   `json:"object"`
-	Created int64    `json:"created"`
-	Model   string   `json:"model"`
-	Usage   Usage    `json:"usage"`
-	Choices []Choice `json:"choices"`
+	ID        string
+	CreatedAt time.Time
+	Model     string
+	Usage     Usage
+	Choices   []Choice // Deprecated
+
+	Index   int
+	Message *Message // This will not be a part of `chat.completion.chunk` response
+	Delta   *DeltaMessage
 }

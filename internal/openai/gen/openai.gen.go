@@ -18186,366 +18186,366 @@ func WithBaseURL(baseURL string) ClientOption {
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
 	// ListAssistantsWithResponse request
-	ListAssistantsWithResponse(ctx context.Context, params *ListAssistantsParams, reqEditors ...RequestEditorFn) (*ListAssistantsResponse, error)
+	ListAssistantsWithResponse(ctx context.Context, params *ListAssistantsParams, reqEditors ...RequestEditorFn) (*ListAssistantsMsg, error)
 
 	// CreateAssistantWithBodyWithResponse request with any body
-	CreateAssistantWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateAssistantResponse, error)
+	CreateAssistantWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateAssistantMsg, error)
 
-	CreateAssistantWithResponse(ctx context.Context, body CreateAssistantJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateAssistantResponse, error)
+	CreateAssistantWithResponse(ctx context.Context, body CreateAssistantJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateAssistantMsg, error)
 
 	// DeleteAssistantWithResponse request
-	DeleteAssistantWithResponse(ctx context.Context, assistantId string, reqEditors ...RequestEditorFn) (*DeleteAssistantResponse, error)
+	DeleteAssistantWithResponse(ctx context.Context, assistantId string, reqEditors ...RequestEditorFn) (*DeleteAssistantMsg, error)
 
 	// GetAssistantWithResponse request
-	GetAssistantWithResponse(ctx context.Context, assistantId string, reqEditors ...RequestEditorFn) (*GetAssistantResponse, error)
+	GetAssistantWithResponse(ctx context.Context, assistantId string, reqEditors ...RequestEditorFn) (*GetAssistantMsg, error)
 
 	// ModifyAssistantWithBodyWithResponse request with any body
-	ModifyAssistantWithBodyWithResponse(ctx context.Context, assistantId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyAssistantResponse, error)
+	ModifyAssistantWithBodyWithResponse(ctx context.Context, assistantId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyAssistantMsg, error)
 
-	ModifyAssistantWithResponse(ctx context.Context, assistantId string, body ModifyAssistantJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyAssistantResponse, error)
+	ModifyAssistantWithResponse(ctx context.Context, assistantId string, body ModifyAssistantJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyAssistantMsg, error)
 
 	// CreateSpeechWithBodyWithResponse request with any body
-	CreateSpeechWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateSpeechResponse, error)
+	CreateSpeechWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateSpeechMsg, error)
 
-	CreateSpeechWithResponse(ctx context.Context, body CreateSpeechJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateSpeechResponse, error)
+	CreateSpeechWithResponse(ctx context.Context, body CreateSpeechJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateSpeechMsg, error)
 
 	// CreateTranscriptionWithBodyWithResponse request with any body
-	CreateTranscriptionWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateTranscriptionResponse, error)
+	CreateTranscriptionWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateTranscriptionMsg, error)
 
 	// CreateTranslationWithBodyWithResponse request with any body
-	CreateTranslationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateTranslationResponse, error)
+	CreateTranslationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateTranslationMsg, error)
 
 	// ListBatchesWithResponse request
-	ListBatchesWithResponse(ctx context.Context, params *ListBatchesParams, reqEditors ...RequestEditorFn) (*ListBatchesResponse, error)
+	ListBatchesWithResponse(ctx context.Context, params *ListBatchesParams, reqEditors ...RequestEditorFn) (*ListBatchesMsg, error)
 
 	// CreateBatchWithBodyWithResponse request with any body
-	CreateBatchWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateBatchResponse, error)
+	CreateBatchWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateBatchMsg, error)
 
-	CreateBatchWithResponse(ctx context.Context, body CreateBatchJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateBatchResponse, error)
+	CreateBatchWithResponse(ctx context.Context, body CreateBatchJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateBatchMsg, error)
 
 	// RetrieveBatchWithResponse request
-	RetrieveBatchWithResponse(ctx context.Context, batchId string, reqEditors ...RequestEditorFn) (*RetrieveBatchResponse, error)
+	RetrieveBatchWithResponse(ctx context.Context, batchId string, reqEditors ...RequestEditorFn) (*RetrieveBatchMsg, error)
 
 	// CancelBatchWithResponse request
-	CancelBatchWithResponse(ctx context.Context, batchId string, reqEditors ...RequestEditorFn) (*CancelBatchResponse, error)
+	CancelBatchWithResponse(ctx context.Context, batchId string, reqEditors ...RequestEditorFn) (*CancelBatchMsg, error)
 
 	// CreateChatCompletionWithBodyWithResponse request with any body
-	CreateChatCompletionWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateChatCompletionResponse, error)
+	CreateChatCompletionWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateChatCompletionMsg, error)
 
-	CreateChatCompletionWithResponse(ctx context.Context, body CreateChatCompletionJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateChatCompletionResponse, error)
+	CreateChatCompletionWithResponse(ctx context.Context, body CreateChatCompletionJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateChatCompletionMsg, error)
 
 	// CreateCompletionWithBodyWithResponse request with any body
-	CreateCompletionWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateCompletionResponse, error)
+	CreateCompletionWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateCompletionMsg, error)
 
-	CreateCompletionWithResponse(ctx context.Context, body CreateCompletionJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateCompletionResponse, error)
+	CreateCompletionWithResponse(ctx context.Context, body CreateCompletionJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateCompletionMsg, error)
 
 	// CreateEmbeddingWithBodyWithResponse request with any body
-	CreateEmbeddingWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateEmbeddingResponse, error)
+	CreateEmbeddingWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateEmbeddingMsg, error)
 
-	CreateEmbeddingWithResponse(ctx context.Context, body CreateEmbeddingJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateEmbeddingResponse, error)
+	CreateEmbeddingWithResponse(ctx context.Context, body CreateEmbeddingJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateEmbeddingMsg, error)
 
 	// ListFilesWithResponse request
-	ListFilesWithResponse(ctx context.Context, params *ListFilesParams, reqEditors ...RequestEditorFn) (*ListFilesResponse, error)
+	ListFilesWithResponse(ctx context.Context, params *ListFilesParams, reqEditors ...RequestEditorFn) (*ListFilesMsg, error)
 
 	// CreateFileWithBodyWithResponse request with any body
-	CreateFileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateFileResponse, error)
+	CreateFileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateFileMsg, error)
 
 	// DeleteFileWithResponse request
-	DeleteFileWithResponse(ctx context.Context, fileId string, reqEditors ...RequestEditorFn) (*DeleteFileResponse, error)
+	DeleteFileWithResponse(ctx context.Context, fileId string, reqEditors ...RequestEditorFn) (*DeleteFileMsg, error)
 
 	// RetrieveFileWithResponse request
-	RetrieveFileWithResponse(ctx context.Context, fileId string, reqEditors ...RequestEditorFn) (*RetrieveFileResponse, error)
+	RetrieveFileWithResponse(ctx context.Context, fileId string, reqEditors ...RequestEditorFn) (*RetrieveFileMsg, error)
 
 	// DownloadFileWithResponse request
-	DownloadFileWithResponse(ctx context.Context, fileId string, reqEditors ...RequestEditorFn) (*DownloadFileResponse, error)
+	DownloadFileWithResponse(ctx context.Context, fileId string, reqEditors ...RequestEditorFn) (*DownloadFileMsg, error)
 
 	// ListPaginatedFineTuningJobsWithResponse request
-	ListPaginatedFineTuningJobsWithResponse(ctx context.Context, params *ListPaginatedFineTuningJobsParams, reqEditors ...RequestEditorFn) (*ListPaginatedFineTuningJobsResponse, error)
+	ListPaginatedFineTuningJobsWithResponse(ctx context.Context, params *ListPaginatedFineTuningJobsParams, reqEditors ...RequestEditorFn) (*ListPaginatedFineTuningJobsMsg, error)
 
 	// CreateFineTuningJobWithBodyWithResponse request with any body
-	CreateFineTuningJobWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateFineTuningJobResponse, error)
+	CreateFineTuningJobWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateFineTuningJobMsg, error)
 
-	CreateFineTuningJobWithResponse(ctx context.Context, body CreateFineTuningJobJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateFineTuningJobResponse, error)
+	CreateFineTuningJobWithResponse(ctx context.Context, body CreateFineTuningJobJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateFineTuningJobMsg, error)
 
 	// RetrieveFineTuningJobWithResponse request
-	RetrieveFineTuningJobWithResponse(ctx context.Context, fineTuningJobId string, reqEditors ...RequestEditorFn) (*RetrieveFineTuningJobResponse, error)
+	RetrieveFineTuningJobWithResponse(ctx context.Context, fineTuningJobId string, reqEditors ...RequestEditorFn) (*RetrieveFineTuningJobMsg, error)
 
 	// CancelFineTuningJobWithResponse request
-	CancelFineTuningJobWithResponse(ctx context.Context, fineTuningJobId string, reqEditors ...RequestEditorFn) (*CancelFineTuningJobResponse, error)
+	CancelFineTuningJobWithResponse(ctx context.Context, fineTuningJobId string, reqEditors ...RequestEditorFn) (*CancelFineTuningJobMsg, error)
 
 	// ListFineTuningJobCheckpointsWithResponse request
-	ListFineTuningJobCheckpointsWithResponse(ctx context.Context, fineTuningJobId string, params *ListFineTuningJobCheckpointsParams, reqEditors ...RequestEditorFn) (*ListFineTuningJobCheckpointsResponse, error)
+	ListFineTuningJobCheckpointsWithResponse(ctx context.Context, fineTuningJobId string, params *ListFineTuningJobCheckpointsParams, reqEditors ...RequestEditorFn) (*ListFineTuningJobCheckpointsMsg, error)
 
 	// ListFineTuningEventsWithResponse request
-	ListFineTuningEventsWithResponse(ctx context.Context, fineTuningJobId string, params *ListFineTuningEventsParams, reqEditors ...RequestEditorFn) (*ListFineTuningEventsResponse, error)
+	ListFineTuningEventsWithResponse(ctx context.Context, fineTuningJobId string, params *ListFineTuningEventsParams, reqEditors ...RequestEditorFn) (*ListFineTuningEventsMsg, error)
 
 	// CreateImageEditWithBodyWithResponse request with any body
-	CreateImageEditWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateImageEditResponse, error)
+	CreateImageEditWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateImageEditMsg, error)
 
 	// CreateImageWithBodyWithResponse request with any body
-	CreateImageWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateImageResponse, error)
+	CreateImageWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateImageMsg, error)
 
-	CreateImageWithResponse(ctx context.Context, body CreateImageJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateImageResponse, error)
+	CreateImageWithResponse(ctx context.Context, body CreateImageJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateImageMsg, error)
 
 	// CreateImageVariationWithBodyWithResponse request with any body
-	CreateImageVariationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateImageVariationResponse, error)
+	CreateImageVariationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateImageVariationMsg, error)
 
 	// ListModelsWithResponse request
-	ListModelsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ListModelsResponse, error)
+	ListModelsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ListModelsMsg, error)
 
 	// DeleteModelWithResponse request
-	DeleteModelWithResponse(ctx context.Context, model string, reqEditors ...RequestEditorFn) (*DeleteModelResponse, error)
+	DeleteModelWithResponse(ctx context.Context, model string, reqEditors ...RequestEditorFn) (*DeleteModelMsg, error)
 
 	// RetrieveModelWithResponse request
-	RetrieveModelWithResponse(ctx context.Context, model string, reqEditors ...RequestEditorFn) (*RetrieveModelResponse, error)
+	RetrieveModelWithResponse(ctx context.Context, model string, reqEditors ...RequestEditorFn) (*RetrieveModelMsg, error)
 
 	// CreateModerationWithBodyWithResponse request with any body
-	CreateModerationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateModerationResponse, error)
+	CreateModerationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateModerationMsg, error)
 
-	CreateModerationWithResponse(ctx context.Context, body CreateModerationJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateModerationResponse, error)
+	CreateModerationWithResponse(ctx context.Context, body CreateModerationJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateModerationMsg, error)
 
 	// ListAuditLogsWithResponse request
-	ListAuditLogsWithResponse(ctx context.Context, params *ListAuditLogsParams, reqEditors ...RequestEditorFn) (*ListAuditLogsResponse, error)
+	ListAuditLogsWithResponse(ctx context.Context, params *ListAuditLogsParams, reqEditors ...RequestEditorFn) (*ListAuditLogsMsg, error)
 
 	// ListInvitesWithResponse request
-	ListInvitesWithResponse(ctx context.Context, params *ListInvitesParams, reqEditors ...RequestEditorFn) (*ListInvitesResponse, error)
+	ListInvitesWithResponse(ctx context.Context, params *ListInvitesParams, reqEditors ...RequestEditorFn) (*ListInvitesMsg, error)
 
 	// InviteUserWithBodyWithResponse request with any body
-	InviteUserWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*InviteUserResponse, error)
+	InviteUserWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*InviteUserMsg, error)
 
-	InviteUserWithResponse(ctx context.Context, body InviteUserJSONRequestBody, reqEditors ...RequestEditorFn) (*InviteUserResponse, error)
+	InviteUserWithResponse(ctx context.Context, body InviteUserJSONRequestBody, reqEditors ...RequestEditorFn) (*InviteUserMsg, error)
 
 	// DeleteInviteWithResponse request
-	DeleteInviteWithResponse(ctx context.Context, inviteId string, reqEditors ...RequestEditorFn) (*DeleteInviteResponse, error)
+	DeleteInviteWithResponse(ctx context.Context, inviteId string, reqEditors ...RequestEditorFn) (*DeleteInviteMsg, error)
 
 	// RetrieveInviteWithResponse request
-	RetrieveInviteWithResponse(ctx context.Context, inviteId string, reqEditors ...RequestEditorFn) (*RetrieveInviteResponse, error)
+	RetrieveInviteWithResponse(ctx context.Context, inviteId string, reqEditors ...RequestEditorFn) (*RetrieveInviteMsg, error)
 
 	// ListProjectsWithResponse request
-	ListProjectsWithResponse(ctx context.Context, params *ListProjectsParams, reqEditors ...RequestEditorFn) (*ListProjectsResponse, error)
+	ListProjectsWithResponse(ctx context.Context, params *ListProjectsParams, reqEditors ...RequestEditorFn) (*ListProjectsMsg, error)
 
 	// CreateProjectWithBodyWithResponse request with any body
-	CreateProjectWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateProjectResponse, error)
+	CreateProjectWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateProjectMsg, error)
 
-	CreateProjectWithResponse(ctx context.Context, body CreateProjectJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateProjectResponse, error)
+	CreateProjectWithResponse(ctx context.Context, body CreateProjectJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateProjectMsg, error)
 
 	// RetrieveProjectWithResponse request
-	RetrieveProjectWithResponse(ctx context.Context, projectId string, reqEditors ...RequestEditorFn) (*RetrieveProjectResponse, error)
+	RetrieveProjectWithResponse(ctx context.Context, projectId string, reqEditors ...RequestEditorFn) (*RetrieveProjectMsg, error)
 
 	// ModifyProjectWithBodyWithResponse request with any body
-	ModifyProjectWithBodyWithResponse(ctx context.Context, projectId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyProjectResponse, error)
+	ModifyProjectWithBodyWithResponse(ctx context.Context, projectId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyProjectMsg, error)
 
-	ModifyProjectWithResponse(ctx context.Context, projectId string, body ModifyProjectJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyProjectResponse, error)
+	ModifyProjectWithResponse(ctx context.Context, projectId string, body ModifyProjectJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyProjectMsg, error)
 
 	// ListProjectApiKeysWithResponse request
-	ListProjectApiKeysWithResponse(ctx context.Context, projectId string, params *ListProjectApiKeysParams, reqEditors ...RequestEditorFn) (*ListProjectApiKeysResponse, error)
+	ListProjectApiKeysWithResponse(ctx context.Context, projectId string, params *ListProjectApiKeysParams, reqEditors ...RequestEditorFn) (*ListProjectApiKeysMsg, error)
 
 	// DeleteProjectApiKeyWithResponse request
-	DeleteProjectApiKeyWithResponse(ctx context.Context, projectId string, keyId string, reqEditors ...RequestEditorFn) (*DeleteProjectApiKeyResponse, error)
+	DeleteProjectApiKeyWithResponse(ctx context.Context, projectId string, keyId string, reqEditors ...RequestEditorFn) (*DeleteProjectApiKeyMsg, error)
 
 	// RetrieveProjectApiKeyWithResponse request
-	RetrieveProjectApiKeyWithResponse(ctx context.Context, projectId string, keyId string, reqEditors ...RequestEditorFn) (*RetrieveProjectApiKeyResponse, error)
+	RetrieveProjectApiKeyWithResponse(ctx context.Context, projectId string, keyId string, reqEditors ...RequestEditorFn) (*RetrieveProjectApiKeyMsg, error)
 
 	// ArchiveProjectWithResponse request
-	ArchiveProjectWithResponse(ctx context.Context, projectId string, reqEditors ...RequestEditorFn) (*ArchiveProjectResponse, error)
+	ArchiveProjectWithResponse(ctx context.Context, projectId string, reqEditors ...RequestEditorFn) (*ArchiveProjectMsg, error)
 
 	// ListProjectRateLimitsWithResponse request
-	ListProjectRateLimitsWithResponse(ctx context.Context, projectId string, params *ListProjectRateLimitsParams, reqEditors ...RequestEditorFn) (*ListProjectRateLimitsResponse, error)
+	ListProjectRateLimitsWithResponse(ctx context.Context, projectId string, params *ListProjectRateLimitsParams, reqEditors ...RequestEditorFn) (*ListProjectRateLimitsMsg, error)
 
 	// UpdateProjectRateLimitsWithBodyWithResponse request with any body
-	UpdateProjectRateLimitsWithBodyWithResponse(ctx context.Context, projectId string, rateLimitId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateProjectRateLimitsResponse, error)
+	UpdateProjectRateLimitsWithBodyWithResponse(ctx context.Context, projectId string, rateLimitId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateProjectRateLimitsMsg, error)
 
-	UpdateProjectRateLimitsWithResponse(ctx context.Context, projectId string, rateLimitId string, body UpdateProjectRateLimitsJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateProjectRateLimitsResponse, error)
+	UpdateProjectRateLimitsWithResponse(ctx context.Context, projectId string, rateLimitId string, body UpdateProjectRateLimitsJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateProjectRateLimitsMsg, error)
 
 	// ListProjectServiceAccountsWithResponse request
-	ListProjectServiceAccountsWithResponse(ctx context.Context, projectId string, params *ListProjectServiceAccountsParams, reqEditors ...RequestEditorFn) (*ListProjectServiceAccountsResponse, error)
+	ListProjectServiceAccountsWithResponse(ctx context.Context, projectId string, params *ListProjectServiceAccountsParams, reqEditors ...RequestEditorFn) (*ListProjectServiceAccountsMsg, error)
 
 	// CreateProjectServiceAccountWithBodyWithResponse request with any body
-	CreateProjectServiceAccountWithBodyWithResponse(ctx context.Context, projectId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateProjectServiceAccountResponse, error)
+	CreateProjectServiceAccountWithBodyWithResponse(ctx context.Context, projectId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateProjectServiceAccountMsg, error)
 
-	CreateProjectServiceAccountWithResponse(ctx context.Context, projectId string, body CreateProjectServiceAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateProjectServiceAccountResponse, error)
+	CreateProjectServiceAccountWithResponse(ctx context.Context, projectId string, body CreateProjectServiceAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateProjectServiceAccountMsg, error)
 
 	// DeleteProjectServiceAccountWithResponse request
-	DeleteProjectServiceAccountWithResponse(ctx context.Context, projectId string, serviceAccountId string, reqEditors ...RequestEditorFn) (*DeleteProjectServiceAccountResponse, error)
+	DeleteProjectServiceAccountWithResponse(ctx context.Context, projectId string, serviceAccountId string, reqEditors ...RequestEditorFn) (*DeleteProjectServiceAccountMsg, error)
 
 	// RetrieveProjectServiceAccountWithResponse request
-	RetrieveProjectServiceAccountWithResponse(ctx context.Context, projectId string, serviceAccountId string, reqEditors ...RequestEditorFn) (*RetrieveProjectServiceAccountResponse, error)
+	RetrieveProjectServiceAccountWithResponse(ctx context.Context, projectId string, serviceAccountId string, reqEditors ...RequestEditorFn) (*RetrieveProjectServiceAccountMsg, error)
 
 	// ListProjectUsersWithResponse request
-	ListProjectUsersWithResponse(ctx context.Context, projectId string, params *ListProjectUsersParams, reqEditors ...RequestEditorFn) (*ListProjectUsersResponse, error)
+	ListProjectUsersWithResponse(ctx context.Context, projectId string, params *ListProjectUsersParams, reqEditors ...RequestEditorFn) (*ListProjectUsersMsg, error)
 
 	// CreateProjectUserWithBodyWithResponse request with any body
-	CreateProjectUserWithBodyWithResponse(ctx context.Context, projectId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateProjectUserResponse, error)
+	CreateProjectUserWithBodyWithResponse(ctx context.Context, projectId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateProjectUserMsg, error)
 
-	CreateProjectUserWithResponse(ctx context.Context, projectId string, body CreateProjectUserJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateProjectUserResponse, error)
+	CreateProjectUserWithResponse(ctx context.Context, projectId string, body CreateProjectUserJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateProjectUserMsg, error)
 
 	// DeleteProjectUserWithResponse request
-	DeleteProjectUserWithResponse(ctx context.Context, projectId string, userId string, reqEditors ...RequestEditorFn) (*DeleteProjectUserResponse, error)
+	DeleteProjectUserWithResponse(ctx context.Context, projectId string, userId string, reqEditors ...RequestEditorFn) (*DeleteProjectUserMsg, error)
 
 	// RetrieveProjectUserWithResponse request
-	RetrieveProjectUserWithResponse(ctx context.Context, projectId string, userId string, reqEditors ...RequestEditorFn) (*RetrieveProjectUserResponse, error)
+	RetrieveProjectUserWithResponse(ctx context.Context, projectId string, userId string, reqEditors ...RequestEditorFn) (*RetrieveProjectUserMsg, error)
 
 	// ModifyProjectUserWithBodyWithResponse request with any body
-	ModifyProjectUserWithBodyWithResponse(ctx context.Context, projectId string, userId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyProjectUserResponse, error)
+	ModifyProjectUserWithBodyWithResponse(ctx context.Context, projectId string, userId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyProjectUserMsg, error)
 
-	ModifyProjectUserWithResponse(ctx context.Context, projectId string, userId string, body ModifyProjectUserJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyProjectUserResponse, error)
+	ModifyProjectUserWithResponse(ctx context.Context, projectId string, userId string, body ModifyProjectUserJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyProjectUserMsg, error)
 
 	// ListUsersWithResponse request
-	ListUsersWithResponse(ctx context.Context, params *ListUsersParams, reqEditors ...RequestEditorFn) (*ListUsersResponse, error)
+	ListUsersWithResponse(ctx context.Context, params *ListUsersParams, reqEditors ...RequestEditorFn) (*ListUsersMsg, error)
 
 	// DeleteUserWithResponse request
-	DeleteUserWithResponse(ctx context.Context, userId string, reqEditors ...RequestEditorFn) (*DeleteUserResponse, error)
+	DeleteUserWithResponse(ctx context.Context, userId string, reqEditors ...RequestEditorFn) (*DeleteUserMsg, error)
 
 	// RetrieveUserWithResponse request
-	RetrieveUserWithResponse(ctx context.Context, userId string, reqEditors ...RequestEditorFn) (*RetrieveUserResponse, error)
+	RetrieveUserWithResponse(ctx context.Context, userId string, reqEditors ...RequestEditorFn) (*RetrieveUserMsg, error)
 
 	// ModifyUserWithBodyWithResponse request with any body
-	ModifyUserWithBodyWithResponse(ctx context.Context, userId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyUserResponse, error)
+	ModifyUserWithBodyWithResponse(ctx context.Context, userId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyUserMsg, error)
 
-	ModifyUserWithResponse(ctx context.Context, userId string, body ModifyUserJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyUserResponse, error)
+	ModifyUserWithResponse(ctx context.Context, userId string, body ModifyUserJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyUserMsg, error)
 
 	// CreateThreadWithBodyWithResponse request with any body
-	CreateThreadWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateThreadResponse, error)
+	CreateThreadWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateThreadMsg, error)
 
-	CreateThreadWithResponse(ctx context.Context, body CreateThreadJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateThreadResponse, error)
+	CreateThreadWithResponse(ctx context.Context, body CreateThreadJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateThreadMsg, error)
 
 	// CreateThreadAndRunWithBodyWithResponse request with any body
-	CreateThreadAndRunWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateThreadAndRunResponse, error)
+	CreateThreadAndRunWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateThreadAndRunMsg, error)
 
-	CreateThreadAndRunWithResponse(ctx context.Context, body CreateThreadAndRunJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateThreadAndRunResponse, error)
+	CreateThreadAndRunWithResponse(ctx context.Context, body CreateThreadAndRunJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateThreadAndRunMsg, error)
 
 	// DeleteThreadWithResponse request
-	DeleteThreadWithResponse(ctx context.Context, threadId string, reqEditors ...RequestEditorFn) (*DeleteThreadResponse, error)
+	DeleteThreadWithResponse(ctx context.Context, threadId string, reqEditors ...RequestEditorFn) (*DeleteThreadMsg, error)
 
 	// GetThreadWithResponse request
-	GetThreadWithResponse(ctx context.Context, threadId string, reqEditors ...RequestEditorFn) (*GetThreadResponse, error)
+	GetThreadWithResponse(ctx context.Context, threadId string, reqEditors ...RequestEditorFn) (*GetThreadMsg, error)
 
 	// ModifyThreadWithBodyWithResponse request with any body
-	ModifyThreadWithBodyWithResponse(ctx context.Context, threadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyThreadResponse, error)
+	ModifyThreadWithBodyWithResponse(ctx context.Context, threadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyThreadMsg, error)
 
-	ModifyThreadWithResponse(ctx context.Context, threadId string, body ModifyThreadJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyThreadResponse, error)
+	ModifyThreadWithResponse(ctx context.Context, threadId string, body ModifyThreadJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyThreadMsg, error)
 
 	// ListMessagesWithResponse request
-	ListMessagesWithResponse(ctx context.Context, threadId string, params *ListMessagesParams, reqEditors ...RequestEditorFn) (*ListMessagesResponse, error)
+	ListMessagesWithResponse(ctx context.Context, threadId string, params *ListMessagesParams, reqEditors ...RequestEditorFn) (*ListMessagesMsg, error)
 
 	// CreateMessageWithBodyWithResponse request with any body
-	CreateMessageWithBodyWithResponse(ctx context.Context, threadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateMessageResponse, error)
+	CreateMessageWithBodyWithResponse(ctx context.Context, threadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateMessageMsg, error)
 
-	CreateMessageWithResponse(ctx context.Context, threadId string, body CreateMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateMessageResponse, error)
+	CreateMessageWithResponse(ctx context.Context, threadId string, body CreateMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateMessageMsg, error)
 
 	// DeleteMessageWithResponse request
-	DeleteMessageWithResponse(ctx context.Context, threadId string, messageId string, reqEditors ...RequestEditorFn) (*DeleteMessageResponse, error)
+	DeleteMessageWithResponse(ctx context.Context, threadId string, messageId string, reqEditors ...RequestEditorFn) (*DeleteMessageMsg, error)
 
 	// GetMessageWithResponse request
-	GetMessageWithResponse(ctx context.Context, threadId string, messageId string, reqEditors ...RequestEditorFn) (*GetMessageResponse, error)
+	GetMessageWithResponse(ctx context.Context, threadId string, messageId string, reqEditors ...RequestEditorFn) (*GetMessageMsg, error)
 
 	// ModifyMessageWithBodyWithResponse request with any body
-	ModifyMessageWithBodyWithResponse(ctx context.Context, threadId string, messageId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyMessageResponse, error)
+	ModifyMessageWithBodyWithResponse(ctx context.Context, threadId string, messageId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyMessageMsg, error)
 
-	ModifyMessageWithResponse(ctx context.Context, threadId string, messageId string, body ModifyMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyMessageResponse, error)
+	ModifyMessageWithResponse(ctx context.Context, threadId string, messageId string, body ModifyMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyMessageMsg, error)
 
 	// ListRunsWithResponse request
-	ListRunsWithResponse(ctx context.Context, threadId string, params *ListRunsParams, reqEditors ...RequestEditorFn) (*ListRunsResponse, error)
+	ListRunsWithResponse(ctx context.Context, threadId string, params *ListRunsParams, reqEditors ...RequestEditorFn) (*ListRunsMsg, error)
 
 	// CreateRunWithBodyWithResponse request with any body
-	CreateRunWithBodyWithResponse(ctx context.Context, threadId string, params *CreateRunParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateRunResponse, error)
+	CreateRunWithBodyWithResponse(ctx context.Context, threadId string, params *CreateRunParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateRunMsg, error)
 
-	CreateRunWithResponse(ctx context.Context, threadId string, params *CreateRunParams, body CreateRunJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateRunResponse, error)
+	CreateRunWithResponse(ctx context.Context, threadId string, params *CreateRunParams, body CreateRunJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateRunMsg, error)
 
 	// GetRunWithResponse request
-	GetRunWithResponse(ctx context.Context, threadId string, runId string, reqEditors ...RequestEditorFn) (*GetRunResponse, error)
+	GetRunWithResponse(ctx context.Context, threadId string, runId string, reqEditors ...RequestEditorFn) (*GetRunMsg, error)
 
 	// ModifyRunWithBodyWithResponse request with any body
-	ModifyRunWithBodyWithResponse(ctx context.Context, threadId string, runId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyRunResponse, error)
+	ModifyRunWithBodyWithResponse(ctx context.Context, threadId string, runId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyRunMsg, error)
 
-	ModifyRunWithResponse(ctx context.Context, threadId string, runId string, body ModifyRunJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyRunResponse, error)
+	ModifyRunWithResponse(ctx context.Context, threadId string, runId string, body ModifyRunJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyRunMsg, error)
 
 	// CancelRunWithResponse request
-	CancelRunWithResponse(ctx context.Context, threadId string, runId string, reqEditors ...RequestEditorFn) (*CancelRunResponse, error)
+	CancelRunWithResponse(ctx context.Context, threadId string, runId string, reqEditors ...RequestEditorFn) (*CancelRunMsg, error)
 
 	// ListRunStepsWithResponse request
-	ListRunStepsWithResponse(ctx context.Context, threadId string, runId string, params *ListRunStepsParams, reqEditors ...RequestEditorFn) (*ListRunStepsResponse, error)
+	ListRunStepsWithResponse(ctx context.Context, threadId string, runId string, params *ListRunStepsParams, reqEditors ...RequestEditorFn) (*ListRunStepsMsg, error)
 
 	// GetRunStepWithResponse request
-	GetRunStepWithResponse(ctx context.Context, threadId string, runId string, stepId string, params *GetRunStepParams, reqEditors ...RequestEditorFn) (*GetRunStepResponse, error)
+	GetRunStepWithResponse(ctx context.Context, threadId string, runId string, stepId string, params *GetRunStepParams, reqEditors ...RequestEditorFn) (*GetRunStepMsg, error)
 
 	// SubmitToolOuputsToRunWithBodyWithResponse request with any body
-	SubmitToolOuputsToRunWithBodyWithResponse(ctx context.Context, threadId string, runId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SubmitToolOuputsToRunResponse, error)
+	SubmitToolOuputsToRunWithBodyWithResponse(ctx context.Context, threadId string, runId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SubmitToolOuputsToRunMsg, error)
 
-	SubmitToolOuputsToRunWithResponse(ctx context.Context, threadId string, runId string, body SubmitToolOuputsToRunJSONRequestBody, reqEditors ...RequestEditorFn) (*SubmitToolOuputsToRunResponse, error)
+	SubmitToolOuputsToRunWithResponse(ctx context.Context, threadId string, runId string, body SubmitToolOuputsToRunJSONRequestBody, reqEditors ...RequestEditorFn) (*SubmitToolOuputsToRunMsg, error)
 
 	// CreateUploadWithBodyWithResponse request with any body
-	CreateUploadWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateUploadResponse, error)
+	CreateUploadWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateUploadMsg, error)
 
-	CreateUploadWithResponse(ctx context.Context, body CreateUploadJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateUploadResponse, error)
+	CreateUploadWithResponse(ctx context.Context, body CreateUploadJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateUploadMsg, error)
 
 	// CancelUploadWithResponse request
-	CancelUploadWithResponse(ctx context.Context, uploadId string, reqEditors ...RequestEditorFn) (*CancelUploadResponse, error)
+	CancelUploadWithResponse(ctx context.Context, uploadId string, reqEditors ...RequestEditorFn) (*CancelUploadMsg, error)
 
 	// CompleteUploadWithBodyWithResponse request with any body
-	CompleteUploadWithBodyWithResponse(ctx context.Context, uploadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CompleteUploadResponse, error)
+	CompleteUploadWithBodyWithResponse(ctx context.Context, uploadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CompleteUploadMsg, error)
 
-	CompleteUploadWithResponse(ctx context.Context, uploadId string, body CompleteUploadJSONRequestBody, reqEditors ...RequestEditorFn) (*CompleteUploadResponse, error)
+	CompleteUploadWithResponse(ctx context.Context, uploadId string, body CompleteUploadJSONRequestBody, reqEditors ...RequestEditorFn) (*CompleteUploadMsg, error)
 
 	// AddUploadPartWithBodyWithResponse request with any body
-	AddUploadPartWithBodyWithResponse(ctx context.Context, uploadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AddUploadPartResponse, error)
+	AddUploadPartWithBodyWithResponse(ctx context.Context, uploadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AddUploadPartMsg, error)
 
 	// ListVectorStoresWithResponse request
-	ListVectorStoresWithResponse(ctx context.Context, params *ListVectorStoresParams, reqEditors ...RequestEditorFn) (*ListVectorStoresResponse, error)
+	ListVectorStoresWithResponse(ctx context.Context, params *ListVectorStoresParams, reqEditors ...RequestEditorFn) (*ListVectorStoresMsg, error)
 
 	// CreateVectorStoreWithBodyWithResponse request with any body
-	CreateVectorStoreWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateVectorStoreResponse, error)
+	CreateVectorStoreWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateVectorStoreMsg, error)
 
-	CreateVectorStoreWithResponse(ctx context.Context, body CreateVectorStoreJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateVectorStoreResponse, error)
+	CreateVectorStoreWithResponse(ctx context.Context, body CreateVectorStoreJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateVectorStoreMsg, error)
 
 	// DeleteVectorStoreWithResponse request
-	DeleteVectorStoreWithResponse(ctx context.Context, vectorStoreId string, reqEditors ...RequestEditorFn) (*DeleteVectorStoreResponse, error)
+	DeleteVectorStoreWithResponse(ctx context.Context, vectorStoreId string, reqEditors ...RequestEditorFn) (*DeleteVectorStoreMsg, error)
 
 	// GetVectorStoreWithResponse request
-	GetVectorStoreWithResponse(ctx context.Context, vectorStoreId string, reqEditors ...RequestEditorFn) (*GetVectorStoreResponse, error)
+	GetVectorStoreWithResponse(ctx context.Context, vectorStoreId string, reqEditors ...RequestEditorFn) (*GetVectorStoreMsg, error)
 
 	// ModifyVectorStoreWithBodyWithResponse request with any body
-	ModifyVectorStoreWithBodyWithResponse(ctx context.Context, vectorStoreId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyVectorStoreResponse, error)
+	ModifyVectorStoreWithBodyWithResponse(ctx context.Context, vectorStoreId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyVectorStoreMsg, error)
 
-	ModifyVectorStoreWithResponse(ctx context.Context, vectorStoreId string, body ModifyVectorStoreJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyVectorStoreResponse, error)
+	ModifyVectorStoreWithResponse(ctx context.Context, vectorStoreId string, body ModifyVectorStoreJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyVectorStoreMsg, error)
 
 	// CreateVectorStoreFileBatchWithBodyWithResponse request with any body
-	CreateVectorStoreFileBatchWithBodyWithResponse(ctx context.Context, vectorStoreId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateVectorStoreFileBatchResponse, error)
+	CreateVectorStoreFileBatchWithBodyWithResponse(ctx context.Context, vectorStoreId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateVectorStoreFileBatchMsg, error)
 
-	CreateVectorStoreFileBatchWithResponse(ctx context.Context, vectorStoreId string, body CreateVectorStoreFileBatchJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateVectorStoreFileBatchResponse, error)
+	CreateVectorStoreFileBatchWithResponse(ctx context.Context, vectorStoreId string, body CreateVectorStoreFileBatchJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateVectorStoreFileBatchMsg, error)
 
 	// GetVectorStoreFileBatchWithResponse request
-	GetVectorStoreFileBatchWithResponse(ctx context.Context, vectorStoreId string, batchId string, reqEditors ...RequestEditorFn) (*GetVectorStoreFileBatchResponse, error)
+	GetVectorStoreFileBatchWithResponse(ctx context.Context, vectorStoreId string, batchId string, reqEditors ...RequestEditorFn) (*GetVectorStoreFileBatchMsg, error)
 
 	// CancelVectorStoreFileBatchWithResponse request
-	CancelVectorStoreFileBatchWithResponse(ctx context.Context, vectorStoreId string, batchId string, reqEditors ...RequestEditorFn) (*CancelVectorStoreFileBatchResponse, error)
+	CancelVectorStoreFileBatchWithResponse(ctx context.Context, vectorStoreId string, batchId string, reqEditors ...RequestEditorFn) (*CancelVectorStoreFileBatchMsg, error)
 
 	// ListFilesInVectorStoreBatchWithResponse request
-	ListFilesInVectorStoreBatchWithResponse(ctx context.Context, vectorStoreId string, batchId string, params *ListFilesInVectorStoreBatchParams, reqEditors ...RequestEditorFn) (*ListFilesInVectorStoreBatchResponse, error)
+	ListFilesInVectorStoreBatchWithResponse(ctx context.Context, vectorStoreId string, batchId string, params *ListFilesInVectorStoreBatchParams, reqEditors ...RequestEditorFn) (*ListFilesInVectorStoreBatchMsg, error)
 
 	// ListVectorStoreFilesWithResponse request
-	ListVectorStoreFilesWithResponse(ctx context.Context, vectorStoreId string, params *ListVectorStoreFilesParams, reqEditors ...RequestEditorFn) (*ListVectorStoreFilesResponse, error)
+	ListVectorStoreFilesWithResponse(ctx context.Context, vectorStoreId string, params *ListVectorStoreFilesParams, reqEditors ...RequestEditorFn) (*ListVectorStoreFilesMsg, error)
 
 	// CreateVectorStoreFileWithBodyWithResponse request with any body
-	CreateVectorStoreFileWithBodyWithResponse(ctx context.Context, vectorStoreId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateVectorStoreFileResponse, error)
+	CreateVectorStoreFileWithBodyWithResponse(ctx context.Context, vectorStoreId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateVectorStoreFileMsg, error)
 
-	CreateVectorStoreFileWithResponse(ctx context.Context, vectorStoreId string, body CreateVectorStoreFileJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateVectorStoreFileResponse, error)
+	CreateVectorStoreFileWithResponse(ctx context.Context, vectorStoreId string, body CreateVectorStoreFileJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateVectorStoreFileMsg, error)
 
 	// DeleteVectorStoreFileWithResponse request
-	DeleteVectorStoreFileWithResponse(ctx context.Context, vectorStoreId string, fileId string, reqEditors ...RequestEditorFn) (*DeleteVectorStoreFileResponse, error)
+	DeleteVectorStoreFileWithResponse(ctx context.Context, vectorStoreId string, fileId string, reqEditors ...RequestEditorFn) (*DeleteVectorStoreFileMsg, error)
 
 	// GetVectorStoreFileWithResponse request
-	GetVectorStoreFileWithResponse(ctx context.Context, vectorStoreId string, fileId string, reqEditors ...RequestEditorFn) (*GetVectorStoreFileResponse, error)
+	GetVectorStoreFileWithResponse(ctx context.Context, vectorStoreId string, fileId string, reqEditors ...RequestEditorFn) (*GetVectorStoreFileMsg, error)
 }
 
-type ListAssistantsResponse struct {
+type ListAssistantsMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ListAssistantsResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListAssistantsResponse) Status() string {
+func (r ListAssistantsMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -18553,21 +18553,21 @@ func (r ListAssistantsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListAssistantsResponse) StatusCode() int {
+func (r ListAssistantsMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateAssistantResponse struct {
+type CreateAssistantMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *AssistantObject
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateAssistantResponse) Status() string {
+func (r CreateAssistantMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -18575,21 +18575,21 @@ func (r CreateAssistantResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateAssistantResponse) StatusCode() int {
+func (r CreateAssistantMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type DeleteAssistantResponse struct {
+type DeleteAssistantMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *DeleteAssistantResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r DeleteAssistantResponse) Status() string {
+func (r DeleteAssistantMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -18597,21 +18597,21 @@ func (r DeleteAssistantResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DeleteAssistantResponse) StatusCode() int {
+func (r DeleteAssistantMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetAssistantResponse struct {
+type GetAssistantMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *AssistantObject
 }
 
 // Status returns HTTPResponse.Status
-func (r GetAssistantResponse) Status() string {
+func (r GetAssistantMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -18619,21 +18619,21 @@ func (r GetAssistantResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetAssistantResponse) StatusCode() int {
+func (r GetAssistantMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ModifyAssistantResponse struct {
+type ModifyAssistantMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *AssistantObject
 }
 
 // Status returns HTTPResponse.Status
-func (r ModifyAssistantResponse) Status() string {
+func (r ModifyAssistantMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -18641,20 +18641,20 @@ func (r ModifyAssistantResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ModifyAssistantResponse) StatusCode() int {
+func (r ModifyAssistantMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateSpeechResponse struct {
+type CreateSpeechMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateSpeechResponse) Status() string {
+func (r CreateSpeechMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -18662,14 +18662,14 @@ func (r CreateSpeechResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateSpeechResponse) StatusCode() int {
+func (r CreateSpeechMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateTranscriptionResponse struct {
+type CreateTranscriptionMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *struct {
@@ -18678,7 +18678,7 @@ type CreateTranscriptionResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateTranscriptionResponse) Status() string {
+func (r CreateTranscriptionMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -18686,14 +18686,14 @@ func (r CreateTranscriptionResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateTranscriptionResponse) StatusCode() int {
+func (r CreateTranscriptionMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateTranslationResponse struct {
+type CreateTranslationMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *struct {
@@ -18702,7 +18702,7 @@ type CreateTranslationResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateTranslationResponse) Status() string {
+func (r CreateTranslationMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -18710,21 +18710,21 @@ func (r CreateTranslationResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateTranslationResponse) StatusCode() int {
+func (r CreateTranslationMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ListBatchesResponse struct {
+type ListBatchesMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ListBatchesResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListBatchesResponse) Status() string {
+func (r ListBatchesMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -18732,21 +18732,21 @@ func (r ListBatchesResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListBatchesResponse) StatusCode() int {
+func (r ListBatchesMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateBatchResponse struct {
+type CreateBatchMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *Batch
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateBatchResponse) Status() string {
+func (r CreateBatchMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -18754,21 +18754,21 @@ func (r CreateBatchResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateBatchResponse) StatusCode() int {
+func (r CreateBatchMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type RetrieveBatchResponse struct {
+type RetrieveBatchMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *Batch
 }
 
 // Status returns HTTPResponse.Status
-func (r RetrieveBatchResponse) Status() string {
+func (r RetrieveBatchMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -18776,21 +18776,21 @@ func (r RetrieveBatchResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r RetrieveBatchResponse) StatusCode() int {
+func (r RetrieveBatchMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CancelBatchResponse struct {
+type CancelBatchMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *Batch
 }
 
 // Status returns HTTPResponse.Status
-func (r CancelBatchResponse) Status() string {
+func (r CancelBatchMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -18798,21 +18798,21 @@ func (r CancelBatchResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CancelBatchResponse) StatusCode() int {
+func (r CancelBatchMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateChatCompletionResponse struct {
+type CreateChatCompletionMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *CreateChatCompletionResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateChatCompletionResponse) Status() string {
+func (r CreateChatCompletionMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -18820,21 +18820,21 @@ func (r CreateChatCompletionResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateChatCompletionResponse) StatusCode() int {
+func (r CreateChatCompletionMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateCompletionResponse struct {
+type CreateCompletionMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *CreateCompletionResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateCompletionResponse) Status() string {
+func (r CreateCompletionMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -18842,21 +18842,21 @@ func (r CreateCompletionResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateCompletionResponse) StatusCode() int {
+func (r CreateCompletionMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateEmbeddingResponse struct {
+type CreateEmbeddingMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *CreateEmbeddingResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateEmbeddingResponse) Status() string {
+func (r CreateEmbeddingMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -18864,21 +18864,21 @@ func (r CreateEmbeddingResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateEmbeddingResponse) StatusCode() int {
+func (r CreateEmbeddingMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ListFilesResponse struct {
+type ListFilesMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ListFilesResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListFilesResponse) Status() string {
+func (r ListFilesMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -18886,21 +18886,21 @@ func (r ListFilesResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListFilesResponse) StatusCode() int {
+func (r ListFilesMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateFileResponse struct {
+type CreateFileMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *OpenAIFile
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateFileResponse) Status() string {
+func (r CreateFileMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -18908,21 +18908,21 @@ func (r CreateFileResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateFileResponse) StatusCode() int {
+func (r CreateFileMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type DeleteFileResponse struct {
+type DeleteFileMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *DeleteFileResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r DeleteFileResponse) Status() string {
+func (r DeleteFileMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -18930,21 +18930,21 @@ func (r DeleteFileResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DeleteFileResponse) StatusCode() int {
+func (r DeleteFileMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type RetrieveFileResponse struct {
+type RetrieveFileMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *OpenAIFile
 }
 
 // Status returns HTTPResponse.Status
-func (r RetrieveFileResponse) Status() string {
+func (r RetrieveFileMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -18952,21 +18952,21 @@ func (r RetrieveFileResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r RetrieveFileResponse) StatusCode() int {
+func (r RetrieveFileMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type DownloadFileResponse struct {
+type DownloadFileMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *string
 }
 
 // Status returns HTTPResponse.Status
-func (r DownloadFileResponse) Status() string {
+func (r DownloadFileMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -18974,21 +18974,21 @@ func (r DownloadFileResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DownloadFileResponse) StatusCode() int {
+func (r DownloadFileMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ListPaginatedFineTuningJobsResponse struct {
+type ListPaginatedFineTuningJobsMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ListPaginatedFineTuningJobsResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListPaginatedFineTuningJobsResponse) Status() string {
+func (r ListPaginatedFineTuningJobsMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -18996,21 +18996,21 @@ func (r ListPaginatedFineTuningJobsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListPaginatedFineTuningJobsResponse) StatusCode() int {
+func (r ListPaginatedFineTuningJobsMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateFineTuningJobResponse struct {
+type CreateFineTuningJobMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *FineTuningJob
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateFineTuningJobResponse) Status() string {
+func (r CreateFineTuningJobMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19018,21 +19018,21 @@ func (r CreateFineTuningJobResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateFineTuningJobResponse) StatusCode() int {
+func (r CreateFineTuningJobMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type RetrieveFineTuningJobResponse struct {
+type RetrieveFineTuningJobMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *FineTuningJob
 }
 
 // Status returns HTTPResponse.Status
-func (r RetrieveFineTuningJobResponse) Status() string {
+func (r RetrieveFineTuningJobMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19040,21 +19040,21 @@ func (r RetrieveFineTuningJobResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r RetrieveFineTuningJobResponse) StatusCode() int {
+func (r RetrieveFineTuningJobMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CancelFineTuningJobResponse struct {
+type CancelFineTuningJobMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *FineTuningJob
 }
 
 // Status returns HTTPResponse.Status
-func (r CancelFineTuningJobResponse) Status() string {
+func (r CancelFineTuningJobMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19062,21 +19062,21 @@ func (r CancelFineTuningJobResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CancelFineTuningJobResponse) StatusCode() int {
+func (r CancelFineTuningJobMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ListFineTuningJobCheckpointsResponse struct {
+type ListFineTuningJobCheckpointsMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ListFineTuningJobCheckpointsResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListFineTuningJobCheckpointsResponse) Status() string {
+func (r ListFineTuningJobCheckpointsMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19084,21 +19084,21 @@ func (r ListFineTuningJobCheckpointsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListFineTuningJobCheckpointsResponse) StatusCode() int {
+func (r ListFineTuningJobCheckpointsMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ListFineTuningEventsResponse struct {
+type ListFineTuningEventsMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ListFineTuningJobEventsResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListFineTuningEventsResponse) Status() string {
+func (r ListFineTuningEventsMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19106,21 +19106,21 @@ func (r ListFineTuningEventsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListFineTuningEventsResponse) StatusCode() int {
+func (r ListFineTuningEventsMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateImageEditResponse struct {
+type CreateImageEditMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ImagesResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateImageEditResponse) Status() string {
+func (r CreateImageEditMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19128,21 +19128,21 @@ func (r CreateImageEditResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateImageEditResponse) StatusCode() int {
+func (r CreateImageEditMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateImageResponse struct {
+type CreateImageMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ImagesResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateImageResponse) Status() string {
+func (r CreateImageMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19150,21 +19150,21 @@ func (r CreateImageResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateImageResponse) StatusCode() int {
+func (r CreateImageMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateImageVariationResponse struct {
+type CreateImageVariationMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ImagesResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateImageVariationResponse) Status() string {
+func (r CreateImageVariationMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19172,21 +19172,21 @@ func (r CreateImageVariationResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateImageVariationResponse) StatusCode() int {
+func (r CreateImageVariationMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ListModelsResponse struct {
+type ListModelsMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ListModelsResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListModelsResponse) Status() string {
+func (r ListModelsMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19194,21 +19194,21 @@ func (r ListModelsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListModelsResponse) StatusCode() int {
+func (r ListModelsMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type DeleteModelResponse struct {
+type DeleteModelMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *DeleteModelResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r DeleteModelResponse) Status() string {
+func (r DeleteModelMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19216,21 +19216,21 @@ func (r DeleteModelResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DeleteModelResponse) StatusCode() int {
+func (r DeleteModelMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type RetrieveModelResponse struct {
+type RetrieveModelMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *Model
 }
 
 // Status returns HTTPResponse.Status
-func (r RetrieveModelResponse) Status() string {
+func (r RetrieveModelMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19238,21 +19238,21 @@ func (r RetrieveModelResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r RetrieveModelResponse) StatusCode() int {
+func (r RetrieveModelMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateModerationResponse struct {
+type CreateModerationMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *CreateModerationResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateModerationResponse) Status() string {
+func (r CreateModerationMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19260,21 +19260,21 @@ func (r CreateModerationResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateModerationResponse) StatusCode() int {
+func (r CreateModerationMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ListAuditLogsResponse struct {
+type ListAuditLogsMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ListAuditLogsResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListAuditLogsResponse) Status() string {
+func (r ListAuditLogsMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19282,21 +19282,21 @@ func (r ListAuditLogsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListAuditLogsResponse) StatusCode() int {
+func (r ListAuditLogsMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ListInvitesResponse struct {
+type ListInvitesMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *InviteListResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListInvitesResponse) Status() string {
+func (r ListInvitesMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19304,21 +19304,21 @@ func (r ListInvitesResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListInvitesResponse) StatusCode() int {
+func (r ListInvitesMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type InviteUserResponse struct {
+type InviteUserMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *Invite
 }
 
 // Status returns HTTPResponse.Status
-func (r InviteUserResponse) Status() string {
+func (r InviteUserMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19326,21 +19326,21 @@ func (r InviteUserResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r InviteUserResponse) StatusCode() int {
+func (r InviteUserMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type DeleteInviteResponse struct {
+type DeleteInviteMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *InviteDeleteResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r DeleteInviteResponse) Status() string {
+func (r DeleteInviteMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19348,21 +19348,21 @@ func (r DeleteInviteResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DeleteInviteResponse) StatusCode() int {
+func (r DeleteInviteMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type RetrieveInviteResponse struct {
+type RetrieveInviteMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *Invite
 }
 
 // Status returns HTTPResponse.Status
-func (r RetrieveInviteResponse) Status() string {
+func (r RetrieveInviteMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19370,21 +19370,21 @@ func (r RetrieveInviteResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r RetrieveInviteResponse) StatusCode() int {
+func (r RetrieveInviteMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ListProjectsResponse struct {
+type ListProjectsMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ProjectListResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListProjectsResponse) Status() string {
+func (r ListProjectsMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19392,21 +19392,21 @@ func (r ListProjectsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListProjectsResponse) StatusCode() int {
+func (r ListProjectsMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateProjectResponse struct {
+type CreateProjectMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *Project
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateProjectResponse) Status() string {
+func (r CreateProjectMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19414,21 +19414,21 @@ func (r CreateProjectResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateProjectResponse) StatusCode() int {
+func (r CreateProjectMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type RetrieveProjectResponse struct {
+type RetrieveProjectMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *Project
 }
 
 // Status returns HTTPResponse.Status
-func (r RetrieveProjectResponse) Status() string {
+func (r RetrieveProjectMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19436,14 +19436,14 @@ func (r RetrieveProjectResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r RetrieveProjectResponse) StatusCode() int {
+func (r RetrieveProjectMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ModifyProjectResponse struct {
+type ModifyProjectMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *Project
@@ -19451,7 +19451,7 @@ type ModifyProjectResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r ModifyProjectResponse) Status() string {
+func (r ModifyProjectMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19459,21 +19459,21 @@ func (r ModifyProjectResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ModifyProjectResponse) StatusCode() int {
+func (r ModifyProjectMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ListProjectApiKeysResponse struct {
+type ListProjectApiKeysMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ProjectApiKeyListResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListProjectApiKeysResponse) Status() string {
+func (r ListProjectApiKeysMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19481,14 +19481,14 @@ func (r ListProjectApiKeysResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListProjectApiKeysResponse) StatusCode() int {
+func (r ListProjectApiKeysMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type DeleteProjectApiKeyResponse struct {
+type DeleteProjectApiKeyMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ProjectApiKeyDeleteResponse
@@ -19496,7 +19496,7 @@ type DeleteProjectApiKeyResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r DeleteProjectApiKeyResponse) Status() string {
+func (r DeleteProjectApiKeyMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19504,21 +19504,21 @@ func (r DeleteProjectApiKeyResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DeleteProjectApiKeyResponse) StatusCode() int {
+func (r DeleteProjectApiKeyMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type RetrieveProjectApiKeyResponse struct {
+type RetrieveProjectApiKeyMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ProjectApiKey
 }
 
 // Status returns HTTPResponse.Status
-func (r RetrieveProjectApiKeyResponse) Status() string {
+func (r RetrieveProjectApiKeyMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19526,21 +19526,21 @@ func (r RetrieveProjectApiKeyResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r RetrieveProjectApiKeyResponse) StatusCode() int {
+func (r RetrieveProjectApiKeyMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ArchiveProjectResponse struct {
+type ArchiveProjectMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *Project
 }
 
 // Status returns HTTPResponse.Status
-func (r ArchiveProjectResponse) Status() string {
+func (r ArchiveProjectMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19548,21 +19548,21 @@ func (r ArchiveProjectResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ArchiveProjectResponse) StatusCode() int {
+func (r ArchiveProjectMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ListProjectRateLimitsResponse struct {
+type ListProjectRateLimitsMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ProjectRateLimitListResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListProjectRateLimitsResponse) Status() string {
+func (r ListProjectRateLimitsMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19570,14 +19570,14 @@ func (r ListProjectRateLimitsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListProjectRateLimitsResponse) StatusCode() int {
+func (r ListProjectRateLimitsMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type UpdateProjectRateLimitsResponse struct {
+type UpdateProjectRateLimitsMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ProjectRateLimit
@@ -19585,7 +19585,7 @@ type UpdateProjectRateLimitsResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r UpdateProjectRateLimitsResponse) Status() string {
+func (r UpdateProjectRateLimitsMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19593,14 +19593,14 @@ func (r UpdateProjectRateLimitsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r UpdateProjectRateLimitsResponse) StatusCode() int {
+func (r UpdateProjectRateLimitsMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ListProjectServiceAccountsResponse struct {
+type ListProjectServiceAccountsMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ProjectServiceAccountListResponse
@@ -19608,7 +19608,7 @@ type ListProjectServiceAccountsResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r ListProjectServiceAccountsResponse) Status() string {
+func (r ListProjectServiceAccountsMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19616,14 +19616,14 @@ func (r ListProjectServiceAccountsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListProjectServiceAccountsResponse) StatusCode() int {
+func (r ListProjectServiceAccountsMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateProjectServiceAccountResponse struct {
+type CreateProjectServiceAccountMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ProjectServiceAccountCreateResponse
@@ -19631,7 +19631,7 @@ type CreateProjectServiceAccountResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateProjectServiceAccountResponse) Status() string {
+func (r CreateProjectServiceAccountMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19639,21 +19639,21 @@ func (r CreateProjectServiceAccountResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateProjectServiceAccountResponse) StatusCode() int {
+func (r CreateProjectServiceAccountMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type DeleteProjectServiceAccountResponse struct {
+type DeleteProjectServiceAccountMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ProjectServiceAccountDeleteResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r DeleteProjectServiceAccountResponse) Status() string {
+func (r DeleteProjectServiceAccountMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19661,21 +19661,21 @@ func (r DeleteProjectServiceAccountResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DeleteProjectServiceAccountResponse) StatusCode() int {
+func (r DeleteProjectServiceAccountMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type RetrieveProjectServiceAccountResponse struct {
+type RetrieveProjectServiceAccountMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ProjectServiceAccount
 }
 
 // Status returns HTTPResponse.Status
-func (r RetrieveProjectServiceAccountResponse) Status() string {
+func (r RetrieveProjectServiceAccountMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19683,14 +19683,14 @@ func (r RetrieveProjectServiceAccountResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r RetrieveProjectServiceAccountResponse) StatusCode() int {
+func (r RetrieveProjectServiceAccountMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ListProjectUsersResponse struct {
+type ListProjectUsersMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ProjectUserListResponse
@@ -19698,7 +19698,7 @@ type ListProjectUsersResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r ListProjectUsersResponse) Status() string {
+func (r ListProjectUsersMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19706,14 +19706,14 @@ func (r ListProjectUsersResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListProjectUsersResponse) StatusCode() int {
+func (r ListProjectUsersMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateProjectUserResponse struct {
+type CreateProjectUserMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ProjectUser
@@ -19721,7 +19721,7 @@ type CreateProjectUserResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateProjectUserResponse) Status() string {
+func (r CreateProjectUserMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19729,14 +19729,14 @@ func (r CreateProjectUserResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateProjectUserResponse) StatusCode() int {
+func (r CreateProjectUserMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type DeleteProjectUserResponse struct {
+type DeleteProjectUserMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ProjectUserDeleteResponse
@@ -19744,7 +19744,7 @@ type DeleteProjectUserResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r DeleteProjectUserResponse) Status() string {
+func (r DeleteProjectUserMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19752,21 +19752,21 @@ func (r DeleteProjectUserResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DeleteProjectUserResponse) StatusCode() int {
+func (r DeleteProjectUserMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type RetrieveProjectUserResponse struct {
+type RetrieveProjectUserMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ProjectUser
 }
 
 // Status returns HTTPResponse.Status
-func (r RetrieveProjectUserResponse) Status() string {
+func (r RetrieveProjectUserMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19774,14 +19774,14 @@ func (r RetrieveProjectUserResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r RetrieveProjectUserResponse) StatusCode() int {
+func (r RetrieveProjectUserMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ModifyProjectUserResponse struct {
+type ModifyProjectUserMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ProjectUser
@@ -19789,7 +19789,7 @@ type ModifyProjectUserResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r ModifyProjectUserResponse) Status() string {
+func (r ModifyProjectUserMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19797,21 +19797,21 @@ func (r ModifyProjectUserResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ModifyProjectUserResponse) StatusCode() int {
+func (r ModifyProjectUserMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ListUsersResponse struct {
+type ListUsersMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *UserListResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListUsersResponse) Status() string {
+func (r ListUsersMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19819,21 +19819,21 @@ func (r ListUsersResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListUsersResponse) StatusCode() int {
+func (r ListUsersMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type DeleteUserResponse struct {
+type DeleteUserMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *UserDeleteResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r DeleteUserResponse) Status() string {
+func (r DeleteUserMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19841,21 +19841,21 @@ func (r DeleteUserResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DeleteUserResponse) StatusCode() int {
+func (r DeleteUserMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type RetrieveUserResponse struct {
+type RetrieveUserMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *User
 }
 
 // Status returns HTTPResponse.Status
-func (r RetrieveUserResponse) Status() string {
+func (r RetrieveUserMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19863,21 +19863,21 @@ func (r RetrieveUserResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r RetrieveUserResponse) StatusCode() int {
+func (r RetrieveUserMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ModifyUserResponse struct {
+type ModifyUserMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *User
 }
 
 // Status returns HTTPResponse.Status
-func (r ModifyUserResponse) Status() string {
+func (r ModifyUserMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19885,21 +19885,21 @@ func (r ModifyUserResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ModifyUserResponse) StatusCode() int {
+func (r ModifyUserMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateThreadResponse struct {
+type CreateThreadMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ThreadObject
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateThreadResponse) Status() string {
+func (r CreateThreadMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19907,21 +19907,21 @@ func (r CreateThreadResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateThreadResponse) StatusCode() int {
+func (r CreateThreadMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateThreadAndRunResponse struct {
+type CreateThreadAndRunMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *RunObject
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateThreadAndRunResponse) Status() string {
+func (r CreateThreadAndRunMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19929,21 +19929,21 @@ func (r CreateThreadAndRunResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateThreadAndRunResponse) StatusCode() int {
+func (r CreateThreadAndRunMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type DeleteThreadResponse struct {
+type DeleteThreadMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *DeleteThreadResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r DeleteThreadResponse) Status() string {
+func (r DeleteThreadMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19951,21 +19951,21 @@ func (r DeleteThreadResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DeleteThreadResponse) StatusCode() int {
+func (r DeleteThreadMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetThreadResponse struct {
+type GetThreadMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ThreadObject
 }
 
 // Status returns HTTPResponse.Status
-func (r GetThreadResponse) Status() string {
+func (r GetThreadMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19973,21 +19973,21 @@ func (r GetThreadResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetThreadResponse) StatusCode() int {
+func (r GetThreadMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ModifyThreadResponse struct {
+type ModifyThreadMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ThreadObject
 }
 
 // Status returns HTTPResponse.Status
-func (r ModifyThreadResponse) Status() string {
+func (r ModifyThreadMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -19995,21 +19995,21 @@ func (r ModifyThreadResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ModifyThreadResponse) StatusCode() int {
+func (r ModifyThreadMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ListMessagesResponse struct {
+type ListMessagesMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ListMessagesResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListMessagesResponse) Status() string {
+func (r ListMessagesMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20017,21 +20017,21 @@ func (r ListMessagesResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListMessagesResponse) StatusCode() int {
+func (r ListMessagesMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateMessageResponse struct {
+type CreateMessageMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *MessageObject
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateMessageResponse) Status() string {
+func (r CreateMessageMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20039,21 +20039,21 @@ func (r CreateMessageResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateMessageResponse) StatusCode() int {
+func (r CreateMessageMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type DeleteMessageResponse struct {
+type DeleteMessageMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *DeleteMessageResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r DeleteMessageResponse) Status() string {
+func (r DeleteMessageMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20061,21 +20061,21 @@ func (r DeleteMessageResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DeleteMessageResponse) StatusCode() int {
+func (r DeleteMessageMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetMessageResponse struct {
+type GetMessageMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *MessageObject
 }
 
 // Status returns HTTPResponse.Status
-func (r GetMessageResponse) Status() string {
+func (r GetMessageMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20083,21 +20083,21 @@ func (r GetMessageResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetMessageResponse) StatusCode() int {
+func (r GetMessageMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ModifyMessageResponse struct {
+type ModifyMessageMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *MessageObject
 }
 
 // Status returns HTTPResponse.Status
-func (r ModifyMessageResponse) Status() string {
+func (r ModifyMessageMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20105,21 +20105,21 @@ func (r ModifyMessageResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ModifyMessageResponse) StatusCode() int {
+func (r ModifyMessageMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ListRunsResponse struct {
+type ListRunsMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ListRunsResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListRunsResponse) Status() string {
+func (r ListRunsMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20127,21 +20127,21 @@ func (r ListRunsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListRunsResponse) StatusCode() int {
+func (r ListRunsMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateRunResponse struct {
+type CreateRunMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *RunObject
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateRunResponse) Status() string {
+func (r CreateRunMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20149,21 +20149,21 @@ func (r CreateRunResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateRunResponse) StatusCode() int {
+func (r CreateRunMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetRunResponse struct {
+type GetRunMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *RunObject
 }
 
 // Status returns HTTPResponse.Status
-func (r GetRunResponse) Status() string {
+func (r GetRunMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20171,21 +20171,21 @@ func (r GetRunResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetRunResponse) StatusCode() int {
+func (r GetRunMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ModifyRunResponse struct {
+type ModifyRunMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *RunObject
 }
 
 // Status returns HTTPResponse.Status
-func (r ModifyRunResponse) Status() string {
+func (r ModifyRunMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20193,21 +20193,21 @@ func (r ModifyRunResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ModifyRunResponse) StatusCode() int {
+func (r ModifyRunMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CancelRunResponse struct {
+type CancelRunMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *RunObject
 }
 
 // Status returns HTTPResponse.Status
-func (r CancelRunResponse) Status() string {
+func (r CancelRunMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20215,21 +20215,21 @@ func (r CancelRunResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CancelRunResponse) StatusCode() int {
+func (r CancelRunMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ListRunStepsResponse struct {
+type ListRunStepsMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ListRunStepsResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListRunStepsResponse) Status() string {
+func (r ListRunStepsMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20237,21 +20237,21 @@ func (r ListRunStepsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListRunStepsResponse) StatusCode() int {
+func (r ListRunStepsMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetRunStepResponse struct {
+type GetRunStepMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *RunStepObject
 }
 
 // Status returns HTTPResponse.Status
-func (r GetRunStepResponse) Status() string {
+func (r GetRunStepMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20259,21 +20259,21 @@ func (r GetRunStepResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetRunStepResponse) StatusCode() int {
+func (r GetRunStepMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type SubmitToolOuputsToRunResponse struct {
+type SubmitToolOuputsToRunMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *RunObject
 }
 
 // Status returns HTTPResponse.Status
-func (r SubmitToolOuputsToRunResponse) Status() string {
+func (r SubmitToolOuputsToRunMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20281,21 +20281,21 @@ func (r SubmitToolOuputsToRunResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r SubmitToolOuputsToRunResponse) StatusCode() int {
+func (r SubmitToolOuputsToRunMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateUploadResponse struct {
+type CreateUploadMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *Upload
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateUploadResponse) Status() string {
+func (r CreateUploadMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20303,21 +20303,21 @@ func (r CreateUploadResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateUploadResponse) StatusCode() int {
+func (r CreateUploadMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CancelUploadResponse struct {
+type CancelUploadMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *Upload
 }
 
 // Status returns HTTPResponse.Status
-func (r CancelUploadResponse) Status() string {
+func (r CancelUploadMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20325,21 +20325,21 @@ func (r CancelUploadResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CancelUploadResponse) StatusCode() int {
+func (r CancelUploadMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CompleteUploadResponse struct {
+type CompleteUploadMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *Upload
 }
 
 // Status returns HTTPResponse.Status
-func (r CompleteUploadResponse) Status() string {
+func (r CompleteUploadMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20347,21 +20347,21 @@ func (r CompleteUploadResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CompleteUploadResponse) StatusCode() int {
+func (r CompleteUploadMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type AddUploadPartResponse struct {
+type AddUploadPartMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *UploadPart
 }
 
 // Status returns HTTPResponse.Status
-func (r AddUploadPartResponse) Status() string {
+func (r AddUploadPartMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20369,21 +20369,21 @@ func (r AddUploadPartResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r AddUploadPartResponse) StatusCode() int {
+func (r AddUploadPartMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ListVectorStoresResponse struct {
+type ListVectorStoresMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ListVectorStoresResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListVectorStoresResponse) Status() string {
+func (r ListVectorStoresMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20391,21 +20391,21 @@ func (r ListVectorStoresResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListVectorStoresResponse) StatusCode() int {
+func (r ListVectorStoresMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateVectorStoreResponse struct {
+type CreateVectorStoreMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *VectorStoreObject
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateVectorStoreResponse) Status() string {
+func (r CreateVectorStoreMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20413,21 +20413,21 @@ func (r CreateVectorStoreResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateVectorStoreResponse) StatusCode() int {
+func (r CreateVectorStoreMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type DeleteVectorStoreResponse struct {
+type DeleteVectorStoreMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *DeleteVectorStoreResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r DeleteVectorStoreResponse) Status() string {
+func (r DeleteVectorStoreMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20435,21 +20435,21 @@ func (r DeleteVectorStoreResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DeleteVectorStoreResponse) StatusCode() int {
+func (r DeleteVectorStoreMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetVectorStoreResponse struct {
+type GetVectorStoreMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *VectorStoreObject
 }
 
 // Status returns HTTPResponse.Status
-func (r GetVectorStoreResponse) Status() string {
+func (r GetVectorStoreMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20457,21 +20457,21 @@ func (r GetVectorStoreResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetVectorStoreResponse) StatusCode() int {
+func (r GetVectorStoreMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ModifyVectorStoreResponse struct {
+type ModifyVectorStoreMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *VectorStoreObject
 }
 
 // Status returns HTTPResponse.Status
-func (r ModifyVectorStoreResponse) Status() string {
+func (r ModifyVectorStoreMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20479,21 +20479,21 @@ func (r ModifyVectorStoreResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ModifyVectorStoreResponse) StatusCode() int {
+func (r ModifyVectorStoreMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateVectorStoreFileBatchResponse struct {
+type CreateVectorStoreFileBatchMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *VectorStoreFileBatchObject
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateVectorStoreFileBatchResponse) Status() string {
+func (r CreateVectorStoreFileBatchMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20501,21 +20501,21 @@ func (r CreateVectorStoreFileBatchResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateVectorStoreFileBatchResponse) StatusCode() int {
+func (r CreateVectorStoreFileBatchMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetVectorStoreFileBatchResponse struct {
+type GetVectorStoreFileBatchMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *VectorStoreFileBatchObject
 }
 
 // Status returns HTTPResponse.Status
-func (r GetVectorStoreFileBatchResponse) Status() string {
+func (r GetVectorStoreFileBatchMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20523,21 +20523,21 @@ func (r GetVectorStoreFileBatchResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetVectorStoreFileBatchResponse) StatusCode() int {
+func (r GetVectorStoreFileBatchMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CancelVectorStoreFileBatchResponse struct {
+type CancelVectorStoreFileBatchMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *VectorStoreFileBatchObject
 }
 
 // Status returns HTTPResponse.Status
-func (r CancelVectorStoreFileBatchResponse) Status() string {
+func (r CancelVectorStoreFileBatchMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20545,21 +20545,21 @@ func (r CancelVectorStoreFileBatchResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CancelVectorStoreFileBatchResponse) StatusCode() int {
+func (r CancelVectorStoreFileBatchMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ListFilesInVectorStoreBatchResponse struct {
+type ListFilesInVectorStoreBatchMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ListVectorStoreFilesResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListFilesInVectorStoreBatchResponse) Status() string {
+func (r ListFilesInVectorStoreBatchMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20567,21 +20567,21 @@ func (r ListFilesInVectorStoreBatchResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListFilesInVectorStoreBatchResponse) StatusCode() int {
+func (r ListFilesInVectorStoreBatchMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type ListVectorStoreFilesResponse struct {
+type ListVectorStoreFilesMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ListVectorStoreFilesResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListVectorStoreFilesResponse) Status() string {
+func (r ListVectorStoreFilesMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20589,21 +20589,21 @@ func (r ListVectorStoreFilesResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListVectorStoreFilesResponse) StatusCode() int {
+func (r ListVectorStoreFilesMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type CreateVectorStoreFileResponse struct {
+type CreateVectorStoreFileMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *VectorStoreFileObject
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateVectorStoreFileResponse) Status() string {
+func (r CreateVectorStoreFileMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20611,21 +20611,21 @@ func (r CreateVectorStoreFileResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateVectorStoreFileResponse) StatusCode() int {
+func (r CreateVectorStoreFileMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type DeleteVectorStoreFileResponse struct {
+type DeleteVectorStoreFileMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *DeleteVectorStoreFileResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r DeleteVectorStoreFileResponse) Status() string {
+func (r DeleteVectorStoreFileMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20633,21 +20633,21 @@ func (r DeleteVectorStoreFileResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DeleteVectorStoreFileResponse) StatusCode() int {
+func (r DeleteVectorStoreFileMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetVectorStoreFileResponse struct {
+type GetVectorStoreFileMsg struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *VectorStoreFileObject
 }
 
 // Status returns HTTPResponse.Status
-func (r GetVectorStoreFileResponse) Status() string {
+func (r GetVectorStoreFileMsg) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -20655,1142 +20655,1142 @@ func (r GetVectorStoreFileResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetVectorStoreFileResponse) StatusCode() int {
+func (r GetVectorStoreFileMsg) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-// ListAssistantsWithResponse request returning *ListAssistantsResponse
-func (c *ClientWithResponses) ListAssistantsWithResponse(ctx context.Context, params *ListAssistantsParams, reqEditors ...RequestEditorFn) (*ListAssistantsResponse, error) {
+// ListAssistantsWithResponse request returning *ListAssistantsMsg
+func (c *ClientWithResponses) ListAssistantsWithResponse(ctx context.Context, params *ListAssistantsParams, reqEditors ...RequestEditorFn) (*ListAssistantsMsg, error) {
 	rsp, err := c.ListAssistants(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListAssistantsResponse(rsp)
+	return ParseListAssistantsMsg(rsp)
 }
 
-// CreateAssistantWithBodyWithResponse request with arbitrary body returning *CreateAssistantResponse
-func (c *ClientWithResponses) CreateAssistantWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateAssistantResponse, error) {
+// CreateAssistantWithBodyWithResponse request with arbitrary body returning *CreateAssistantMsg
+func (c *ClientWithResponses) CreateAssistantWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateAssistantMsg, error) {
 	rsp, err := c.CreateAssistantWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateAssistantResponse(rsp)
+	return ParseCreateAssistantMsg(rsp)
 }
 
-func (c *ClientWithResponses) CreateAssistantWithResponse(ctx context.Context, body CreateAssistantJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateAssistantResponse, error) {
+func (c *ClientWithResponses) CreateAssistantWithResponse(ctx context.Context, body CreateAssistantJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateAssistantMsg, error) {
 	rsp, err := c.CreateAssistant(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateAssistantResponse(rsp)
+	return ParseCreateAssistantMsg(rsp)
 }
 
-// DeleteAssistantWithResponse request returning *DeleteAssistantResponse
-func (c *ClientWithResponses) DeleteAssistantWithResponse(ctx context.Context, assistantId string, reqEditors ...RequestEditorFn) (*DeleteAssistantResponse, error) {
+// DeleteAssistantWithResponse request returning *DeleteAssistantMsg
+func (c *ClientWithResponses) DeleteAssistantWithResponse(ctx context.Context, assistantId string, reqEditors ...RequestEditorFn) (*DeleteAssistantMsg, error) {
 	rsp, err := c.DeleteAssistant(ctx, assistantId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDeleteAssistantResponse(rsp)
+	return ParseDeleteAssistantMsg(rsp)
 }
 
-// GetAssistantWithResponse request returning *GetAssistantResponse
-func (c *ClientWithResponses) GetAssistantWithResponse(ctx context.Context, assistantId string, reqEditors ...RequestEditorFn) (*GetAssistantResponse, error) {
+// GetAssistantWithResponse request returning *GetAssistantMsg
+func (c *ClientWithResponses) GetAssistantWithResponse(ctx context.Context, assistantId string, reqEditors ...RequestEditorFn) (*GetAssistantMsg, error) {
 	rsp, err := c.GetAssistant(ctx, assistantId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetAssistantResponse(rsp)
+	return ParseGetAssistantMsg(rsp)
 }
 
-// ModifyAssistantWithBodyWithResponse request with arbitrary body returning *ModifyAssistantResponse
-func (c *ClientWithResponses) ModifyAssistantWithBodyWithResponse(ctx context.Context, assistantId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyAssistantResponse, error) {
+// ModifyAssistantWithBodyWithResponse request with arbitrary body returning *ModifyAssistantMsg
+func (c *ClientWithResponses) ModifyAssistantWithBodyWithResponse(ctx context.Context, assistantId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyAssistantMsg, error) {
 	rsp, err := c.ModifyAssistantWithBody(ctx, assistantId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseModifyAssistantResponse(rsp)
+	return ParseModifyAssistantMsg(rsp)
 }
 
-func (c *ClientWithResponses) ModifyAssistantWithResponse(ctx context.Context, assistantId string, body ModifyAssistantJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyAssistantResponse, error) {
+func (c *ClientWithResponses) ModifyAssistantWithResponse(ctx context.Context, assistantId string, body ModifyAssistantJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyAssistantMsg, error) {
 	rsp, err := c.ModifyAssistant(ctx, assistantId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseModifyAssistantResponse(rsp)
+	return ParseModifyAssistantMsg(rsp)
 }
 
-// CreateSpeechWithBodyWithResponse request with arbitrary body returning *CreateSpeechResponse
-func (c *ClientWithResponses) CreateSpeechWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateSpeechResponse, error) {
+// CreateSpeechWithBodyWithResponse request with arbitrary body returning *CreateSpeechMsg
+func (c *ClientWithResponses) CreateSpeechWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateSpeechMsg, error) {
 	rsp, err := c.CreateSpeechWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateSpeechResponse(rsp)
+	return ParseCreateSpeechMsg(rsp)
 }
 
-func (c *ClientWithResponses) CreateSpeechWithResponse(ctx context.Context, body CreateSpeechJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateSpeechResponse, error) {
+func (c *ClientWithResponses) CreateSpeechWithResponse(ctx context.Context, body CreateSpeechJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateSpeechMsg, error) {
 	rsp, err := c.CreateSpeech(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateSpeechResponse(rsp)
+	return ParseCreateSpeechMsg(rsp)
 }
 
-// CreateTranscriptionWithBodyWithResponse request with arbitrary body returning *CreateTranscriptionResponse
-func (c *ClientWithResponses) CreateTranscriptionWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateTranscriptionResponse, error) {
+// CreateTranscriptionWithBodyWithResponse request with arbitrary body returning *CreateTranscriptionMsg
+func (c *ClientWithResponses) CreateTranscriptionWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateTranscriptionMsg, error) {
 	rsp, err := c.CreateTranscriptionWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateTranscriptionResponse(rsp)
+	return ParseCreateTranscriptionMsg(rsp)
 }
 
-// CreateTranslationWithBodyWithResponse request with arbitrary body returning *CreateTranslationResponse
-func (c *ClientWithResponses) CreateTranslationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateTranslationResponse, error) {
+// CreateTranslationWithBodyWithResponse request with arbitrary body returning *CreateTranslationMsg
+func (c *ClientWithResponses) CreateTranslationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateTranslationMsg, error) {
 	rsp, err := c.CreateTranslationWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateTranslationResponse(rsp)
+	return ParseCreateTranslationMsg(rsp)
 }
 
-// ListBatchesWithResponse request returning *ListBatchesResponse
-func (c *ClientWithResponses) ListBatchesWithResponse(ctx context.Context, params *ListBatchesParams, reqEditors ...RequestEditorFn) (*ListBatchesResponse, error) {
+// ListBatchesWithResponse request returning *ListBatchesMsg
+func (c *ClientWithResponses) ListBatchesWithResponse(ctx context.Context, params *ListBatchesParams, reqEditors ...RequestEditorFn) (*ListBatchesMsg, error) {
 	rsp, err := c.ListBatches(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListBatchesResponse(rsp)
+	return ParseListBatchesMsg(rsp)
 }
 
-// CreateBatchWithBodyWithResponse request with arbitrary body returning *CreateBatchResponse
-func (c *ClientWithResponses) CreateBatchWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateBatchResponse, error) {
+// CreateBatchWithBodyWithResponse request with arbitrary body returning *CreateBatchMsg
+func (c *ClientWithResponses) CreateBatchWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateBatchMsg, error) {
 	rsp, err := c.CreateBatchWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateBatchResponse(rsp)
+	return ParseCreateBatchMsg(rsp)
 }
 
-func (c *ClientWithResponses) CreateBatchWithResponse(ctx context.Context, body CreateBatchJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateBatchResponse, error) {
+func (c *ClientWithResponses) CreateBatchWithResponse(ctx context.Context, body CreateBatchJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateBatchMsg, error) {
 	rsp, err := c.CreateBatch(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateBatchResponse(rsp)
+	return ParseCreateBatchMsg(rsp)
 }
 
-// RetrieveBatchWithResponse request returning *RetrieveBatchResponse
-func (c *ClientWithResponses) RetrieveBatchWithResponse(ctx context.Context, batchId string, reqEditors ...RequestEditorFn) (*RetrieveBatchResponse, error) {
+// RetrieveBatchWithResponse request returning *RetrieveBatchMsg
+func (c *ClientWithResponses) RetrieveBatchWithResponse(ctx context.Context, batchId string, reqEditors ...RequestEditorFn) (*RetrieveBatchMsg, error) {
 	rsp, err := c.RetrieveBatch(ctx, batchId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseRetrieveBatchResponse(rsp)
+	return ParseRetrieveBatchMsg(rsp)
 }
 
-// CancelBatchWithResponse request returning *CancelBatchResponse
-func (c *ClientWithResponses) CancelBatchWithResponse(ctx context.Context, batchId string, reqEditors ...RequestEditorFn) (*CancelBatchResponse, error) {
+// CancelBatchWithResponse request returning *CancelBatchMsg
+func (c *ClientWithResponses) CancelBatchWithResponse(ctx context.Context, batchId string, reqEditors ...RequestEditorFn) (*CancelBatchMsg, error) {
 	rsp, err := c.CancelBatch(ctx, batchId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCancelBatchResponse(rsp)
+	return ParseCancelBatchMsg(rsp)
 }
 
-// CreateChatCompletionWithBodyWithResponse request with arbitrary body returning *CreateChatCompletionResponse
-func (c *ClientWithResponses) CreateChatCompletionWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateChatCompletionResponse, error) {
+// CreateChatCompletionWithBodyWithResponse request with arbitrary body returning *CreateChatCompletionMsg
+func (c *ClientWithResponses) CreateChatCompletionWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateChatCompletionMsg, error) {
 	rsp, err := c.CreateChatCompletionWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateChatCompletionResponse(rsp)
+	return ParseCreateChatCompletionMsg(rsp)
 }
 
-func (c *ClientWithResponses) CreateChatCompletionWithResponse(ctx context.Context, body CreateChatCompletionJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateChatCompletionResponse, error) {
+func (c *ClientWithResponses) CreateChatCompletionWithResponse(ctx context.Context, body CreateChatCompletionJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateChatCompletionMsg, error) {
 	rsp, err := c.CreateChatCompletion(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateChatCompletionResponse(rsp)
+	return ParseCreateChatCompletionMsg(rsp)
 }
 
-// CreateCompletionWithBodyWithResponse request with arbitrary body returning *CreateCompletionResponse
-func (c *ClientWithResponses) CreateCompletionWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateCompletionResponse, error) {
+// CreateCompletionWithBodyWithResponse request with arbitrary body returning *CreateCompletionMsg
+func (c *ClientWithResponses) CreateCompletionWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateCompletionMsg, error) {
 	rsp, err := c.CreateCompletionWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateCompletionResponse(rsp)
+	return ParseCreateCompletionMsg(rsp)
 }
 
-func (c *ClientWithResponses) CreateCompletionWithResponse(ctx context.Context, body CreateCompletionJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateCompletionResponse, error) {
+func (c *ClientWithResponses) CreateCompletionWithResponse(ctx context.Context, body CreateCompletionJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateCompletionMsg, error) {
 	rsp, err := c.CreateCompletion(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateCompletionResponse(rsp)
+	return ParseCreateCompletionMsg(rsp)
 }
 
-// CreateEmbeddingWithBodyWithResponse request with arbitrary body returning *CreateEmbeddingResponse
-func (c *ClientWithResponses) CreateEmbeddingWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateEmbeddingResponse, error) {
+// CreateEmbeddingWithBodyWithResponse request with arbitrary body returning *CreateEmbeddingMsg
+func (c *ClientWithResponses) CreateEmbeddingWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateEmbeddingMsg, error) {
 	rsp, err := c.CreateEmbeddingWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateEmbeddingResponse(rsp)
+	return ParseCreateEmbeddingMsg(rsp)
 }
 
-func (c *ClientWithResponses) CreateEmbeddingWithResponse(ctx context.Context, body CreateEmbeddingJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateEmbeddingResponse, error) {
+func (c *ClientWithResponses) CreateEmbeddingWithResponse(ctx context.Context, body CreateEmbeddingJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateEmbeddingMsg, error) {
 	rsp, err := c.CreateEmbedding(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateEmbeddingResponse(rsp)
+	return ParseCreateEmbeddingMsg(rsp)
 }
 
-// ListFilesWithResponse request returning *ListFilesResponse
-func (c *ClientWithResponses) ListFilesWithResponse(ctx context.Context, params *ListFilesParams, reqEditors ...RequestEditorFn) (*ListFilesResponse, error) {
+// ListFilesWithResponse request returning *ListFilesMsg
+func (c *ClientWithResponses) ListFilesWithResponse(ctx context.Context, params *ListFilesParams, reqEditors ...RequestEditorFn) (*ListFilesMsg, error) {
 	rsp, err := c.ListFiles(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListFilesResponse(rsp)
+	return ParseListFilesMsg(rsp)
 }
 
-// CreateFileWithBodyWithResponse request with arbitrary body returning *CreateFileResponse
-func (c *ClientWithResponses) CreateFileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateFileResponse, error) {
+// CreateFileWithBodyWithResponse request with arbitrary body returning *CreateFileMsg
+func (c *ClientWithResponses) CreateFileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateFileMsg, error) {
 	rsp, err := c.CreateFileWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateFileResponse(rsp)
+	return ParseCreateFileMsg(rsp)
 }
 
-// DeleteFileWithResponse request returning *DeleteFileResponse
-func (c *ClientWithResponses) DeleteFileWithResponse(ctx context.Context, fileId string, reqEditors ...RequestEditorFn) (*DeleteFileResponse, error) {
+// DeleteFileWithResponse request returning *DeleteFileMsg
+func (c *ClientWithResponses) DeleteFileWithResponse(ctx context.Context, fileId string, reqEditors ...RequestEditorFn) (*DeleteFileMsg, error) {
 	rsp, err := c.DeleteFile(ctx, fileId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDeleteFileResponse(rsp)
+	return ParseDeleteFileMsg(rsp)
 }
 
-// RetrieveFileWithResponse request returning *RetrieveFileResponse
-func (c *ClientWithResponses) RetrieveFileWithResponse(ctx context.Context, fileId string, reqEditors ...RequestEditorFn) (*RetrieveFileResponse, error) {
+// RetrieveFileWithResponse request returning *RetrieveFileMsg
+func (c *ClientWithResponses) RetrieveFileWithResponse(ctx context.Context, fileId string, reqEditors ...RequestEditorFn) (*RetrieveFileMsg, error) {
 	rsp, err := c.RetrieveFile(ctx, fileId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseRetrieveFileResponse(rsp)
+	return ParseRetrieveFileMsg(rsp)
 }
 
-// DownloadFileWithResponse request returning *DownloadFileResponse
-func (c *ClientWithResponses) DownloadFileWithResponse(ctx context.Context, fileId string, reqEditors ...RequestEditorFn) (*DownloadFileResponse, error) {
+// DownloadFileWithResponse request returning *DownloadFileMsg
+func (c *ClientWithResponses) DownloadFileWithResponse(ctx context.Context, fileId string, reqEditors ...RequestEditorFn) (*DownloadFileMsg, error) {
 	rsp, err := c.DownloadFile(ctx, fileId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDownloadFileResponse(rsp)
+	return ParseDownloadFileMsg(rsp)
 }
 
-// ListPaginatedFineTuningJobsWithResponse request returning *ListPaginatedFineTuningJobsResponse
-func (c *ClientWithResponses) ListPaginatedFineTuningJobsWithResponse(ctx context.Context, params *ListPaginatedFineTuningJobsParams, reqEditors ...RequestEditorFn) (*ListPaginatedFineTuningJobsResponse, error) {
+// ListPaginatedFineTuningJobsWithResponse request returning *ListPaginatedFineTuningJobsMsg
+func (c *ClientWithResponses) ListPaginatedFineTuningJobsWithResponse(ctx context.Context, params *ListPaginatedFineTuningJobsParams, reqEditors ...RequestEditorFn) (*ListPaginatedFineTuningJobsMsg, error) {
 	rsp, err := c.ListPaginatedFineTuningJobs(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListPaginatedFineTuningJobsResponse(rsp)
+	return ParseListPaginatedFineTuningJobsMsg(rsp)
 }
 
-// CreateFineTuningJobWithBodyWithResponse request with arbitrary body returning *CreateFineTuningJobResponse
-func (c *ClientWithResponses) CreateFineTuningJobWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateFineTuningJobResponse, error) {
+// CreateFineTuningJobWithBodyWithResponse request with arbitrary body returning *CreateFineTuningJobMsg
+func (c *ClientWithResponses) CreateFineTuningJobWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateFineTuningJobMsg, error) {
 	rsp, err := c.CreateFineTuningJobWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateFineTuningJobResponse(rsp)
+	return ParseCreateFineTuningJobMsg(rsp)
 }
 
-func (c *ClientWithResponses) CreateFineTuningJobWithResponse(ctx context.Context, body CreateFineTuningJobJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateFineTuningJobResponse, error) {
+func (c *ClientWithResponses) CreateFineTuningJobWithResponse(ctx context.Context, body CreateFineTuningJobJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateFineTuningJobMsg, error) {
 	rsp, err := c.CreateFineTuningJob(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateFineTuningJobResponse(rsp)
+	return ParseCreateFineTuningJobMsg(rsp)
 }
 
-// RetrieveFineTuningJobWithResponse request returning *RetrieveFineTuningJobResponse
-func (c *ClientWithResponses) RetrieveFineTuningJobWithResponse(ctx context.Context, fineTuningJobId string, reqEditors ...RequestEditorFn) (*RetrieveFineTuningJobResponse, error) {
+// RetrieveFineTuningJobWithResponse request returning *RetrieveFineTuningJobMsg
+func (c *ClientWithResponses) RetrieveFineTuningJobWithResponse(ctx context.Context, fineTuningJobId string, reqEditors ...RequestEditorFn) (*RetrieveFineTuningJobMsg, error) {
 	rsp, err := c.RetrieveFineTuningJob(ctx, fineTuningJobId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseRetrieveFineTuningJobResponse(rsp)
+	return ParseRetrieveFineTuningJobMsg(rsp)
 }
 
-// CancelFineTuningJobWithResponse request returning *CancelFineTuningJobResponse
-func (c *ClientWithResponses) CancelFineTuningJobWithResponse(ctx context.Context, fineTuningJobId string, reqEditors ...RequestEditorFn) (*CancelFineTuningJobResponse, error) {
+// CancelFineTuningJobWithResponse request returning *CancelFineTuningJobMsg
+func (c *ClientWithResponses) CancelFineTuningJobWithResponse(ctx context.Context, fineTuningJobId string, reqEditors ...RequestEditorFn) (*CancelFineTuningJobMsg, error) {
 	rsp, err := c.CancelFineTuningJob(ctx, fineTuningJobId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCancelFineTuningJobResponse(rsp)
+	return ParseCancelFineTuningJobMsg(rsp)
 }
 
-// ListFineTuningJobCheckpointsWithResponse request returning *ListFineTuningJobCheckpointsResponse
-func (c *ClientWithResponses) ListFineTuningJobCheckpointsWithResponse(ctx context.Context, fineTuningJobId string, params *ListFineTuningJobCheckpointsParams, reqEditors ...RequestEditorFn) (*ListFineTuningJobCheckpointsResponse, error) {
+// ListFineTuningJobCheckpointsWithResponse request returning *ListFineTuningJobCheckpointsMsg
+func (c *ClientWithResponses) ListFineTuningJobCheckpointsWithResponse(ctx context.Context, fineTuningJobId string, params *ListFineTuningJobCheckpointsParams, reqEditors ...RequestEditorFn) (*ListFineTuningJobCheckpointsMsg, error) {
 	rsp, err := c.ListFineTuningJobCheckpoints(ctx, fineTuningJobId, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListFineTuningJobCheckpointsResponse(rsp)
+	return ParseListFineTuningJobCheckpointsMsg(rsp)
 }
 
-// ListFineTuningEventsWithResponse request returning *ListFineTuningEventsResponse
-func (c *ClientWithResponses) ListFineTuningEventsWithResponse(ctx context.Context, fineTuningJobId string, params *ListFineTuningEventsParams, reqEditors ...RequestEditorFn) (*ListFineTuningEventsResponse, error) {
+// ListFineTuningEventsWithResponse request returning *ListFineTuningEventsMsg
+func (c *ClientWithResponses) ListFineTuningEventsWithResponse(ctx context.Context, fineTuningJobId string, params *ListFineTuningEventsParams, reqEditors ...RequestEditorFn) (*ListFineTuningEventsMsg, error) {
 	rsp, err := c.ListFineTuningEvents(ctx, fineTuningJobId, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListFineTuningEventsResponse(rsp)
+	return ParseListFineTuningEventsMsg(rsp)
 }
 
-// CreateImageEditWithBodyWithResponse request with arbitrary body returning *CreateImageEditResponse
-func (c *ClientWithResponses) CreateImageEditWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateImageEditResponse, error) {
+// CreateImageEditWithBodyWithResponse request with arbitrary body returning *CreateImageEditMsg
+func (c *ClientWithResponses) CreateImageEditWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateImageEditMsg, error) {
 	rsp, err := c.CreateImageEditWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateImageEditResponse(rsp)
+	return ParseCreateImageEditMsg(rsp)
 }
 
-// CreateImageWithBodyWithResponse request with arbitrary body returning *CreateImageResponse
-func (c *ClientWithResponses) CreateImageWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateImageResponse, error) {
+// CreateImageWithBodyWithResponse request with arbitrary body returning *CreateImageMsg
+func (c *ClientWithResponses) CreateImageWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateImageMsg, error) {
 	rsp, err := c.CreateImageWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateImageResponse(rsp)
+	return ParseCreateImageMsg(rsp)
 }
 
-func (c *ClientWithResponses) CreateImageWithResponse(ctx context.Context, body CreateImageJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateImageResponse, error) {
+func (c *ClientWithResponses) CreateImageWithResponse(ctx context.Context, body CreateImageJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateImageMsg, error) {
 	rsp, err := c.CreateImage(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateImageResponse(rsp)
+	return ParseCreateImageMsg(rsp)
 }
 
-// CreateImageVariationWithBodyWithResponse request with arbitrary body returning *CreateImageVariationResponse
-func (c *ClientWithResponses) CreateImageVariationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateImageVariationResponse, error) {
+// CreateImageVariationWithBodyWithResponse request with arbitrary body returning *CreateImageVariationMsg
+func (c *ClientWithResponses) CreateImageVariationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateImageVariationMsg, error) {
 	rsp, err := c.CreateImageVariationWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateImageVariationResponse(rsp)
+	return ParseCreateImageVariationMsg(rsp)
 }
 
-// ListModelsWithResponse request returning *ListModelsResponse
-func (c *ClientWithResponses) ListModelsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ListModelsResponse, error) {
+// ListModelsWithResponse request returning *ListModelsMsg
+func (c *ClientWithResponses) ListModelsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ListModelsMsg, error) {
 	rsp, err := c.ListModels(ctx, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListModelsResponse(rsp)
+	return ParseListModelsMsg(rsp)
 }
 
-// DeleteModelWithResponse request returning *DeleteModelResponse
-func (c *ClientWithResponses) DeleteModelWithResponse(ctx context.Context, model string, reqEditors ...RequestEditorFn) (*DeleteModelResponse, error) {
+// DeleteModelWithResponse request returning *DeleteModelMsg
+func (c *ClientWithResponses) DeleteModelWithResponse(ctx context.Context, model string, reqEditors ...RequestEditorFn) (*DeleteModelMsg, error) {
 	rsp, err := c.DeleteModel(ctx, model, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDeleteModelResponse(rsp)
+	return ParseDeleteModelMsg(rsp)
 }
 
-// RetrieveModelWithResponse request returning *RetrieveModelResponse
-func (c *ClientWithResponses) RetrieveModelWithResponse(ctx context.Context, model string, reqEditors ...RequestEditorFn) (*RetrieveModelResponse, error) {
+// RetrieveModelWithResponse request returning *RetrieveModelMsg
+func (c *ClientWithResponses) RetrieveModelWithResponse(ctx context.Context, model string, reqEditors ...RequestEditorFn) (*RetrieveModelMsg, error) {
 	rsp, err := c.RetrieveModel(ctx, model, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseRetrieveModelResponse(rsp)
+	return ParseRetrieveModelMsg(rsp)
 }
 
-// CreateModerationWithBodyWithResponse request with arbitrary body returning *CreateModerationResponse
-func (c *ClientWithResponses) CreateModerationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateModerationResponse, error) {
+// CreateModerationWithBodyWithResponse request with arbitrary body returning *CreateModerationMsg
+func (c *ClientWithResponses) CreateModerationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateModerationMsg, error) {
 	rsp, err := c.CreateModerationWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateModerationResponse(rsp)
+	return ParseCreateModerationMsg(rsp)
 }
 
-func (c *ClientWithResponses) CreateModerationWithResponse(ctx context.Context, body CreateModerationJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateModerationResponse, error) {
+func (c *ClientWithResponses) CreateModerationWithResponse(ctx context.Context, body CreateModerationJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateModerationMsg, error) {
 	rsp, err := c.CreateModeration(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateModerationResponse(rsp)
+	return ParseCreateModerationMsg(rsp)
 }
 
-// ListAuditLogsWithResponse request returning *ListAuditLogsResponse
-func (c *ClientWithResponses) ListAuditLogsWithResponse(ctx context.Context, params *ListAuditLogsParams, reqEditors ...RequestEditorFn) (*ListAuditLogsResponse, error) {
+// ListAuditLogsWithResponse request returning *ListAuditLogsMsg
+func (c *ClientWithResponses) ListAuditLogsWithResponse(ctx context.Context, params *ListAuditLogsParams, reqEditors ...RequestEditorFn) (*ListAuditLogsMsg, error) {
 	rsp, err := c.ListAuditLogs(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListAuditLogsResponse(rsp)
+	return ParseListAuditLogsMsg(rsp)
 }
 
-// ListInvitesWithResponse request returning *ListInvitesResponse
-func (c *ClientWithResponses) ListInvitesWithResponse(ctx context.Context, params *ListInvitesParams, reqEditors ...RequestEditorFn) (*ListInvitesResponse, error) {
+// ListInvitesWithResponse request returning *ListInvitesMsg
+func (c *ClientWithResponses) ListInvitesWithResponse(ctx context.Context, params *ListInvitesParams, reqEditors ...RequestEditorFn) (*ListInvitesMsg, error) {
 	rsp, err := c.ListInvites(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListInvitesResponse(rsp)
+	return ParseListInvitesMsg(rsp)
 }
 
-// InviteUserWithBodyWithResponse request with arbitrary body returning *InviteUserResponse
-func (c *ClientWithResponses) InviteUserWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*InviteUserResponse, error) {
+// InviteUserWithBodyWithResponse request with arbitrary body returning *InviteUserMsg
+func (c *ClientWithResponses) InviteUserWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*InviteUserMsg, error) {
 	rsp, err := c.InviteUserWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseInviteUserResponse(rsp)
+	return ParseInviteUserMsg(rsp)
 }
 
-func (c *ClientWithResponses) InviteUserWithResponse(ctx context.Context, body InviteUserJSONRequestBody, reqEditors ...RequestEditorFn) (*InviteUserResponse, error) {
+func (c *ClientWithResponses) InviteUserWithResponse(ctx context.Context, body InviteUserJSONRequestBody, reqEditors ...RequestEditorFn) (*InviteUserMsg, error) {
 	rsp, err := c.InviteUser(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseInviteUserResponse(rsp)
+	return ParseInviteUserMsg(rsp)
 }
 
-// DeleteInviteWithResponse request returning *DeleteInviteResponse
-func (c *ClientWithResponses) DeleteInviteWithResponse(ctx context.Context, inviteId string, reqEditors ...RequestEditorFn) (*DeleteInviteResponse, error) {
+// DeleteInviteWithResponse request returning *DeleteInviteMsg
+func (c *ClientWithResponses) DeleteInviteWithResponse(ctx context.Context, inviteId string, reqEditors ...RequestEditorFn) (*DeleteInviteMsg, error) {
 	rsp, err := c.DeleteInvite(ctx, inviteId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDeleteInviteResponse(rsp)
+	return ParseDeleteInviteMsg(rsp)
 }
 
-// RetrieveInviteWithResponse request returning *RetrieveInviteResponse
-func (c *ClientWithResponses) RetrieveInviteWithResponse(ctx context.Context, inviteId string, reqEditors ...RequestEditorFn) (*RetrieveInviteResponse, error) {
+// RetrieveInviteWithResponse request returning *RetrieveInviteMsg
+func (c *ClientWithResponses) RetrieveInviteWithResponse(ctx context.Context, inviteId string, reqEditors ...RequestEditorFn) (*RetrieveInviteMsg, error) {
 	rsp, err := c.RetrieveInvite(ctx, inviteId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseRetrieveInviteResponse(rsp)
+	return ParseRetrieveInviteMsg(rsp)
 }
 
-// ListProjectsWithResponse request returning *ListProjectsResponse
-func (c *ClientWithResponses) ListProjectsWithResponse(ctx context.Context, params *ListProjectsParams, reqEditors ...RequestEditorFn) (*ListProjectsResponse, error) {
+// ListProjectsWithResponse request returning *ListProjectsMsg
+func (c *ClientWithResponses) ListProjectsWithResponse(ctx context.Context, params *ListProjectsParams, reqEditors ...RequestEditorFn) (*ListProjectsMsg, error) {
 	rsp, err := c.ListProjects(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListProjectsResponse(rsp)
+	return ParseListProjectsMsg(rsp)
 }
 
-// CreateProjectWithBodyWithResponse request with arbitrary body returning *CreateProjectResponse
-func (c *ClientWithResponses) CreateProjectWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateProjectResponse, error) {
+// CreateProjectWithBodyWithResponse request with arbitrary body returning *CreateProjectMsg
+func (c *ClientWithResponses) CreateProjectWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateProjectMsg, error) {
 	rsp, err := c.CreateProjectWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateProjectResponse(rsp)
+	return ParseCreateProjectMsg(rsp)
 }
 
-func (c *ClientWithResponses) CreateProjectWithResponse(ctx context.Context, body CreateProjectJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateProjectResponse, error) {
+func (c *ClientWithResponses) CreateProjectWithResponse(ctx context.Context, body CreateProjectJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateProjectMsg, error) {
 	rsp, err := c.CreateProject(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateProjectResponse(rsp)
+	return ParseCreateProjectMsg(rsp)
 }
 
-// RetrieveProjectWithResponse request returning *RetrieveProjectResponse
-func (c *ClientWithResponses) RetrieveProjectWithResponse(ctx context.Context, projectId string, reqEditors ...RequestEditorFn) (*RetrieveProjectResponse, error) {
+// RetrieveProjectWithResponse request returning *RetrieveProjectMsg
+func (c *ClientWithResponses) RetrieveProjectWithResponse(ctx context.Context, projectId string, reqEditors ...RequestEditorFn) (*RetrieveProjectMsg, error) {
 	rsp, err := c.RetrieveProject(ctx, projectId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseRetrieveProjectResponse(rsp)
+	return ParseRetrieveProjectMsg(rsp)
 }
 
-// ModifyProjectWithBodyWithResponse request with arbitrary body returning *ModifyProjectResponse
-func (c *ClientWithResponses) ModifyProjectWithBodyWithResponse(ctx context.Context, projectId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyProjectResponse, error) {
+// ModifyProjectWithBodyWithResponse request with arbitrary body returning *ModifyProjectMsg
+func (c *ClientWithResponses) ModifyProjectWithBodyWithResponse(ctx context.Context, projectId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyProjectMsg, error) {
 	rsp, err := c.ModifyProjectWithBody(ctx, projectId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseModifyProjectResponse(rsp)
+	return ParseModifyProjectMsg(rsp)
 }
 
-func (c *ClientWithResponses) ModifyProjectWithResponse(ctx context.Context, projectId string, body ModifyProjectJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyProjectResponse, error) {
+func (c *ClientWithResponses) ModifyProjectWithResponse(ctx context.Context, projectId string, body ModifyProjectJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyProjectMsg, error) {
 	rsp, err := c.ModifyProject(ctx, projectId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseModifyProjectResponse(rsp)
+	return ParseModifyProjectMsg(rsp)
 }
 
-// ListProjectApiKeysWithResponse request returning *ListProjectApiKeysResponse
-func (c *ClientWithResponses) ListProjectApiKeysWithResponse(ctx context.Context, projectId string, params *ListProjectApiKeysParams, reqEditors ...RequestEditorFn) (*ListProjectApiKeysResponse, error) {
+// ListProjectApiKeysWithResponse request returning *ListProjectApiKeysMsg
+func (c *ClientWithResponses) ListProjectApiKeysWithResponse(ctx context.Context, projectId string, params *ListProjectApiKeysParams, reqEditors ...RequestEditorFn) (*ListProjectApiKeysMsg, error) {
 	rsp, err := c.ListProjectApiKeys(ctx, projectId, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListProjectApiKeysResponse(rsp)
+	return ParseListProjectApiKeysMsg(rsp)
 }
 
-// DeleteProjectApiKeyWithResponse request returning *DeleteProjectApiKeyResponse
-func (c *ClientWithResponses) DeleteProjectApiKeyWithResponse(ctx context.Context, projectId string, keyId string, reqEditors ...RequestEditorFn) (*DeleteProjectApiKeyResponse, error) {
+// DeleteProjectApiKeyWithResponse request returning *DeleteProjectApiKeyMsg
+func (c *ClientWithResponses) DeleteProjectApiKeyWithResponse(ctx context.Context, projectId string, keyId string, reqEditors ...RequestEditorFn) (*DeleteProjectApiKeyMsg, error) {
 	rsp, err := c.DeleteProjectApiKey(ctx, projectId, keyId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDeleteProjectApiKeyResponse(rsp)
+	return ParseDeleteProjectApiKeyMsg(rsp)
 }
 
-// RetrieveProjectApiKeyWithResponse request returning *RetrieveProjectApiKeyResponse
-func (c *ClientWithResponses) RetrieveProjectApiKeyWithResponse(ctx context.Context, projectId string, keyId string, reqEditors ...RequestEditorFn) (*RetrieveProjectApiKeyResponse, error) {
+// RetrieveProjectApiKeyWithResponse request returning *RetrieveProjectApiKeyMsg
+func (c *ClientWithResponses) RetrieveProjectApiKeyWithResponse(ctx context.Context, projectId string, keyId string, reqEditors ...RequestEditorFn) (*RetrieveProjectApiKeyMsg, error) {
 	rsp, err := c.RetrieveProjectApiKey(ctx, projectId, keyId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseRetrieveProjectApiKeyResponse(rsp)
+	return ParseRetrieveProjectApiKeyMsg(rsp)
 }
 
-// ArchiveProjectWithResponse request returning *ArchiveProjectResponse
-func (c *ClientWithResponses) ArchiveProjectWithResponse(ctx context.Context, projectId string, reqEditors ...RequestEditorFn) (*ArchiveProjectResponse, error) {
+// ArchiveProjectWithResponse request returning *ArchiveProjectMsg
+func (c *ClientWithResponses) ArchiveProjectWithResponse(ctx context.Context, projectId string, reqEditors ...RequestEditorFn) (*ArchiveProjectMsg, error) {
 	rsp, err := c.ArchiveProject(ctx, projectId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseArchiveProjectResponse(rsp)
+	return ParseArchiveProjectMsg(rsp)
 }
 
-// ListProjectRateLimitsWithResponse request returning *ListProjectRateLimitsResponse
-func (c *ClientWithResponses) ListProjectRateLimitsWithResponse(ctx context.Context, projectId string, params *ListProjectRateLimitsParams, reqEditors ...RequestEditorFn) (*ListProjectRateLimitsResponse, error) {
+// ListProjectRateLimitsWithResponse request returning *ListProjectRateLimitsMsg
+func (c *ClientWithResponses) ListProjectRateLimitsWithResponse(ctx context.Context, projectId string, params *ListProjectRateLimitsParams, reqEditors ...RequestEditorFn) (*ListProjectRateLimitsMsg, error) {
 	rsp, err := c.ListProjectRateLimits(ctx, projectId, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListProjectRateLimitsResponse(rsp)
+	return ParseListProjectRateLimitsMsg(rsp)
 }
 
-// UpdateProjectRateLimitsWithBodyWithResponse request with arbitrary body returning *UpdateProjectRateLimitsResponse
-func (c *ClientWithResponses) UpdateProjectRateLimitsWithBodyWithResponse(ctx context.Context, projectId string, rateLimitId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateProjectRateLimitsResponse, error) {
+// UpdateProjectRateLimitsWithBodyWithResponse request with arbitrary body returning *UpdateProjectRateLimitsMsg
+func (c *ClientWithResponses) UpdateProjectRateLimitsWithBodyWithResponse(ctx context.Context, projectId string, rateLimitId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateProjectRateLimitsMsg, error) {
 	rsp, err := c.UpdateProjectRateLimitsWithBody(ctx, projectId, rateLimitId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseUpdateProjectRateLimitsResponse(rsp)
+	return ParseUpdateProjectRateLimitsMsg(rsp)
 }
 
-func (c *ClientWithResponses) UpdateProjectRateLimitsWithResponse(ctx context.Context, projectId string, rateLimitId string, body UpdateProjectRateLimitsJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateProjectRateLimitsResponse, error) {
+func (c *ClientWithResponses) UpdateProjectRateLimitsWithResponse(ctx context.Context, projectId string, rateLimitId string, body UpdateProjectRateLimitsJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateProjectRateLimitsMsg, error) {
 	rsp, err := c.UpdateProjectRateLimits(ctx, projectId, rateLimitId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseUpdateProjectRateLimitsResponse(rsp)
+	return ParseUpdateProjectRateLimitsMsg(rsp)
 }
 
-// ListProjectServiceAccountsWithResponse request returning *ListProjectServiceAccountsResponse
-func (c *ClientWithResponses) ListProjectServiceAccountsWithResponse(ctx context.Context, projectId string, params *ListProjectServiceAccountsParams, reqEditors ...RequestEditorFn) (*ListProjectServiceAccountsResponse, error) {
+// ListProjectServiceAccountsWithResponse request returning *ListProjectServiceAccountsMsg
+func (c *ClientWithResponses) ListProjectServiceAccountsWithResponse(ctx context.Context, projectId string, params *ListProjectServiceAccountsParams, reqEditors ...RequestEditorFn) (*ListProjectServiceAccountsMsg, error) {
 	rsp, err := c.ListProjectServiceAccounts(ctx, projectId, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListProjectServiceAccountsResponse(rsp)
+	return ParseListProjectServiceAccountsMsg(rsp)
 }
 
-// CreateProjectServiceAccountWithBodyWithResponse request with arbitrary body returning *CreateProjectServiceAccountResponse
-func (c *ClientWithResponses) CreateProjectServiceAccountWithBodyWithResponse(ctx context.Context, projectId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateProjectServiceAccountResponse, error) {
+// CreateProjectServiceAccountWithBodyWithResponse request with arbitrary body returning *CreateProjectServiceAccountMsg
+func (c *ClientWithResponses) CreateProjectServiceAccountWithBodyWithResponse(ctx context.Context, projectId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateProjectServiceAccountMsg, error) {
 	rsp, err := c.CreateProjectServiceAccountWithBody(ctx, projectId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateProjectServiceAccountResponse(rsp)
+	return ParseCreateProjectServiceAccountMsg(rsp)
 }
 
-func (c *ClientWithResponses) CreateProjectServiceAccountWithResponse(ctx context.Context, projectId string, body CreateProjectServiceAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateProjectServiceAccountResponse, error) {
+func (c *ClientWithResponses) CreateProjectServiceAccountWithResponse(ctx context.Context, projectId string, body CreateProjectServiceAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateProjectServiceAccountMsg, error) {
 	rsp, err := c.CreateProjectServiceAccount(ctx, projectId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateProjectServiceAccountResponse(rsp)
+	return ParseCreateProjectServiceAccountMsg(rsp)
 }
 
-// DeleteProjectServiceAccountWithResponse request returning *DeleteProjectServiceAccountResponse
-func (c *ClientWithResponses) DeleteProjectServiceAccountWithResponse(ctx context.Context, projectId string, serviceAccountId string, reqEditors ...RequestEditorFn) (*DeleteProjectServiceAccountResponse, error) {
+// DeleteProjectServiceAccountWithResponse request returning *DeleteProjectServiceAccountMsg
+func (c *ClientWithResponses) DeleteProjectServiceAccountWithResponse(ctx context.Context, projectId string, serviceAccountId string, reqEditors ...RequestEditorFn) (*DeleteProjectServiceAccountMsg, error) {
 	rsp, err := c.DeleteProjectServiceAccount(ctx, projectId, serviceAccountId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDeleteProjectServiceAccountResponse(rsp)
+	return ParseDeleteProjectServiceAccountMsg(rsp)
 }
 
-// RetrieveProjectServiceAccountWithResponse request returning *RetrieveProjectServiceAccountResponse
-func (c *ClientWithResponses) RetrieveProjectServiceAccountWithResponse(ctx context.Context, projectId string, serviceAccountId string, reqEditors ...RequestEditorFn) (*RetrieveProjectServiceAccountResponse, error) {
+// RetrieveProjectServiceAccountWithResponse request returning *RetrieveProjectServiceAccountMsg
+func (c *ClientWithResponses) RetrieveProjectServiceAccountWithResponse(ctx context.Context, projectId string, serviceAccountId string, reqEditors ...RequestEditorFn) (*RetrieveProjectServiceAccountMsg, error) {
 	rsp, err := c.RetrieveProjectServiceAccount(ctx, projectId, serviceAccountId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseRetrieveProjectServiceAccountResponse(rsp)
+	return ParseRetrieveProjectServiceAccountMsg(rsp)
 }
 
-// ListProjectUsersWithResponse request returning *ListProjectUsersResponse
-func (c *ClientWithResponses) ListProjectUsersWithResponse(ctx context.Context, projectId string, params *ListProjectUsersParams, reqEditors ...RequestEditorFn) (*ListProjectUsersResponse, error) {
+// ListProjectUsersWithResponse request returning *ListProjectUsersMsg
+func (c *ClientWithResponses) ListProjectUsersWithResponse(ctx context.Context, projectId string, params *ListProjectUsersParams, reqEditors ...RequestEditorFn) (*ListProjectUsersMsg, error) {
 	rsp, err := c.ListProjectUsers(ctx, projectId, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListProjectUsersResponse(rsp)
+	return ParseListProjectUsersMsg(rsp)
 }
 
-// CreateProjectUserWithBodyWithResponse request with arbitrary body returning *CreateProjectUserResponse
-func (c *ClientWithResponses) CreateProjectUserWithBodyWithResponse(ctx context.Context, projectId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateProjectUserResponse, error) {
+// CreateProjectUserWithBodyWithResponse request with arbitrary body returning *CreateProjectUserMsg
+func (c *ClientWithResponses) CreateProjectUserWithBodyWithResponse(ctx context.Context, projectId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateProjectUserMsg, error) {
 	rsp, err := c.CreateProjectUserWithBody(ctx, projectId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateProjectUserResponse(rsp)
+	return ParseCreateProjectUserMsg(rsp)
 }
 
-func (c *ClientWithResponses) CreateProjectUserWithResponse(ctx context.Context, projectId string, body CreateProjectUserJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateProjectUserResponse, error) {
+func (c *ClientWithResponses) CreateProjectUserWithResponse(ctx context.Context, projectId string, body CreateProjectUserJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateProjectUserMsg, error) {
 	rsp, err := c.CreateProjectUser(ctx, projectId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateProjectUserResponse(rsp)
+	return ParseCreateProjectUserMsg(rsp)
 }
 
-// DeleteProjectUserWithResponse request returning *DeleteProjectUserResponse
-func (c *ClientWithResponses) DeleteProjectUserWithResponse(ctx context.Context, projectId string, userId string, reqEditors ...RequestEditorFn) (*DeleteProjectUserResponse, error) {
+// DeleteProjectUserWithResponse request returning *DeleteProjectUserMsg
+func (c *ClientWithResponses) DeleteProjectUserWithResponse(ctx context.Context, projectId string, userId string, reqEditors ...RequestEditorFn) (*DeleteProjectUserMsg, error) {
 	rsp, err := c.DeleteProjectUser(ctx, projectId, userId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDeleteProjectUserResponse(rsp)
+	return ParseDeleteProjectUserMsg(rsp)
 }
 
-// RetrieveProjectUserWithResponse request returning *RetrieveProjectUserResponse
-func (c *ClientWithResponses) RetrieveProjectUserWithResponse(ctx context.Context, projectId string, userId string, reqEditors ...RequestEditorFn) (*RetrieveProjectUserResponse, error) {
+// RetrieveProjectUserWithResponse request returning *RetrieveProjectUserMsg
+func (c *ClientWithResponses) RetrieveProjectUserWithResponse(ctx context.Context, projectId string, userId string, reqEditors ...RequestEditorFn) (*RetrieveProjectUserMsg, error) {
 	rsp, err := c.RetrieveProjectUser(ctx, projectId, userId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseRetrieveProjectUserResponse(rsp)
+	return ParseRetrieveProjectUserMsg(rsp)
 }
 
-// ModifyProjectUserWithBodyWithResponse request with arbitrary body returning *ModifyProjectUserResponse
-func (c *ClientWithResponses) ModifyProjectUserWithBodyWithResponse(ctx context.Context, projectId string, userId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyProjectUserResponse, error) {
+// ModifyProjectUserWithBodyWithResponse request with arbitrary body returning *ModifyProjectUserMsg
+func (c *ClientWithResponses) ModifyProjectUserWithBodyWithResponse(ctx context.Context, projectId string, userId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyProjectUserMsg, error) {
 	rsp, err := c.ModifyProjectUserWithBody(ctx, projectId, userId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseModifyProjectUserResponse(rsp)
+	return ParseModifyProjectUserMsg(rsp)
 }
 
-func (c *ClientWithResponses) ModifyProjectUserWithResponse(ctx context.Context, projectId string, userId string, body ModifyProjectUserJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyProjectUserResponse, error) {
+func (c *ClientWithResponses) ModifyProjectUserWithResponse(ctx context.Context, projectId string, userId string, body ModifyProjectUserJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyProjectUserMsg, error) {
 	rsp, err := c.ModifyProjectUser(ctx, projectId, userId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseModifyProjectUserResponse(rsp)
+	return ParseModifyProjectUserMsg(rsp)
 }
 
-// ListUsersWithResponse request returning *ListUsersResponse
-func (c *ClientWithResponses) ListUsersWithResponse(ctx context.Context, params *ListUsersParams, reqEditors ...RequestEditorFn) (*ListUsersResponse, error) {
+// ListUsersWithResponse request returning *ListUsersMsg
+func (c *ClientWithResponses) ListUsersWithResponse(ctx context.Context, params *ListUsersParams, reqEditors ...RequestEditorFn) (*ListUsersMsg, error) {
 	rsp, err := c.ListUsers(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListUsersResponse(rsp)
+	return ParseListUsersMsg(rsp)
 }
 
-// DeleteUserWithResponse request returning *DeleteUserResponse
-func (c *ClientWithResponses) DeleteUserWithResponse(ctx context.Context, userId string, reqEditors ...RequestEditorFn) (*DeleteUserResponse, error) {
+// DeleteUserWithResponse request returning *DeleteUserMsg
+func (c *ClientWithResponses) DeleteUserWithResponse(ctx context.Context, userId string, reqEditors ...RequestEditorFn) (*DeleteUserMsg, error) {
 	rsp, err := c.DeleteUser(ctx, userId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDeleteUserResponse(rsp)
+	return ParseDeleteUserMsg(rsp)
 }
 
-// RetrieveUserWithResponse request returning *RetrieveUserResponse
-func (c *ClientWithResponses) RetrieveUserWithResponse(ctx context.Context, userId string, reqEditors ...RequestEditorFn) (*RetrieveUserResponse, error) {
+// RetrieveUserWithResponse request returning *RetrieveUserMsg
+func (c *ClientWithResponses) RetrieveUserWithResponse(ctx context.Context, userId string, reqEditors ...RequestEditorFn) (*RetrieveUserMsg, error) {
 	rsp, err := c.RetrieveUser(ctx, userId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseRetrieveUserResponse(rsp)
+	return ParseRetrieveUserMsg(rsp)
 }
 
-// ModifyUserWithBodyWithResponse request with arbitrary body returning *ModifyUserResponse
-func (c *ClientWithResponses) ModifyUserWithBodyWithResponse(ctx context.Context, userId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyUserResponse, error) {
+// ModifyUserWithBodyWithResponse request with arbitrary body returning *ModifyUserMsg
+func (c *ClientWithResponses) ModifyUserWithBodyWithResponse(ctx context.Context, userId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyUserMsg, error) {
 	rsp, err := c.ModifyUserWithBody(ctx, userId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseModifyUserResponse(rsp)
+	return ParseModifyUserMsg(rsp)
 }
 
-func (c *ClientWithResponses) ModifyUserWithResponse(ctx context.Context, userId string, body ModifyUserJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyUserResponse, error) {
+func (c *ClientWithResponses) ModifyUserWithResponse(ctx context.Context, userId string, body ModifyUserJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyUserMsg, error) {
 	rsp, err := c.ModifyUser(ctx, userId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseModifyUserResponse(rsp)
+	return ParseModifyUserMsg(rsp)
 }
 
-// CreateThreadWithBodyWithResponse request with arbitrary body returning *CreateThreadResponse
-func (c *ClientWithResponses) CreateThreadWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateThreadResponse, error) {
+// CreateThreadWithBodyWithResponse request with arbitrary body returning *CreateThreadMsg
+func (c *ClientWithResponses) CreateThreadWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateThreadMsg, error) {
 	rsp, err := c.CreateThreadWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateThreadResponse(rsp)
+	return ParseCreateThreadMsg(rsp)
 }
 
-func (c *ClientWithResponses) CreateThreadWithResponse(ctx context.Context, body CreateThreadJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateThreadResponse, error) {
+func (c *ClientWithResponses) CreateThreadWithResponse(ctx context.Context, body CreateThreadJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateThreadMsg, error) {
 	rsp, err := c.CreateThread(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateThreadResponse(rsp)
+	return ParseCreateThreadMsg(rsp)
 }
 
-// CreateThreadAndRunWithBodyWithResponse request with arbitrary body returning *CreateThreadAndRunResponse
-func (c *ClientWithResponses) CreateThreadAndRunWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateThreadAndRunResponse, error) {
+// CreateThreadAndRunWithBodyWithResponse request with arbitrary body returning *CreateThreadAndRunMsg
+func (c *ClientWithResponses) CreateThreadAndRunWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateThreadAndRunMsg, error) {
 	rsp, err := c.CreateThreadAndRunWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateThreadAndRunResponse(rsp)
+	return ParseCreateThreadAndRunMsg(rsp)
 }
 
-func (c *ClientWithResponses) CreateThreadAndRunWithResponse(ctx context.Context, body CreateThreadAndRunJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateThreadAndRunResponse, error) {
+func (c *ClientWithResponses) CreateThreadAndRunWithResponse(ctx context.Context, body CreateThreadAndRunJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateThreadAndRunMsg, error) {
 	rsp, err := c.CreateThreadAndRun(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateThreadAndRunResponse(rsp)
+	return ParseCreateThreadAndRunMsg(rsp)
 }
 
-// DeleteThreadWithResponse request returning *DeleteThreadResponse
-func (c *ClientWithResponses) DeleteThreadWithResponse(ctx context.Context, threadId string, reqEditors ...RequestEditorFn) (*DeleteThreadResponse, error) {
+// DeleteThreadWithResponse request returning *DeleteThreadMsg
+func (c *ClientWithResponses) DeleteThreadWithResponse(ctx context.Context, threadId string, reqEditors ...RequestEditorFn) (*DeleteThreadMsg, error) {
 	rsp, err := c.DeleteThread(ctx, threadId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDeleteThreadResponse(rsp)
+	return ParseDeleteThreadMsg(rsp)
 }
 
-// GetThreadWithResponse request returning *GetThreadResponse
-func (c *ClientWithResponses) GetThreadWithResponse(ctx context.Context, threadId string, reqEditors ...RequestEditorFn) (*GetThreadResponse, error) {
+// GetThreadWithResponse request returning *GetThreadMsg
+func (c *ClientWithResponses) GetThreadWithResponse(ctx context.Context, threadId string, reqEditors ...RequestEditorFn) (*GetThreadMsg, error) {
 	rsp, err := c.GetThread(ctx, threadId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetThreadResponse(rsp)
+	return ParseGetThreadMsg(rsp)
 }
 
-// ModifyThreadWithBodyWithResponse request with arbitrary body returning *ModifyThreadResponse
-func (c *ClientWithResponses) ModifyThreadWithBodyWithResponse(ctx context.Context, threadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyThreadResponse, error) {
+// ModifyThreadWithBodyWithResponse request with arbitrary body returning *ModifyThreadMsg
+func (c *ClientWithResponses) ModifyThreadWithBodyWithResponse(ctx context.Context, threadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyThreadMsg, error) {
 	rsp, err := c.ModifyThreadWithBody(ctx, threadId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseModifyThreadResponse(rsp)
+	return ParseModifyThreadMsg(rsp)
 }
 
-func (c *ClientWithResponses) ModifyThreadWithResponse(ctx context.Context, threadId string, body ModifyThreadJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyThreadResponse, error) {
+func (c *ClientWithResponses) ModifyThreadWithResponse(ctx context.Context, threadId string, body ModifyThreadJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyThreadMsg, error) {
 	rsp, err := c.ModifyThread(ctx, threadId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseModifyThreadResponse(rsp)
+	return ParseModifyThreadMsg(rsp)
 }
 
-// ListMessagesWithResponse request returning *ListMessagesResponse
-func (c *ClientWithResponses) ListMessagesWithResponse(ctx context.Context, threadId string, params *ListMessagesParams, reqEditors ...RequestEditorFn) (*ListMessagesResponse, error) {
+// ListMessagesWithResponse request returning *ListMessagesMsg
+func (c *ClientWithResponses) ListMessagesWithResponse(ctx context.Context, threadId string, params *ListMessagesParams, reqEditors ...RequestEditorFn) (*ListMessagesMsg, error) {
 	rsp, err := c.ListMessages(ctx, threadId, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListMessagesResponse(rsp)
+	return ParseListMessagesMsg(rsp)
 }
 
-// CreateMessageWithBodyWithResponse request with arbitrary body returning *CreateMessageResponse
-func (c *ClientWithResponses) CreateMessageWithBodyWithResponse(ctx context.Context, threadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateMessageResponse, error) {
+// CreateMessageWithBodyWithResponse request with arbitrary body returning *CreateMessageMsg
+func (c *ClientWithResponses) CreateMessageWithBodyWithResponse(ctx context.Context, threadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateMessageMsg, error) {
 	rsp, err := c.CreateMessageWithBody(ctx, threadId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateMessageResponse(rsp)
+	return ParseCreateMessageMsg(rsp)
 }
 
-func (c *ClientWithResponses) CreateMessageWithResponse(ctx context.Context, threadId string, body CreateMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateMessageResponse, error) {
+func (c *ClientWithResponses) CreateMessageWithResponse(ctx context.Context, threadId string, body CreateMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateMessageMsg, error) {
 	rsp, err := c.CreateMessage(ctx, threadId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateMessageResponse(rsp)
+	return ParseCreateMessageMsg(rsp)
 }
 
-// DeleteMessageWithResponse request returning *DeleteMessageResponse
-func (c *ClientWithResponses) DeleteMessageWithResponse(ctx context.Context, threadId string, messageId string, reqEditors ...RequestEditorFn) (*DeleteMessageResponse, error) {
+// DeleteMessageWithResponse request returning *DeleteMessageMsg
+func (c *ClientWithResponses) DeleteMessageWithResponse(ctx context.Context, threadId string, messageId string, reqEditors ...RequestEditorFn) (*DeleteMessageMsg, error) {
 	rsp, err := c.DeleteMessage(ctx, threadId, messageId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDeleteMessageResponse(rsp)
+	return ParseDeleteMessageMsg(rsp)
 }
 
-// GetMessageWithResponse request returning *GetMessageResponse
-func (c *ClientWithResponses) GetMessageWithResponse(ctx context.Context, threadId string, messageId string, reqEditors ...RequestEditorFn) (*GetMessageResponse, error) {
+// GetMessageWithResponse request returning *GetMessageMsg
+func (c *ClientWithResponses) GetMessageWithResponse(ctx context.Context, threadId string, messageId string, reqEditors ...RequestEditorFn) (*GetMessageMsg, error) {
 	rsp, err := c.GetMessage(ctx, threadId, messageId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetMessageResponse(rsp)
+	return ParseGetMessageMsg(rsp)
 }
 
-// ModifyMessageWithBodyWithResponse request with arbitrary body returning *ModifyMessageResponse
-func (c *ClientWithResponses) ModifyMessageWithBodyWithResponse(ctx context.Context, threadId string, messageId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyMessageResponse, error) {
+// ModifyMessageWithBodyWithResponse request with arbitrary body returning *ModifyMessageMsg
+func (c *ClientWithResponses) ModifyMessageWithBodyWithResponse(ctx context.Context, threadId string, messageId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyMessageMsg, error) {
 	rsp, err := c.ModifyMessageWithBody(ctx, threadId, messageId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseModifyMessageResponse(rsp)
+	return ParseModifyMessageMsg(rsp)
 }
 
-func (c *ClientWithResponses) ModifyMessageWithResponse(ctx context.Context, threadId string, messageId string, body ModifyMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyMessageResponse, error) {
+func (c *ClientWithResponses) ModifyMessageWithResponse(ctx context.Context, threadId string, messageId string, body ModifyMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyMessageMsg, error) {
 	rsp, err := c.ModifyMessage(ctx, threadId, messageId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseModifyMessageResponse(rsp)
+	return ParseModifyMessageMsg(rsp)
 }
 
-// ListRunsWithResponse request returning *ListRunsResponse
-func (c *ClientWithResponses) ListRunsWithResponse(ctx context.Context, threadId string, params *ListRunsParams, reqEditors ...RequestEditorFn) (*ListRunsResponse, error) {
+// ListRunsWithResponse request returning *ListRunsMsg
+func (c *ClientWithResponses) ListRunsWithResponse(ctx context.Context, threadId string, params *ListRunsParams, reqEditors ...RequestEditorFn) (*ListRunsMsg, error) {
 	rsp, err := c.ListRuns(ctx, threadId, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListRunsResponse(rsp)
+	return ParseListRunsMsg(rsp)
 }
 
-// CreateRunWithBodyWithResponse request with arbitrary body returning *CreateRunResponse
-func (c *ClientWithResponses) CreateRunWithBodyWithResponse(ctx context.Context, threadId string, params *CreateRunParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateRunResponse, error) {
+// CreateRunWithBodyWithResponse request with arbitrary body returning *CreateRunMsg
+func (c *ClientWithResponses) CreateRunWithBodyWithResponse(ctx context.Context, threadId string, params *CreateRunParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateRunMsg, error) {
 	rsp, err := c.CreateRunWithBody(ctx, threadId, params, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateRunResponse(rsp)
+	return ParseCreateRunMsg(rsp)
 }
 
-func (c *ClientWithResponses) CreateRunWithResponse(ctx context.Context, threadId string, params *CreateRunParams, body CreateRunJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateRunResponse, error) {
+func (c *ClientWithResponses) CreateRunWithResponse(ctx context.Context, threadId string, params *CreateRunParams, body CreateRunJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateRunMsg, error) {
 	rsp, err := c.CreateRun(ctx, threadId, params, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateRunResponse(rsp)
+	return ParseCreateRunMsg(rsp)
 }
 
-// GetRunWithResponse request returning *GetRunResponse
-func (c *ClientWithResponses) GetRunWithResponse(ctx context.Context, threadId string, runId string, reqEditors ...RequestEditorFn) (*GetRunResponse, error) {
+// GetRunWithResponse request returning *GetRunMsg
+func (c *ClientWithResponses) GetRunWithResponse(ctx context.Context, threadId string, runId string, reqEditors ...RequestEditorFn) (*GetRunMsg, error) {
 	rsp, err := c.GetRun(ctx, threadId, runId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetRunResponse(rsp)
+	return ParseGetRunMsg(rsp)
 }
 
-// ModifyRunWithBodyWithResponse request with arbitrary body returning *ModifyRunResponse
-func (c *ClientWithResponses) ModifyRunWithBodyWithResponse(ctx context.Context, threadId string, runId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyRunResponse, error) {
+// ModifyRunWithBodyWithResponse request with arbitrary body returning *ModifyRunMsg
+func (c *ClientWithResponses) ModifyRunWithBodyWithResponse(ctx context.Context, threadId string, runId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyRunMsg, error) {
 	rsp, err := c.ModifyRunWithBody(ctx, threadId, runId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseModifyRunResponse(rsp)
+	return ParseModifyRunMsg(rsp)
 }
 
-func (c *ClientWithResponses) ModifyRunWithResponse(ctx context.Context, threadId string, runId string, body ModifyRunJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyRunResponse, error) {
+func (c *ClientWithResponses) ModifyRunWithResponse(ctx context.Context, threadId string, runId string, body ModifyRunJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyRunMsg, error) {
 	rsp, err := c.ModifyRun(ctx, threadId, runId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseModifyRunResponse(rsp)
+	return ParseModifyRunMsg(rsp)
 }
 
-// CancelRunWithResponse request returning *CancelRunResponse
-func (c *ClientWithResponses) CancelRunWithResponse(ctx context.Context, threadId string, runId string, reqEditors ...RequestEditorFn) (*CancelRunResponse, error) {
+// CancelRunWithResponse request returning *CancelRunMsg
+func (c *ClientWithResponses) CancelRunWithResponse(ctx context.Context, threadId string, runId string, reqEditors ...RequestEditorFn) (*CancelRunMsg, error) {
 	rsp, err := c.CancelRun(ctx, threadId, runId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCancelRunResponse(rsp)
+	return ParseCancelRunMsg(rsp)
 }
 
-// ListRunStepsWithResponse request returning *ListRunStepsResponse
-func (c *ClientWithResponses) ListRunStepsWithResponse(ctx context.Context, threadId string, runId string, params *ListRunStepsParams, reqEditors ...RequestEditorFn) (*ListRunStepsResponse, error) {
+// ListRunStepsWithResponse request returning *ListRunStepsMsg
+func (c *ClientWithResponses) ListRunStepsWithResponse(ctx context.Context, threadId string, runId string, params *ListRunStepsParams, reqEditors ...RequestEditorFn) (*ListRunStepsMsg, error) {
 	rsp, err := c.ListRunSteps(ctx, threadId, runId, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListRunStepsResponse(rsp)
+	return ParseListRunStepsMsg(rsp)
 }
 
-// GetRunStepWithResponse request returning *GetRunStepResponse
-func (c *ClientWithResponses) GetRunStepWithResponse(ctx context.Context, threadId string, runId string, stepId string, params *GetRunStepParams, reqEditors ...RequestEditorFn) (*GetRunStepResponse, error) {
+// GetRunStepWithResponse request returning *GetRunStepMsg
+func (c *ClientWithResponses) GetRunStepWithResponse(ctx context.Context, threadId string, runId string, stepId string, params *GetRunStepParams, reqEditors ...RequestEditorFn) (*GetRunStepMsg, error) {
 	rsp, err := c.GetRunStep(ctx, threadId, runId, stepId, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetRunStepResponse(rsp)
+	return ParseGetRunStepMsg(rsp)
 }
 
-// SubmitToolOuputsToRunWithBodyWithResponse request with arbitrary body returning *SubmitToolOuputsToRunResponse
-func (c *ClientWithResponses) SubmitToolOuputsToRunWithBodyWithResponse(ctx context.Context, threadId string, runId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SubmitToolOuputsToRunResponse, error) {
+// SubmitToolOuputsToRunWithBodyWithResponse request with arbitrary body returning *SubmitToolOuputsToRunMsg
+func (c *ClientWithResponses) SubmitToolOuputsToRunWithBodyWithResponse(ctx context.Context, threadId string, runId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SubmitToolOuputsToRunMsg, error) {
 	rsp, err := c.SubmitToolOuputsToRunWithBody(ctx, threadId, runId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseSubmitToolOuputsToRunResponse(rsp)
+	return ParseSubmitToolOuputsToRunMsg(rsp)
 }
 
-func (c *ClientWithResponses) SubmitToolOuputsToRunWithResponse(ctx context.Context, threadId string, runId string, body SubmitToolOuputsToRunJSONRequestBody, reqEditors ...RequestEditorFn) (*SubmitToolOuputsToRunResponse, error) {
+func (c *ClientWithResponses) SubmitToolOuputsToRunWithResponse(ctx context.Context, threadId string, runId string, body SubmitToolOuputsToRunJSONRequestBody, reqEditors ...RequestEditorFn) (*SubmitToolOuputsToRunMsg, error) {
 	rsp, err := c.SubmitToolOuputsToRun(ctx, threadId, runId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseSubmitToolOuputsToRunResponse(rsp)
+	return ParseSubmitToolOuputsToRunMsg(rsp)
 }
 
-// CreateUploadWithBodyWithResponse request with arbitrary body returning *CreateUploadResponse
-func (c *ClientWithResponses) CreateUploadWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateUploadResponse, error) {
+// CreateUploadWithBodyWithResponse request with arbitrary body returning *CreateUploadMsg
+func (c *ClientWithResponses) CreateUploadWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateUploadMsg, error) {
 	rsp, err := c.CreateUploadWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateUploadResponse(rsp)
+	return ParseCreateUploadMsg(rsp)
 }
 
-func (c *ClientWithResponses) CreateUploadWithResponse(ctx context.Context, body CreateUploadJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateUploadResponse, error) {
+func (c *ClientWithResponses) CreateUploadWithResponse(ctx context.Context, body CreateUploadJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateUploadMsg, error) {
 	rsp, err := c.CreateUpload(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateUploadResponse(rsp)
+	return ParseCreateUploadMsg(rsp)
 }
 
-// CancelUploadWithResponse request returning *CancelUploadResponse
-func (c *ClientWithResponses) CancelUploadWithResponse(ctx context.Context, uploadId string, reqEditors ...RequestEditorFn) (*CancelUploadResponse, error) {
+// CancelUploadWithResponse request returning *CancelUploadMsg
+func (c *ClientWithResponses) CancelUploadWithResponse(ctx context.Context, uploadId string, reqEditors ...RequestEditorFn) (*CancelUploadMsg, error) {
 	rsp, err := c.CancelUpload(ctx, uploadId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCancelUploadResponse(rsp)
+	return ParseCancelUploadMsg(rsp)
 }
 
-// CompleteUploadWithBodyWithResponse request with arbitrary body returning *CompleteUploadResponse
-func (c *ClientWithResponses) CompleteUploadWithBodyWithResponse(ctx context.Context, uploadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CompleteUploadResponse, error) {
+// CompleteUploadWithBodyWithResponse request with arbitrary body returning *CompleteUploadMsg
+func (c *ClientWithResponses) CompleteUploadWithBodyWithResponse(ctx context.Context, uploadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CompleteUploadMsg, error) {
 	rsp, err := c.CompleteUploadWithBody(ctx, uploadId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCompleteUploadResponse(rsp)
+	return ParseCompleteUploadMsg(rsp)
 }
 
-func (c *ClientWithResponses) CompleteUploadWithResponse(ctx context.Context, uploadId string, body CompleteUploadJSONRequestBody, reqEditors ...RequestEditorFn) (*CompleteUploadResponse, error) {
+func (c *ClientWithResponses) CompleteUploadWithResponse(ctx context.Context, uploadId string, body CompleteUploadJSONRequestBody, reqEditors ...RequestEditorFn) (*CompleteUploadMsg, error) {
 	rsp, err := c.CompleteUpload(ctx, uploadId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCompleteUploadResponse(rsp)
+	return ParseCompleteUploadMsg(rsp)
 }
 
-// AddUploadPartWithBodyWithResponse request with arbitrary body returning *AddUploadPartResponse
-func (c *ClientWithResponses) AddUploadPartWithBodyWithResponse(ctx context.Context, uploadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AddUploadPartResponse, error) {
+// AddUploadPartWithBodyWithResponse request with arbitrary body returning *AddUploadPartMsg
+func (c *ClientWithResponses) AddUploadPartWithBodyWithResponse(ctx context.Context, uploadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AddUploadPartMsg, error) {
 	rsp, err := c.AddUploadPartWithBody(ctx, uploadId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseAddUploadPartResponse(rsp)
+	return ParseAddUploadPartMsg(rsp)
 }
 
-// ListVectorStoresWithResponse request returning *ListVectorStoresResponse
-func (c *ClientWithResponses) ListVectorStoresWithResponse(ctx context.Context, params *ListVectorStoresParams, reqEditors ...RequestEditorFn) (*ListVectorStoresResponse, error) {
+// ListVectorStoresWithResponse request returning *ListVectorStoresMsg
+func (c *ClientWithResponses) ListVectorStoresWithResponse(ctx context.Context, params *ListVectorStoresParams, reqEditors ...RequestEditorFn) (*ListVectorStoresMsg, error) {
 	rsp, err := c.ListVectorStores(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListVectorStoresResponse(rsp)
+	return ParseListVectorStoresMsg(rsp)
 }
 
-// CreateVectorStoreWithBodyWithResponse request with arbitrary body returning *CreateVectorStoreResponse
-func (c *ClientWithResponses) CreateVectorStoreWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateVectorStoreResponse, error) {
+// CreateVectorStoreWithBodyWithResponse request with arbitrary body returning *CreateVectorStoreMsg
+func (c *ClientWithResponses) CreateVectorStoreWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateVectorStoreMsg, error) {
 	rsp, err := c.CreateVectorStoreWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateVectorStoreResponse(rsp)
+	return ParseCreateVectorStoreMsg(rsp)
 }
 
-func (c *ClientWithResponses) CreateVectorStoreWithResponse(ctx context.Context, body CreateVectorStoreJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateVectorStoreResponse, error) {
+func (c *ClientWithResponses) CreateVectorStoreWithResponse(ctx context.Context, body CreateVectorStoreJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateVectorStoreMsg, error) {
 	rsp, err := c.CreateVectorStore(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateVectorStoreResponse(rsp)
+	return ParseCreateVectorStoreMsg(rsp)
 }
 
-// DeleteVectorStoreWithResponse request returning *DeleteVectorStoreResponse
-func (c *ClientWithResponses) DeleteVectorStoreWithResponse(ctx context.Context, vectorStoreId string, reqEditors ...RequestEditorFn) (*DeleteVectorStoreResponse, error) {
+// DeleteVectorStoreWithResponse request returning *DeleteVectorStoreMsg
+func (c *ClientWithResponses) DeleteVectorStoreWithResponse(ctx context.Context, vectorStoreId string, reqEditors ...RequestEditorFn) (*DeleteVectorStoreMsg, error) {
 	rsp, err := c.DeleteVectorStore(ctx, vectorStoreId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDeleteVectorStoreResponse(rsp)
+	return ParseDeleteVectorStoreMsg(rsp)
 }
 
-// GetVectorStoreWithResponse request returning *GetVectorStoreResponse
-func (c *ClientWithResponses) GetVectorStoreWithResponse(ctx context.Context, vectorStoreId string, reqEditors ...RequestEditorFn) (*GetVectorStoreResponse, error) {
+// GetVectorStoreWithResponse request returning *GetVectorStoreMsg
+func (c *ClientWithResponses) GetVectorStoreWithResponse(ctx context.Context, vectorStoreId string, reqEditors ...RequestEditorFn) (*GetVectorStoreMsg, error) {
 	rsp, err := c.GetVectorStore(ctx, vectorStoreId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetVectorStoreResponse(rsp)
+	return ParseGetVectorStoreMsg(rsp)
 }
 
-// ModifyVectorStoreWithBodyWithResponse request with arbitrary body returning *ModifyVectorStoreResponse
-func (c *ClientWithResponses) ModifyVectorStoreWithBodyWithResponse(ctx context.Context, vectorStoreId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyVectorStoreResponse, error) {
+// ModifyVectorStoreWithBodyWithResponse request with arbitrary body returning *ModifyVectorStoreMsg
+func (c *ClientWithResponses) ModifyVectorStoreWithBodyWithResponse(ctx context.Context, vectorStoreId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ModifyVectorStoreMsg, error) {
 	rsp, err := c.ModifyVectorStoreWithBody(ctx, vectorStoreId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseModifyVectorStoreResponse(rsp)
+	return ParseModifyVectorStoreMsg(rsp)
 }
 
-func (c *ClientWithResponses) ModifyVectorStoreWithResponse(ctx context.Context, vectorStoreId string, body ModifyVectorStoreJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyVectorStoreResponse, error) {
+func (c *ClientWithResponses) ModifyVectorStoreWithResponse(ctx context.Context, vectorStoreId string, body ModifyVectorStoreJSONRequestBody, reqEditors ...RequestEditorFn) (*ModifyVectorStoreMsg, error) {
 	rsp, err := c.ModifyVectorStore(ctx, vectorStoreId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseModifyVectorStoreResponse(rsp)
+	return ParseModifyVectorStoreMsg(rsp)
 }
 
-// CreateVectorStoreFileBatchWithBodyWithResponse request with arbitrary body returning *CreateVectorStoreFileBatchResponse
-func (c *ClientWithResponses) CreateVectorStoreFileBatchWithBodyWithResponse(ctx context.Context, vectorStoreId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateVectorStoreFileBatchResponse, error) {
+// CreateVectorStoreFileBatchWithBodyWithResponse request with arbitrary body returning *CreateVectorStoreFileBatchMsg
+func (c *ClientWithResponses) CreateVectorStoreFileBatchWithBodyWithResponse(ctx context.Context, vectorStoreId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateVectorStoreFileBatchMsg, error) {
 	rsp, err := c.CreateVectorStoreFileBatchWithBody(ctx, vectorStoreId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateVectorStoreFileBatchResponse(rsp)
+	return ParseCreateVectorStoreFileBatchMsg(rsp)
 }
 
-func (c *ClientWithResponses) CreateVectorStoreFileBatchWithResponse(ctx context.Context, vectorStoreId string, body CreateVectorStoreFileBatchJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateVectorStoreFileBatchResponse, error) {
+func (c *ClientWithResponses) CreateVectorStoreFileBatchWithResponse(ctx context.Context, vectorStoreId string, body CreateVectorStoreFileBatchJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateVectorStoreFileBatchMsg, error) {
 	rsp, err := c.CreateVectorStoreFileBatch(ctx, vectorStoreId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateVectorStoreFileBatchResponse(rsp)
+	return ParseCreateVectorStoreFileBatchMsg(rsp)
 }
 
-// GetVectorStoreFileBatchWithResponse request returning *GetVectorStoreFileBatchResponse
-func (c *ClientWithResponses) GetVectorStoreFileBatchWithResponse(ctx context.Context, vectorStoreId string, batchId string, reqEditors ...RequestEditorFn) (*GetVectorStoreFileBatchResponse, error) {
+// GetVectorStoreFileBatchWithResponse request returning *GetVectorStoreFileBatchMsg
+func (c *ClientWithResponses) GetVectorStoreFileBatchWithResponse(ctx context.Context, vectorStoreId string, batchId string, reqEditors ...RequestEditorFn) (*GetVectorStoreFileBatchMsg, error) {
 	rsp, err := c.GetVectorStoreFileBatch(ctx, vectorStoreId, batchId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetVectorStoreFileBatchResponse(rsp)
+	return ParseGetVectorStoreFileBatchMsg(rsp)
 }
 
-// CancelVectorStoreFileBatchWithResponse request returning *CancelVectorStoreFileBatchResponse
-func (c *ClientWithResponses) CancelVectorStoreFileBatchWithResponse(ctx context.Context, vectorStoreId string, batchId string, reqEditors ...RequestEditorFn) (*CancelVectorStoreFileBatchResponse, error) {
+// CancelVectorStoreFileBatchWithResponse request returning *CancelVectorStoreFileBatchMsg
+func (c *ClientWithResponses) CancelVectorStoreFileBatchWithResponse(ctx context.Context, vectorStoreId string, batchId string, reqEditors ...RequestEditorFn) (*CancelVectorStoreFileBatchMsg, error) {
 	rsp, err := c.CancelVectorStoreFileBatch(ctx, vectorStoreId, batchId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCancelVectorStoreFileBatchResponse(rsp)
+	return ParseCancelVectorStoreFileBatchMsg(rsp)
 }
 
-// ListFilesInVectorStoreBatchWithResponse request returning *ListFilesInVectorStoreBatchResponse
-func (c *ClientWithResponses) ListFilesInVectorStoreBatchWithResponse(ctx context.Context, vectorStoreId string, batchId string, params *ListFilesInVectorStoreBatchParams, reqEditors ...RequestEditorFn) (*ListFilesInVectorStoreBatchResponse, error) {
+// ListFilesInVectorStoreBatchWithResponse request returning *ListFilesInVectorStoreBatchMsg
+func (c *ClientWithResponses) ListFilesInVectorStoreBatchWithResponse(ctx context.Context, vectorStoreId string, batchId string, params *ListFilesInVectorStoreBatchParams, reqEditors ...RequestEditorFn) (*ListFilesInVectorStoreBatchMsg, error) {
 	rsp, err := c.ListFilesInVectorStoreBatch(ctx, vectorStoreId, batchId, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListFilesInVectorStoreBatchResponse(rsp)
+	return ParseListFilesInVectorStoreBatchMsg(rsp)
 }
 
-// ListVectorStoreFilesWithResponse request returning *ListVectorStoreFilesResponse
-func (c *ClientWithResponses) ListVectorStoreFilesWithResponse(ctx context.Context, vectorStoreId string, params *ListVectorStoreFilesParams, reqEditors ...RequestEditorFn) (*ListVectorStoreFilesResponse, error) {
+// ListVectorStoreFilesWithResponse request returning *ListVectorStoreFilesMsg
+func (c *ClientWithResponses) ListVectorStoreFilesWithResponse(ctx context.Context, vectorStoreId string, params *ListVectorStoreFilesParams, reqEditors ...RequestEditorFn) (*ListVectorStoreFilesMsg, error) {
 	rsp, err := c.ListVectorStoreFiles(ctx, vectorStoreId, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListVectorStoreFilesResponse(rsp)
+	return ParseListVectorStoreFilesMsg(rsp)
 }
 
-// CreateVectorStoreFileWithBodyWithResponse request with arbitrary body returning *CreateVectorStoreFileResponse
-func (c *ClientWithResponses) CreateVectorStoreFileWithBodyWithResponse(ctx context.Context, vectorStoreId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateVectorStoreFileResponse, error) {
+// CreateVectorStoreFileWithBodyWithResponse request with arbitrary body returning *CreateVectorStoreFileMsg
+func (c *ClientWithResponses) CreateVectorStoreFileWithBodyWithResponse(ctx context.Context, vectorStoreId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateVectorStoreFileMsg, error) {
 	rsp, err := c.CreateVectorStoreFileWithBody(ctx, vectorStoreId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateVectorStoreFileResponse(rsp)
+	return ParseCreateVectorStoreFileMsg(rsp)
 }
 
-func (c *ClientWithResponses) CreateVectorStoreFileWithResponse(ctx context.Context, vectorStoreId string, body CreateVectorStoreFileJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateVectorStoreFileResponse, error) {
+func (c *ClientWithResponses) CreateVectorStoreFileWithResponse(ctx context.Context, vectorStoreId string, body CreateVectorStoreFileJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateVectorStoreFileMsg, error) {
 	rsp, err := c.CreateVectorStoreFile(ctx, vectorStoreId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateVectorStoreFileResponse(rsp)
+	return ParseCreateVectorStoreFileMsg(rsp)
 }
 
-// DeleteVectorStoreFileWithResponse request returning *DeleteVectorStoreFileResponse
-func (c *ClientWithResponses) DeleteVectorStoreFileWithResponse(ctx context.Context, vectorStoreId string, fileId string, reqEditors ...RequestEditorFn) (*DeleteVectorStoreFileResponse, error) {
+// DeleteVectorStoreFileWithResponse request returning *DeleteVectorStoreFileMsg
+func (c *ClientWithResponses) DeleteVectorStoreFileWithResponse(ctx context.Context, vectorStoreId string, fileId string, reqEditors ...RequestEditorFn) (*DeleteVectorStoreFileMsg, error) {
 	rsp, err := c.DeleteVectorStoreFile(ctx, vectorStoreId, fileId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDeleteVectorStoreFileResponse(rsp)
+	return ParseDeleteVectorStoreFileMsg(rsp)
 }
 
-// GetVectorStoreFileWithResponse request returning *GetVectorStoreFileResponse
-func (c *ClientWithResponses) GetVectorStoreFileWithResponse(ctx context.Context, vectorStoreId string, fileId string, reqEditors ...RequestEditorFn) (*GetVectorStoreFileResponse, error) {
+// GetVectorStoreFileWithResponse request returning *GetVectorStoreFileMsg
+func (c *ClientWithResponses) GetVectorStoreFileWithResponse(ctx context.Context, vectorStoreId string, fileId string, reqEditors ...RequestEditorFn) (*GetVectorStoreFileMsg, error) {
 	rsp, err := c.GetVectorStoreFile(ctx, vectorStoreId, fileId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetVectorStoreFileResponse(rsp)
+	return ParseGetVectorStoreFileMsg(rsp)
 }
 
-// ParseListAssistantsResponse parses an HTTP response from a ListAssistantsWithResponse call
-func ParseListAssistantsResponse(rsp *http.Response) (*ListAssistantsResponse, error) {
+// ParseListAssistantsMsg parses an HTTP response from a ListAssistantsWithResponse call
+func ParseListAssistantsMsg(rsp *http.Response) (*ListAssistantsMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListAssistantsResponse{
+	response := &ListAssistantsMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -21808,15 +21808,15 @@ func ParseListAssistantsResponse(rsp *http.Response) (*ListAssistantsResponse, e
 	return response, nil
 }
 
-// ParseCreateAssistantResponse parses an HTTP response from a CreateAssistantWithResponse call
-func ParseCreateAssistantResponse(rsp *http.Response) (*CreateAssistantResponse, error) {
+// ParseCreateAssistantMsg parses an HTTP response from a CreateAssistantWithResponse call
+func ParseCreateAssistantMsg(rsp *http.Response) (*CreateAssistantMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateAssistantResponse{
+	response := &CreateAssistantMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -21834,15 +21834,15 @@ func ParseCreateAssistantResponse(rsp *http.Response) (*CreateAssistantResponse,
 	return response, nil
 }
 
-// ParseDeleteAssistantResponse parses an HTTP response from a DeleteAssistantWithResponse call
-func ParseDeleteAssistantResponse(rsp *http.Response) (*DeleteAssistantResponse, error) {
+// ParseDeleteAssistantMsg parses an HTTP response from a DeleteAssistantWithResponse call
+func ParseDeleteAssistantMsg(rsp *http.Response) (*DeleteAssistantMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DeleteAssistantResponse{
+	response := &DeleteAssistantMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -21860,15 +21860,15 @@ func ParseDeleteAssistantResponse(rsp *http.Response) (*DeleteAssistantResponse,
 	return response, nil
 }
 
-// ParseGetAssistantResponse parses an HTTP response from a GetAssistantWithResponse call
-func ParseGetAssistantResponse(rsp *http.Response) (*GetAssistantResponse, error) {
+// ParseGetAssistantMsg parses an HTTP response from a GetAssistantWithResponse call
+func ParseGetAssistantMsg(rsp *http.Response) (*GetAssistantMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetAssistantResponse{
+	response := &GetAssistantMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -21886,15 +21886,15 @@ func ParseGetAssistantResponse(rsp *http.Response) (*GetAssistantResponse, error
 	return response, nil
 }
 
-// ParseModifyAssistantResponse parses an HTTP response from a ModifyAssistantWithResponse call
-func ParseModifyAssistantResponse(rsp *http.Response) (*ModifyAssistantResponse, error) {
+// ParseModifyAssistantMsg parses an HTTP response from a ModifyAssistantWithResponse call
+func ParseModifyAssistantMsg(rsp *http.Response) (*ModifyAssistantMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ModifyAssistantResponse{
+	response := &ModifyAssistantMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -21912,15 +21912,15 @@ func ParseModifyAssistantResponse(rsp *http.Response) (*ModifyAssistantResponse,
 	return response, nil
 }
 
-// ParseCreateSpeechResponse parses an HTTP response from a CreateSpeechWithResponse call
-func ParseCreateSpeechResponse(rsp *http.Response) (*CreateSpeechResponse, error) {
+// ParseCreateSpeechMsg parses an HTTP response from a CreateSpeechWithResponse call
+func ParseCreateSpeechMsg(rsp *http.Response) (*CreateSpeechMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateSpeechResponse{
+	response := &CreateSpeechMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -21928,15 +21928,15 @@ func ParseCreateSpeechResponse(rsp *http.Response) (*CreateSpeechResponse, error
 	return response, nil
 }
 
-// ParseCreateTranscriptionResponse parses an HTTP response from a CreateTranscriptionWithResponse call
-func ParseCreateTranscriptionResponse(rsp *http.Response) (*CreateTranscriptionResponse, error) {
+// ParseCreateTranscriptionMsg parses an HTTP response from a CreateTranscriptionWithResponse call
+func ParseCreateTranscriptionMsg(rsp *http.Response) (*CreateTranscriptionMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateTranscriptionResponse{
+	response := &CreateTranscriptionMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -21956,15 +21956,15 @@ func ParseCreateTranscriptionResponse(rsp *http.Response) (*CreateTranscriptionR
 	return response, nil
 }
 
-// ParseCreateTranslationResponse parses an HTTP response from a CreateTranslationWithResponse call
-func ParseCreateTranslationResponse(rsp *http.Response) (*CreateTranslationResponse, error) {
+// ParseCreateTranslationMsg parses an HTTP response from a CreateTranslationWithResponse call
+func ParseCreateTranslationMsg(rsp *http.Response) (*CreateTranslationMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateTranslationResponse{
+	response := &CreateTranslationMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -21984,15 +21984,15 @@ func ParseCreateTranslationResponse(rsp *http.Response) (*CreateTranslationRespo
 	return response, nil
 }
 
-// ParseListBatchesResponse parses an HTTP response from a ListBatchesWithResponse call
-func ParseListBatchesResponse(rsp *http.Response) (*ListBatchesResponse, error) {
+// ParseListBatchesMsg parses an HTTP response from a ListBatchesWithResponse call
+func ParseListBatchesMsg(rsp *http.Response) (*ListBatchesMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListBatchesResponse{
+	response := &ListBatchesMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22010,15 +22010,15 @@ func ParseListBatchesResponse(rsp *http.Response) (*ListBatchesResponse, error) 
 	return response, nil
 }
 
-// ParseCreateBatchResponse parses an HTTP response from a CreateBatchWithResponse call
-func ParseCreateBatchResponse(rsp *http.Response) (*CreateBatchResponse, error) {
+// ParseCreateBatchMsg parses an HTTP response from a CreateBatchWithResponse call
+func ParseCreateBatchMsg(rsp *http.Response) (*CreateBatchMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateBatchResponse{
+	response := &CreateBatchMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22036,15 +22036,15 @@ func ParseCreateBatchResponse(rsp *http.Response) (*CreateBatchResponse, error) 
 	return response, nil
 }
 
-// ParseRetrieveBatchResponse parses an HTTP response from a RetrieveBatchWithResponse call
-func ParseRetrieveBatchResponse(rsp *http.Response) (*RetrieveBatchResponse, error) {
+// ParseRetrieveBatchMsg parses an HTTP response from a RetrieveBatchWithResponse call
+func ParseRetrieveBatchMsg(rsp *http.Response) (*RetrieveBatchMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &RetrieveBatchResponse{
+	response := &RetrieveBatchMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22062,15 +22062,15 @@ func ParseRetrieveBatchResponse(rsp *http.Response) (*RetrieveBatchResponse, err
 	return response, nil
 }
 
-// ParseCancelBatchResponse parses an HTTP response from a CancelBatchWithResponse call
-func ParseCancelBatchResponse(rsp *http.Response) (*CancelBatchResponse, error) {
+// ParseCancelBatchMsg parses an HTTP response from a CancelBatchWithResponse call
+func ParseCancelBatchMsg(rsp *http.Response) (*CancelBatchMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CancelBatchResponse{
+	response := &CancelBatchMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22088,15 +22088,15 @@ func ParseCancelBatchResponse(rsp *http.Response) (*CancelBatchResponse, error) 
 	return response, nil
 }
 
-// ParseCreateChatCompletionResponse parses an HTTP response from a CreateChatCompletionWithResponse call
-func ParseCreateChatCompletionResponse(rsp *http.Response) (*CreateChatCompletionResponse, error) {
+// ParseCreateChatCompletionMsg parses an HTTP response from a CreateChatCompletionWithResponse call
+func ParseCreateChatCompletionMsg(rsp *http.Response) (*CreateChatCompletionMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateChatCompletionResponse{
+	response := &CreateChatCompletionMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22114,15 +22114,15 @@ func ParseCreateChatCompletionResponse(rsp *http.Response) (*CreateChatCompletio
 	return response, nil
 }
 
-// ParseCreateCompletionResponse parses an HTTP response from a CreateCompletionWithResponse call
-func ParseCreateCompletionResponse(rsp *http.Response) (*CreateCompletionResponse, error) {
+// ParseCreateCompletionMsg parses an HTTP response from a CreateCompletionWithResponse call
+func ParseCreateCompletionMsg(rsp *http.Response) (*CreateCompletionMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateCompletionResponse{
+	response := &CreateCompletionMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22140,15 +22140,15 @@ func ParseCreateCompletionResponse(rsp *http.Response) (*CreateCompletionRespons
 	return response, nil
 }
 
-// ParseCreateEmbeddingResponse parses an HTTP response from a CreateEmbeddingWithResponse call
-func ParseCreateEmbeddingResponse(rsp *http.Response) (*CreateEmbeddingResponse, error) {
+// ParseCreateEmbeddingMsg parses an HTTP response from a CreateEmbeddingWithResponse call
+func ParseCreateEmbeddingMsg(rsp *http.Response) (*CreateEmbeddingMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateEmbeddingResponse{
+	response := &CreateEmbeddingMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22166,15 +22166,15 @@ func ParseCreateEmbeddingResponse(rsp *http.Response) (*CreateEmbeddingResponse,
 	return response, nil
 }
 
-// ParseListFilesResponse parses an HTTP response from a ListFilesWithResponse call
-func ParseListFilesResponse(rsp *http.Response) (*ListFilesResponse, error) {
+// ParseListFilesMsg parses an HTTP response from a ListFilesWithResponse call
+func ParseListFilesMsg(rsp *http.Response) (*ListFilesMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListFilesResponse{
+	response := &ListFilesMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22192,15 +22192,15 @@ func ParseListFilesResponse(rsp *http.Response) (*ListFilesResponse, error) {
 	return response, nil
 }
 
-// ParseCreateFileResponse parses an HTTP response from a CreateFileWithResponse call
-func ParseCreateFileResponse(rsp *http.Response) (*CreateFileResponse, error) {
+// ParseCreateFileMsg parses an HTTP response from a CreateFileWithResponse call
+func ParseCreateFileMsg(rsp *http.Response) (*CreateFileMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateFileResponse{
+	response := &CreateFileMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22218,15 +22218,15 @@ func ParseCreateFileResponse(rsp *http.Response) (*CreateFileResponse, error) {
 	return response, nil
 }
 
-// ParseDeleteFileResponse parses an HTTP response from a DeleteFileWithResponse call
-func ParseDeleteFileResponse(rsp *http.Response) (*DeleteFileResponse, error) {
+// ParseDeleteFileMsg parses an HTTP response from a DeleteFileWithResponse call
+func ParseDeleteFileMsg(rsp *http.Response) (*DeleteFileMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DeleteFileResponse{
+	response := &DeleteFileMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22244,15 +22244,15 @@ func ParseDeleteFileResponse(rsp *http.Response) (*DeleteFileResponse, error) {
 	return response, nil
 }
 
-// ParseRetrieveFileResponse parses an HTTP response from a RetrieveFileWithResponse call
-func ParseRetrieveFileResponse(rsp *http.Response) (*RetrieveFileResponse, error) {
+// ParseRetrieveFileMsg parses an HTTP response from a RetrieveFileWithResponse call
+func ParseRetrieveFileMsg(rsp *http.Response) (*RetrieveFileMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &RetrieveFileResponse{
+	response := &RetrieveFileMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22270,15 +22270,15 @@ func ParseRetrieveFileResponse(rsp *http.Response) (*RetrieveFileResponse, error
 	return response, nil
 }
 
-// ParseDownloadFileResponse parses an HTTP response from a DownloadFileWithResponse call
-func ParseDownloadFileResponse(rsp *http.Response) (*DownloadFileResponse, error) {
+// ParseDownloadFileMsg parses an HTTP response from a DownloadFileWithResponse call
+func ParseDownloadFileMsg(rsp *http.Response) (*DownloadFileMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DownloadFileResponse{
+	response := &DownloadFileMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22296,15 +22296,15 @@ func ParseDownloadFileResponse(rsp *http.Response) (*DownloadFileResponse, error
 	return response, nil
 }
 
-// ParseListPaginatedFineTuningJobsResponse parses an HTTP response from a ListPaginatedFineTuningJobsWithResponse call
-func ParseListPaginatedFineTuningJobsResponse(rsp *http.Response) (*ListPaginatedFineTuningJobsResponse, error) {
+// ParseListPaginatedFineTuningJobsMsg parses an HTTP response from a ListPaginatedFineTuningJobsWithResponse call
+func ParseListPaginatedFineTuningJobsMsg(rsp *http.Response) (*ListPaginatedFineTuningJobsMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListPaginatedFineTuningJobsResponse{
+	response := &ListPaginatedFineTuningJobsMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22322,15 +22322,15 @@ func ParseListPaginatedFineTuningJobsResponse(rsp *http.Response) (*ListPaginate
 	return response, nil
 }
 
-// ParseCreateFineTuningJobResponse parses an HTTP response from a CreateFineTuningJobWithResponse call
-func ParseCreateFineTuningJobResponse(rsp *http.Response) (*CreateFineTuningJobResponse, error) {
+// ParseCreateFineTuningJobMsg parses an HTTP response from a CreateFineTuningJobWithResponse call
+func ParseCreateFineTuningJobMsg(rsp *http.Response) (*CreateFineTuningJobMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateFineTuningJobResponse{
+	response := &CreateFineTuningJobMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22348,15 +22348,15 @@ func ParseCreateFineTuningJobResponse(rsp *http.Response) (*CreateFineTuningJobR
 	return response, nil
 }
 
-// ParseRetrieveFineTuningJobResponse parses an HTTP response from a RetrieveFineTuningJobWithResponse call
-func ParseRetrieveFineTuningJobResponse(rsp *http.Response) (*RetrieveFineTuningJobResponse, error) {
+// ParseRetrieveFineTuningJobMsg parses an HTTP response from a RetrieveFineTuningJobWithResponse call
+func ParseRetrieveFineTuningJobMsg(rsp *http.Response) (*RetrieveFineTuningJobMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &RetrieveFineTuningJobResponse{
+	response := &RetrieveFineTuningJobMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22374,15 +22374,15 @@ func ParseRetrieveFineTuningJobResponse(rsp *http.Response) (*RetrieveFineTuning
 	return response, nil
 }
 
-// ParseCancelFineTuningJobResponse parses an HTTP response from a CancelFineTuningJobWithResponse call
-func ParseCancelFineTuningJobResponse(rsp *http.Response) (*CancelFineTuningJobResponse, error) {
+// ParseCancelFineTuningJobMsg parses an HTTP response from a CancelFineTuningJobWithResponse call
+func ParseCancelFineTuningJobMsg(rsp *http.Response) (*CancelFineTuningJobMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CancelFineTuningJobResponse{
+	response := &CancelFineTuningJobMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22400,15 +22400,15 @@ func ParseCancelFineTuningJobResponse(rsp *http.Response) (*CancelFineTuningJobR
 	return response, nil
 }
 
-// ParseListFineTuningJobCheckpointsResponse parses an HTTP response from a ListFineTuningJobCheckpointsWithResponse call
-func ParseListFineTuningJobCheckpointsResponse(rsp *http.Response) (*ListFineTuningJobCheckpointsResponse, error) {
+// ParseListFineTuningJobCheckpointsMsg parses an HTTP response from a ListFineTuningJobCheckpointsWithResponse call
+func ParseListFineTuningJobCheckpointsMsg(rsp *http.Response) (*ListFineTuningJobCheckpointsMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListFineTuningJobCheckpointsResponse{
+	response := &ListFineTuningJobCheckpointsMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22426,15 +22426,15 @@ func ParseListFineTuningJobCheckpointsResponse(rsp *http.Response) (*ListFineTun
 	return response, nil
 }
 
-// ParseListFineTuningEventsResponse parses an HTTP response from a ListFineTuningEventsWithResponse call
-func ParseListFineTuningEventsResponse(rsp *http.Response) (*ListFineTuningEventsResponse, error) {
+// ParseListFineTuningEventsMsg parses an HTTP response from a ListFineTuningEventsWithResponse call
+func ParseListFineTuningEventsMsg(rsp *http.Response) (*ListFineTuningEventsMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListFineTuningEventsResponse{
+	response := &ListFineTuningEventsMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22452,15 +22452,15 @@ func ParseListFineTuningEventsResponse(rsp *http.Response) (*ListFineTuningEvent
 	return response, nil
 }
 
-// ParseCreateImageEditResponse parses an HTTP response from a CreateImageEditWithResponse call
-func ParseCreateImageEditResponse(rsp *http.Response) (*CreateImageEditResponse, error) {
+// ParseCreateImageEditMsg parses an HTTP response from a CreateImageEditWithResponse call
+func ParseCreateImageEditMsg(rsp *http.Response) (*CreateImageEditMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateImageEditResponse{
+	response := &CreateImageEditMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22478,15 +22478,15 @@ func ParseCreateImageEditResponse(rsp *http.Response) (*CreateImageEditResponse,
 	return response, nil
 }
 
-// ParseCreateImageResponse parses an HTTP response from a CreateImageWithResponse call
-func ParseCreateImageResponse(rsp *http.Response) (*CreateImageResponse, error) {
+// ParseCreateImageMsg parses an HTTP response from a CreateImageWithResponse call
+func ParseCreateImageMsg(rsp *http.Response) (*CreateImageMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateImageResponse{
+	response := &CreateImageMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22504,15 +22504,15 @@ func ParseCreateImageResponse(rsp *http.Response) (*CreateImageResponse, error) 
 	return response, nil
 }
 
-// ParseCreateImageVariationResponse parses an HTTP response from a CreateImageVariationWithResponse call
-func ParseCreateImageVariationResponse(rsp *http.Response) (*CreateImageVariationResponse, error) {
+// ParseCreateImageVariationMsg parses an HTTP response from a CreateImageVariationWithResponse call
+func ParseCreateImageVariationMsg(rsp *http.Response) (*CreateImageVariationMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateImageVariationResponse{
+	response := &CreateImageVariationMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22530,15 +22530,15 @@ func ParseCreateImageVariationResponse(rsp *http.Response) (*CreateImageVariatio
 	return response, nil
 }
 
-// ParseListModelsResponse parses an HTTP response from a ListModelsWithResponse call
-func ParseListModelsResponse(rsp *http.Response) (*ListModelsResponse, error) {
+// ParseListModelsMsg parses an HTTP response from a ListModelsWithResponse call
+func ParseListModelsMsg(rsp *http.Response) (*ListModelsMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListModelsResponse{
+	response := &ListModelsMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22556,15 +22556,15 @@ func ParseListModelsResponse(rsp *http.Response) (*ListModelsResponse, error) {
 	return response, nil
 }
 
-// ParseDeleteModelResponse parses an HTTP response from a DeleteModelWithResponse call
-func ParseDeleteModelResponse(rsp *http.Response) (*DeleteModelResponse, error) {
+// ParseDeleteModelMsg parses an HTTP response from a DeleteModelWithResponse call
+func ParseDeleteModelMsg(rsp *http.Response) (*DeleteModelMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DeleteModelResponse{
+	response := &DeleteModelMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22582,15 +22582,15 @@ func ParseDeleteModelResponse(rsp *http.Response) (*DeleteModelResponse, error) 
 	return response, nil
 }
 
-// ParseRetrieveModelResponse parses an HTTP response from a RetrieveModelWithResponse call
-func ParseRetrieveModelResponse(rsp *http.Response) (*RetrieveModelResponse, error) {
+// ParseRetrieveModelMsg parses an HTTP response from a RetrieveModelWithResponse call
+func ParseRetrieveModelMsg(rsp *http.Response) (*RetrieveModelMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &RetrieveModelResponse{
+	response := &RetrieveModelMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22608,15 +22608,15 @@ func ParseRetrieveModelResponse(rsp *http.Response) (*RetrieveModelResponse, err
 	return response, nil
 }
 
-// ParseCreateModerationResponse parses an HTTP response from a CreateModerationWithResponse call
-func ParseCreateModerationResponse(rsp *http.Response) (*CreateModerationResponse, error) {
+// ParseCreateModerationMsg parses an HTTP response from a CreateModerationWithResponse call
+func ParseCreateModerationMsg(rsp *http.Response) (*CreateModerationMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateModerationResponse{
+	response := &CreateModerationMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22634,15 +22634,15 @@ func ParseCreateModerationResponse(rsp *http.Response) (*CreateModerationRespons
 	return response, nil
 }
 
-// ParseListAuditLogsResponse parses an HTTP response from a ListAuditLogsWithResponse call
-func ParseListAuditLogsResponse(rsp *http.Response) (*ListAuditLogsResponse, error) {
+// ParseListAuditLogsMsg parses an HTTP response from a ListAuditLogsWithResponse call
+func ParseListAuditLogsMsg(rsp *http.Response) (*ListAuditLogsMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListAuditLogsResponse{
+	response := &ListAuditLogsMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22660,15 +22660,15 @@ func ParseListAuditLogsResponse(rsp *http.Response) (*ListAuditLogsResponse, err
 	return response, nil
 }
 
-// ParseListInvitesResponse parses an HTTP response from a ListInvitesWithResponse call
-func ParseListInvitesResponse(rsp *http.Response) (*ListInvitesResponse, error) {
+// ParseListInvitesMsg parses an HTTP response from a ListInvitesWithResponse call
+func ParseListInvitesMsg(rsp *http.Response) (*ListInvitesMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListInvitesResponse{
+	response := &ListInvitesMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22686,15 +22686,15 @@ func ParseListInvitesResponse(rsp *http.Response) (*ListInvitesResponse, error) 
 	return response, nil
 }
 
-// ParseInviteUserResponse parses an HTTP response from a InviteUserWithResponse call
-func ParseInviteUserResponse(rsp *http.Response) (*InviteUserResponse, error) {
+// ParseInviteUserMsg parses an HTTP response from a InviteUserWithResponse call
+func ParseInviteUserMsg(rsp *http.Response) (*InviteUserMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &InviteUserResponse{
+	response := &InviteUserMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22712,15 +22712,15 @@ func ParseInviteUserResponse(rsp *http.Response) (*InviteUserResponse, error) {
 	return response, nil
 }
 
-// ParseDeleteInviteResponse parses an HTTP response from a DeleteInviteWithResponse call
-func ParseDeleteInviteResponse(rsp *http.Response) (*DeleteInviteResponse, error) {
+// ParseDeleteInviteMsg parses an HTTP response from a DeleteInviteWithResponse call
+func ParseDeleteInviteMsg(rsp *http.Response) (*DeleteInviteMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DeleteInviteResponse{
+	response := &DeleteInviteMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22738,15 +22738,15 @@ func ParseDeleteInviteResponse(rsp *http.Response) (*DeleteInviteResponse, error
 	return response, nil
 }
 
-// ParseRetrieveInviteResponse parses an HTTP response from a RetrieveInviteWithResponse call
-func ParseRetrieveInviteResponse(rsp *http.Response) (*RetrieveInviteResponse, error) {
+// ParseRetrieveInviteMsg parses an HTTP response from a RetrieveInviteWithResponse call
+func ParseRetrieveInviteMsg(rsp *http.Response) (*RetrieveInviteMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &RetrieveInviteResponse{
+	response := &RetrieveInviteMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22764,15 +22764,15 @@ func ParseRetrieveInviteResponse(rsp *http.Response) (*RetrieveInviteResponse, e
 	return response, nil
 }
 
-// ParseListProjectsResponse parses an HTTP response from a ListProjectsWithResponse call
-func ParseListProjectsResponse(rsp *http.Response) (*ListProjectsResponse, error) {
+// ParseListProjectsMsg parses an HTTP response from a ListProjectsWithResponse call
+func ParseListProjectsMsg(rsp *http.Response) (*ListProjectsMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListProjectsResponse{
+	response := &ListProjectsMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22790,15 +22790,15 @@ func ParseListProjectsResponse(rsp *http.Response) (*ListProjectsResponse, error
 	return response, nil
 }
 
-// ParseCreateProjectResponse parses an HTTP response from a CreateProjectWithResponse call
-func ParseCreateProjectResponse(rsp *http.Response) (*CreateProjectResponse, error) {
+// ParseCreateProjectMsg parses an HTTP response from a CreateProjectWithResponse call
+func ParseCreateProjectMsg(rsp *http.Response) (*CreateProjectMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateProjectResponse{
+	response := &CreateProjectMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22816,15 +22816,15 @@ func ParseCreateProjectResponse(rsp *http.Response) (*CreateProjectResponse, err
 	return response, nil
 }
 
-// ParseRetrieveProjectResponse parses an HTTP response from a RetrieveProjectWithResponse call
-func ParseRetrieveProjectResponse(rsp *http.Response) (*RetrieveProjectResponse, error) {
+// ParseRetrieveProjectMsg parses an HTTP response from a RetrieveProjectWithResponse call
+func ParseRetrieveProjectMsg(rsp *http.Response) (*RetrieveProjectMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &RetrieveProjectResponse{
+	response := &RetrieveProjectMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22842,15 +22842,15 @@ func ParseRetrieveProjectResponse(rsp *http.Response) (*RetrieveProjectResponse,
 	return response, nil
 }
 
-// ParseModifyProjectResponse parses an HTTP response from a ModifyProjectWithResponse call
-func ParseModifyProjectResponse(rsp *http.Response) (*ModifyProjectResponse, error) {
+// ParseModifyProjectMsg parses an HTTP response from a ModifyProjectWithResponse call
+func ParseModifyProjectMsg(rsp *http.Response) (*ModifyProjectMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ModifyProjectResponse{
+	response := &ModifyProjectMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22875,15 +22875,15 @@ func ParseModifyProjectResponse(rsp *http.Response) (*ModifyProjectResponse, err
 	return response, nil
 }
 
-// ParseListProjectApiKeysResponse parses an HTTP response from a ListProjectApiKeysWithResponse call
-func ParseListProjectApiKeysResponse(rsp *http.Response) (*ListProjectApiKeysResponse, error) {
+// ParseListProjectApiKeysMsg parses an HTTP response from a ListProjectApiKeysWithResponse call
+func ParseListProjectApiKeysMsg(rsp *http.Response) (*ListProjectApiKeysMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListProjectApiKeysResponse{
+	response := &ListProjectApiKeysMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22901,15 +22901,15 @@ func ParseListProjectApiKeysResponse(rsp *http.Response) (*ListProjectApiKeysRes
 	return response, nil
 }
 
-// ParseDeleteProjectApiKeyResponse parses an HTTP response from a DeleteProjectApiKeyWithResponse call
-func ParseDeleteProjectApiKeyResponse(rsp *http.Response) (*DeleteProjectApiKeyResponse, error) {
+// ParseDeleteProjectApiKeyMsg parses an HTTP response from a DeleteProjectApiKeyWithResponse call
+func ParseDeleteProjectApiKeyMsg(rsp *http.Response) (*DeleteProjectApiKeyMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DeleteProjectApiKeyResponse{
+	response := &DeleteProjectApiKeyMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22934,15 +22934,15 @@ func ParseDeleteProjectApiKeyResponse(rsp *http.Response) (*DeleteProjectApiKeyR
 	return response, nil
 }
 
-// ParseRetrieveProjectApiKeyResponse parses an HTTP response from a RetrieveProjectApiKeyWithResponse call
-func ParseRetrieveProjectApiKeyResponse(rsp *http.Response) (*RetrieveProjectApiKeyResponse, error) {
+// ParseRetrieveProjectApiKeyMsg parses an HTTP response from a RetrieveProjectApiKeyWithResponse call
+func ParseRetrieveProjectApiKeyMsg(rsp *http.Response) (*RetrieveProjectApiKeyMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &RetrieveProjectApiKeyResponse{
+	response := &RetrieveProjectApiKeyMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22960,15 +22960,15 @@ func ParseRetrieveProjectApiKeyResponse(rsp *http.Response) (*RetrieveProjectApi
 	return response, nil
 }
 
-// ParseArchiveProjectResponse parses an HTTP response from a ArchiveProjectWithResponse call
-func ParseArchiveProjectResponse(rsp *http.Response) (*ArchiveProjectResponse, error) {
+// ParseArchiveProjectMsg parses an HTTP response from a ArchiveProjectWithResponse call
+func ParseArchiveProjectMsg(rsp *http.Response) (*ArchiveProjectMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ArchiveProjectResponse{
+	response := &ArchiveProjectMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -22986,15 +22986,15 @@ func ParseArchiveProjectResponse(rsp *http.Response) (*ArchiveProjectResponse, e
 	return response, nil
 }
 
-// ParseListProjectRateLimitsResponse parses an HTTP response from a ListProjectRateLimitsWithResponse call
-func ParseListProjectRateLimitsResponse(rsp *http.Response) (*ListProjectRateLimitsResponse, error) {
+// ParseListProjectRateLimitsMsg parses an HTTP response from a ListProjectRateLimitsWithResponse call
+func ParseListProjectRateLimitsMsg(rsp *http.Response) (*ListProjectRateLimitsMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListProjectRateLimitsResponse{
+	response := &ListProjectRateLimitsMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23012,15 +23012,15 @@ func ParseListProjectRateLimitsResponse(rsp *http.Response) (*ListProjectRateLim
 	return response, nil
 }
 
-// ParseUpdateProjectRateLimitsResponse parses an HTTP response from a UpdateProjectRateLimitsWithResponse call
-func ParseUpdateProjectRateLimitsResponse(rsp *http.Response) (*UpdateProjectRateLimitsResponse, error) {
+// ParseUpdateProjectRateLimitsMsg parses an HTTP response from a UpdateProjectRateLimitsWithResponse call
+func ParseUpdateProjectRateLimitsMsg(rsp *http.Response) (*UpdateProjectRateLimitsMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &UpdateProjectRateLimitsResponse{
+	response := &UpdateProjectRateLimitsMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23045,15 +23045,15 @@ func ParseUpdateProjectRateLimitsResponse(rsp *http.Response) (*UpdateProjectRat
 	return response, nil
 }
 
-// ParseListProjectServiceAccountsResponse parses an HTTP response from a ListProjectServiceAccountsWithResponse call
-func ParseListProjectServiceAccountsResponse(rsp *http.Response) (*ListProjectServiceAccountsResponse, error) {
+// ParseListProjectServiceAccountsMsg parses an HTTP response from a ListProjectServiceAccountsWithResponse call
+func ParseListProjectServiceAccountsMsg(rsp *http.Response) (*ListProjectServiceAccountsMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListProjectServiceAccountsResponse{
+	response := &ListProjectServiceAccountsMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23078,15 +23078,15 @@ func ParseListProjectServiceAccountsResponse(rsp *http.Response) (*ListProjectSe
 	return response, nil
 }
 
-// ParseCreateProjectServiceAccountResponse parses an HTTP response from a CreateProjectServiceAccountWithResponse call
-func ParseCreateProjectServiceAccountResponse(rsp *http.Response) (*CreateProjectServiceAccountResponse, error) {
+// ParseCreateProjectServiceAccountMsg parses an HTTP response from a CreateProjectServiceAccountWithResponse call
+func ParseCreateProjectServiceAccountMsg(rsp *http.Response) (*CreateProjectServiceAccountMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateProjectServiceAccountResponse{
+	response := &CreateProjectServiceAccountMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23111,15 +23111,15 @@ func ParseCreateProjectServiceAccountResponse(rsp *http.Response) (*CreateProjec
 	return response, nil
 }
 
-// ParseDeleteProjectServiceAccountResponse parses an HTTP response from a DeleteProjectServiceAccountWithResponse call
-func ParseDeleteProjectServiceAccountResponse(rsp *http.Response) (*DeleteProjectServiceAccountResponse, error) {
+// ParseDeleteProjectServiceAccountMsg parses an HTTP response from a DeleteProjectServiceAccountWithResponse call
+func ParseDeleteProjectServiceAccountMsg(rsp *http.Response) (*DeleteProjectServiceAccountMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DeleteProjectServiceAccountResponse{
+	response := &DeleteProjectServiceAccountMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23137,15 +23137,15 @@ func ParseDeleteProjectServiceAccountResponse(rsp *http.Response) (*DeleteProjec
 	return response, nil
 }
 
-// ParseRetrieveProjectServiceAccountResponse parses an HTTP response from a RetrieveProjectServiceAccountWithResponse call
-func ParseRetrieveProjectServiceAccountResponse(rsp *http.Response) (*RetrieveProjectServiceAccountResponse, error) {
+// ParseRetrieveProjectServiceAccountMsg parses an HTTP response from a RetrieveProjectServiceAccountWithResponse call
+func ParseRetrieveProjectServiceAccountMsg(rsp *http.Response) (*RetrieveProjectServiceAccountMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &RetrieveProjectServiceAccountResponse{
+	response := &RetrieveProjectServiceAccountMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23163,15 +23163,15 @@ func ParseRetrieveProjectServiceAccountResponse(rsp *http.Response) (*RetrievePr
 	return response, nil
 }
 
-// ParseListProjectUsersResponse parses an HTTP response from a ListProjectUsersWithResponse call
-func ParseListProjectUsersResponse(rsp *http.Response) (*ListProjectUsersResponse, error) {
+// ParseListProjectUsersMsg parses an HTTP response from a ListProjectUsersWithResponse call
+func ParseListProjectUsersMsg(rsp *http.Response) (*ListProjectUsersMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListProjectUsersResponse{
+	response := &ListProjectUsersMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23196,15 +23196,15 @@ func ParseListProjectUsersResponse(rsp *http.Response) (*ListProjectUsersRespons
 	return response, nil
 }
 
-// ParseCreateProjectUserResponse parses an HTTP response from a CreateProjectUserWithResponse call
-func ParseCreateProjectUserResponse(rsp *http.Response) (*CreateProjectUserResponse, error) {
+// ParseCreateProjectUserMsg parses an HTTP response from a CreateProjectUserWithResponse call
+func ParseCreateProjectUserMsg(rsp *http.Response) (*CreateProjectUserMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateProjectUserResponse{
+	response := &CreateProjectUserMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23229,15 +23229,15 @@ func ParseCreateProjectUserResponse(rsp *http.Response) (*CreateProjectUserRespo
 	return response, nil
 }
 
-// ParseDeleteProjectUserResponse parses an HTTP response from a DeleteProjectUserWithResponse call
-func ParseDeleteProjectUserResponse(rsp *http.Response) (*DeleteProjectUserResponse, error) {
+// ParseDeleteProjectUserMsg parses an HTTP response from a DeleteProjectUserWithResponse call
+func ParseDeleteProjectUserMsg(rsp *http.Response) (*DeleteProjectUserMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DeleteProjectUserResponse{
+	response := &DeleteProjectUserMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23262,15 +23262,15 @@ func ParseDeleteProjectUserResponse(rsp *http.Response) (*DeleteProjectUserRespo
 	return response, nil
 }
 
-// ParseRetrieveProjectUserResponse parses an HTTP response from a RetrieveProjectUserWithResponse call
-func ParseRetrieveProjectUserResponse(rsp *http.Response) (*RetrieveProjectUserResponse, error) {
+// ParseRetrieveProjectUserMsg parses an HTTP response from a RetrieveProjectUserWithResponse call
+func ParseRetrieveProjectUserMsg(rsp *http.Response) (*RetrieveProjectUserMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &RetrieveProjectUserResponse{
+	response := &RetrieveProjectUserMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23288,15 +23288,15 @@ func ParseRetrieveProjectUserResponse(rsp *http.Response) (*RetrieveProjectUserR
 	return response, nil
 }
 
-// ParseModifyProjectUserResponse parses an HTTP response from a ModifyProjectUserWithResponse call
-func ParseModifyProjectUserResponse(rsp *http.Response) (*ModifyProjectUserResponse, error) {
+// ParseModifyProjectUserMsg parses an HTTP response from a ModifyProjectUserWithResponse call
+func ParseModifyProjectUserMsg(rsp *http.Response) (*ModifyProjectUserMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ModifyProjectUserResponse{
+	response := &ModifyProjectUserMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23321,15 +23321,15 @@ func ParseModifyProjectUserResponse(rsp *http.Response) (*ModifyProjectUserRespo
 	return response, nil
 }
 
-// ParseListUsersResponse parses an HTTP response from a ListUsersWithResponse call
-func ParseListUsersResponse(rsp *http.Response) (*ListUsersResponse, error) {
+// ParseListUsersMsg parses an HTTP response from a ListUsersWithResponse call
+func ParseListUsersMsg(rsp *http.Response) (*ListUsersMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListUsersResponse{
+	response := &ListUsersMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23347,15 +23347,15 @@ func ParseListUsersResponse(rsp *http.Response) (*ListUsersResponse, error) {
 	return response, nil
 }
 
-// ParseDeleteUserResponse parses an HTTP response from a DeleteUserWithResponse call
-func ParseDeleteUserResponse(rsp *http.Response) (*DeleteUserResponse, error) {
+// ParseDeleteUserMsg parses an HTTP response from a DeleteUserWithResponse call
+func ParseDeleteUserMsg(rsp *http.Response) (*DeleteUserMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DeleteUserResponse{
+	response := &DeleteUserMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23373,15 +23373,15 @@ func ParseDeleteUserResponse(rsp *http.Response) (*DeleteUserResponse, error) {
 	return response, nil
 }
 
-// ParseRetrieveUserResponse parses an HTTP response from a RetrieveUserWithResponse call
-func ParseRetrieveUserResponse(rsp *http.Response) (*RetrieveUserResponse, error) {
+// ParseRetrieveUserMsg parses an HTTP response from a RetrieveUserWithResponse call
+func ParseRetrieveUserMsg(rsp *http.Response) (*RetrieveUserMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &RetrieveUserResponse{
+	response := &RetrieveUserMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23399,15 +23399,15 @@ func ParseRetrieveUserResponse(rsp *http.Response) (*RetrieveUserResponse, error
 	return response, nil
 }
 
-// ParseModifyUserResponse parses an HTTP response from a ModifyUserWithResponse call
-func ParseModifyUserResponse(rsp *http.Response) (*ModifyUserResponse, error) {
+// ParseModifyUserMsg parses an HTTP response from a ModifyUserWithResponse call
+func ParseModifyUserMsg(rsp *http.Response) (*ModifyUserMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ModifyUserResponse{
+	response := &ModifyUserMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23425,15 +23425,15 @@ func ParseModifyUserResponse(rsp *http.Response) (*ModifyUserResponse, error) {
 	return response, nil
 }
 
-// ParseCreateThreadResponse parses an HTTP response from a CreateThreadWithResponse call
-func ParseCreateThreadResponse(rsp *http.Response) (*CreateThreadResponse, error) {
+// ParseCreateThreadMsg parses an HTTP response from a CreateThreadWithResponse call
+func ParseCreateThreadMsg(rsp *http.Response) (*CreateThreadMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateThreadResponse{
+	response := &CreateThreadMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23451,15 +23451,15 @@ func ParseCreateThreadResponse(rsp *http.Response) (*CreateThreadResponse, error
 	return response, nil
 }
 
-// ParseCreateThreadAndRunResponse parses an HTTP response from a CreateThreadAndRunWithResponse call
-func ParseCreateThreadAndRunResponse(rsp *http.Response) (*CreateThreadAndRunResponse, error) {
+// ParseCreateThreadAndRunMsg parses an HTTP response from a CreateThreadAndRunWithResponse call
+func ParseCreateThreadAndRunMsg(rsp *http.Response) (*CreateThreadAndRunMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateThreadAndRunResponse{
+	response := &CreateThreadAndRunMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23477,15 +23477,15 @@ func ParseCreateThreadAndRunResponse(rsp *http.Response) (*CreateThreadAndRunRes
 	return response, nil
 }
 
-// ParseDeleteThreadResponse parses an HTTP response from a DeleteThreadWithResponse call
-func ParseDeleteThreadResponse(rsp *http.Response) (*DeleteThreadResponse, error) {
+// ParseDeleteThreadMsg parses an HTTP response from a DeleteThreadWithResponse call
+func ParseDeleteThreadMsg(rsp *http.Response) (*DeleteThreadMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DeleteThreadResponse{
+	response := &DeleteThreadMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23503,15 +23503,15 @@ func ParseDeleteThreadResponse(rsp *http.Response) (*DeleteThreadResponse, error
 	return response, nil
 }
 
-// ParseGetThreadResponse parses an HTTP response from a GetThreadWithResponse call
-func ParseGetThreadResponse(rsp *http.Response) (*GetThreadResponse, error) {
+// ParseGetThreadMsg parses an HTTP response from a GetThreadWithResponse call
+func ParseGetThreadMsg(rsp *http.Response) (*GetThreadMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetThreadResponse{
+	response := &GetThreadMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23529,15 +23529,15 @@ func ParseGetThreadResponse(rsp *http.Response) (*GetThreadResponse, error) {
 	return response, nil
 }
 
-// ParseModifyThreadResponse parses an HTTP response from a ModifyThreadWithResponse call
-func ParseModifyThreadResponse(rsp *http.Response) (*ModifyThreadResponse, error) {
+// ParseModifyThreadMsg parses an HTTP response from a ModifyThreadWithResponse call
+func ParseModifyThreadMsg(rsp *http.Response) (*ModifyThreadMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ModifyThreadResponse{
+	response := &ModifyThreadMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23555,15 +23555,15 @@ func ParseModifyThreadResponse(rsp *http.Response) (*ModifyThreadResponse, error
 	return response, nil
 }
 
-// ParseListMessagesResponse parses an HTTP response from a ListMessagesWithResponse call
-func ParseListMessagesResponse(rsp *http.Response) (*ListMessagesResponse, error) {
+// ParseListMessagesMsg parses an HTTP response from a ListMessagesWithResponse call
+func ParseListMessagesMsg(rsp *http.Response) (*ListMessagesMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListMessagesResponse{
+	response := &ListMessagesMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23581,15 +23581,15 @@ func ParseListMessagesResponse(rsp *http.Response) (*ListMessagesResponse, error
 	return response, nil
 }
 
-// ParseCreateMessageResponse parses an HTTP response from a CreateMessageWithResponse call
-func ParseCreateMessageResponse(rsp *http.Response) (*CreateMessageResponse, error) {
+// ParseCreateMessageMsg parses an HTTP response from a CreateMessageWithResponse call
+func ParseCreateMessageMsg(rsp *http.Response) (*CreateMessageMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateMessageResponse{
+	response := &CreateMessageMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23607,15 +23607,15 @@ func ParseCreateMessageResponse(rsp *http.Response) (*CreateMessageResponse, err
 	return response, nil
 }
 
-// ParseDeleteMessageResponse parses an HTTP response from a DeleteMessageWithResponse call
-func ParseDeleteMessageResponse(rsp *http.Response) (*DeleteMessageResponse, error) {
+// ParseDeleteMessageMsg parses an HTTP response from a DeleteMessageWithResponse call
+func ParseDeleteMessageMsg(rsp *http.Response) (*DeleteMessageMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DeleteMessageResponse{
+	response := &DeleteMessageMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23633,15 +23633,15 @@ func ParseDeleteMessageResponse(rsp *http.Response) (*DeleteMessageResponse, err
 	return response, nil
 }
 
-// ParseGetMessageResponse parses an HTTP response from a GetMessageWithResponse call
-func ParseGetMessageResponse(rsp *http.Response) (*GetMessageResponse, error) {
+// ParseGetMessageMsg parses an HTTP response from a GetMessageWithResponse call
+func ParseGetMessageMsg(rsp *http.Response) (*GetMessageMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetMessageResponse{
+	response := &GetMessageMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23659,15 +23659,15 @@ func ParseGetMessageResponse(rsp *http.Response) (*GetMessageResponse, error) {
 	return response, nil
 }
 
-// ParseModifyMessageResponse parses an HTTP response from a ModifyMessageWithResponse call
-func ParseModifyMessageResponse(rsp *http.Response) (*ModifyMessageResponse, error) {
+// ParseModifyMessageMsg parses an HTTP response from a ModifyMessageWithResponse call
+func ParseModifyMessageMsg(rsp *http.Response) (*ModifyMessageMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ModifyMessageResponse{
+	response := &ModifyMessageMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23685,15 +23685,15 @@ func ParseModifyMessageResponse(rsp *http.Response) (*ModifyMessageResponse, err
 	return response, nil
 }
 
-// ParseListRunsResponse parses an HTTP response from a ListRunsWithResponse call
-func ParseListRunsResponse(rsp *http.Response) (*ListRunsResponse, error) {
+// ParseListRunsMsg parses an HTTP response from a ListRunsWithResponse call
+func ParseListRunsMsg(rsp *http.Response) (*ListRunsMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListRunsResponse{
+	response := &ListRunsMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23711,15 +23711,15 @@ func ParseListRunsResponse(rsp *http.Response) (*ListRunsResponse, error) {
 	return response, nil
 }
 
-// ParseCreateRunResponse parses an HTTP response from a CreateRunWithResponse call
-func ParseCreateRunResponse(rsp *http.Response) (*CreateRunResponse, error) {
+// ParseCreateRunMsg parses an HTTP response from a CreateRunWithResponse call
+func ParseCreateRunMsg(rsp *http.Response) (*CreateRunMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateRunResponse{
+	response := &CreateRunMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23737,15 +23737,15 @@ func ParseCreateRunResponse(rsp *http.Response) (*CreateRunResponse, error) {
 	return response, nil
 }
 
-// ParseGetRunResponse parses an HTTP response from a GetRunWithResponse call
-func ParseGetRunResponse(rsp *http.Response) (*GetRunResponse, error) {
+// ParseGetRunMsg parses an HTTP response from a GetRunWithResponse call
+func ParseGetRunMsg(rsp *http.Response) (*GetRunMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetRunResponse{
+	response := &GetRunMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23763,15 +23763,15 @@ func ParseGetRunResponse(rsp *http.Response) (*GetRunResponse, error) {
 	return response, nil
 }
 
-// ParseModifyRunResponse parses an HTTP response from a ModifyRunWithResponse call
-func ParseModifyRunResponse(rsp *http.Response) (*ModifyRunResponse, error) {
+// ParseModifyRunMsg parses an HTTP response from a ModifyRunWithResponse call
+func ParseModifyRunMsg(rsp *http.Response) (*ModifyRunMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ModifyRunResponse{
+	response := &ModifyRunMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23789,15 +23789,15 @@ func ParseModifyRunResponse(rsp *http.Response) (*ModifyRunResponse, error) {
 	return response, nil
 }
 
-// ParseCancelRunResponse parses an HTTP response from a CancelRunWithResponse call
-func ParseCancelRunResponse(rsp *http.Response) (*CancelRunResponse, error) {
+// ParseCancelRunMsg parses an HTTP response from a CancelRunWithResponse call
+func ParseCancelRunMsg(rsp *http.Response) (*CancelRunMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CancelRunResponse{
+	response := &CancelRunMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23815,15 +23815,15 @@ func ParseCancelRunResponse(rsp *http.Response) (*CancelRunResponse, error) {
 	return response, nil
 }
 
-// ParseListRunStepsResponse parses an HTTP response from a ListRunStepsWithResponse call
-func ParseListRunStepsResponse(rsp *http.Response) (*ListRunStepsResponse, error) {
+// ParseListRunStepsMsg parses an HTTP response from a ListRunStepsWithResponse call
+func ParseListRunStepsMsg(rsp *http.Response) (*ListRunStepsMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListRunStepsResponse{
+	response := &ListRunStepsMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23841,15 +23841,15 @@ func ParseListRunStepsResponse(rsp *http.Response) (*ListRunStepsResponse, error
 	return response, nil
 }
 
-// ParseGetRunStepResponse parses an HTTP response from a GetRunStepWithResponse call
-func ParseGetRunStepResponse(rsp *http.Response) (*GetRunStepResponse, error) {
+// ParseGetRunStepMsg parses an HTTP response from a GetRunStepWithResponse call
+func ParseGetRunStepMsg(rsp *http.Response) (*GetRunStepMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetRunStepResponse{
+	response := &GetRunStepMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23867,15 +23867,15 @@ func ParseGetRunStepResponse(rsp *http.Response) (*GetRunStepResponse, error) {
 	return response, nil
 }
 
-// ParseSubmitToolOuputsToRunResponse parses an HTTP response from a SubmitToolOuputsToRunWithResponse call
-func ParseSubmitToolOuputsToRunResponse(rsp *http.Response) (*SubmitToolOuputsToRunResponse, error) {
+// ParseSubmitToolOuputsToRunMsg parses an HTTP response from a SubmitToolOuputsToRunWithResponse call
+func ParseSubmitToolOuputsToRunMsg(rsp *http.Response) (*SubmitToolOuputsToRunMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &SubmitToolOuputsToRunResponse{
+	response := &SubmitToolOuputsToRunMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23893,15 +23893,15 @@ func ParseSubmitToolOuputsToRunResponse(rsp *http.Response) (*SubmitToolOuputsTo
 	return response, nil
 }
 
-// ParseCreateUploadResponse parses an HTTP response from a CreateUploadWithResponse call
-func ParseCreateUploadResponse(rsp *http.Response) (*CreateUploadResponse, error) {
+// ParseCreateUploadMsg parses an HTTP response from a CreateUploadWithResponse call
+func ParseCreateUploadMsg(rsp *http.Response) (*CreateUploadMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateUploadResponse{
+	response := &CreateUploadMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23919,15 +23919,15 @@ func ParseCreateUploadResponse(rsp *http.Response) (*CreateUploadResponse, error
 	return response, nil
 }
 
-// ParseCancelUploadResponse parses an HTTP response from a CancelUploadWithResponse call
-func ParseCancelUploadResponse(rsp *http.Response) (*CancelUploadResponse, error) {
+// ParseCancelUploadMsg parses an HTTP response from a CancelUploadWithResponse call
+func ParseCancelUploadMsg(rsp *http.Response) (*CancelUploadMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CancelUploadResponse{
+	response := &CancelUploadMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23945,15 +23945,15 @@ func ParseCancelUploadResponse(rsp *http.Response) (*CancelUploadResponse, error
 	return response, nil
 }
 
-// ParseCompleteUploadResponse parses an HTTP response from a CompleteUploadWithResponse call
-func ParseCompleteUploadResponse(rsp *http.Response) (*CompleteUploadResponse, error) {
+// ParseCompleteUploadMsg parses an HTTP response from a CompleteUploadWithResponse call
+func ParseCompleteUploadMsg(rsp *http.Response) (*CompleteUploadMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CompleteUploadResponse{
+	response := &CompleteUploadMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23971,15 +23971,15 @@ func ParseCompleteUploadResponse(rsp *http.Response) (*CompleteUploadResponse, e
 	return response, nil
 }
 
-// ParseAddUploadPartResponse parses an HTTP response from a AddUploadPartWithResponse call
-func ParseAddUploadPartResponse(rsp *http.Response) (*AddUploadPartResponse, error) {
+// ParseAddUploadPartMsg parses an HTTP response from a AddUploadPartWithResponse call
+func ParseAddUploadPartMsg(rsp *http.Response) (*AddUploadPartMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &AddUploadPartResponse{
+	response := &AddUploadPartMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -23997,15 +23997,15 @@ func ParseAddUploadPartResponse(rsp *http.Response) (*AddUploadPartResponse, err
 	return response, nil
 }
 
-// ParseListVectorStoresResponse parses an HTTP response from a ListVectorStoresWithResponse call
-func ParseListVectorStoresResponse(rsp *http.Response) (*ListVectorStoresResponse, error) {
+// ParseListVectorStoresMsg parses an HTTP response from a ListVectorStoresWithResponse call
+func ParseListVectorStoresMsg(rsp *http.Response) (*ListVectorStoresMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListVectorStoresResponse{
+	response := &ListVectorStoresMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -24023,15 +24023,15 @@ func ParseListVectorStoresResponse(rsp *http.Response) (*ListVectorStoresRespons
 	return response, nil
 }
 
-// ParseCreateVectorStoreResponse parses an HTTP response from a CreateVectorStoreWithResponse call
-func ParseCreateVectorStoreResponse(rsp *http.Response) (*CreateVectorStoreResponse, error) {
+// ParseCreateVectorStoreMsg parses an HTTP response from a CreateVectorStoreWithResponse call
+func ParseCreateVectorStoreMsg(rsp *http.Response) (*CreateVectorStoreMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateVectorStoreResponse{
+	response := &CreateVectorStoreMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -24049,15 +24049,15 @@ func ParseCreateVectorStoreResponse(rsp *http.Response) (*CreateVectorStoreRespo
 	return response, nil
 }
 
-// ParseDeleteVectorStoreResponse parses an HTTP response from a DeleteVectorStoreWithResponse call
-func ParseDeleteVectorStoreResponse(rsp *http.Response) (*DeleteVectorStoreResponse, error) {
+// ParseDeleteVectorStoreMsg parses an HTTP response from a DeleteVectorStoreWithResponse call
+func ParseDeleteVectorStoreMsg(rsp *http.Response) (*DeleteVectorStoreMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DeleteVectorStoreResponse{
+	response := &DeleteVectorStoreMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -24075,15 +24075,15 @@ func ParseDeleteVectorStoreResponse(rsp *http.Response) (*DeleteVectorStoreRespo
 	return response, nil
 }
 
-// ParseGetVectorStoreResponse parses an HTTP response from a GetVectorStoreWithResponse call
-func ParseGetVectorStoreResponse(rsp *http.Response) (*GetVectorStoreResponse, error) {
+// ParseGetVectorStoreMsg parses an HTTP response from a GetVectorStoreWithResponse call
+func ParseGetVectorStoreMsg(rsp *http.Response) (*GetVectorStoreMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetVectorStoreResponse{
+	response := &GetVectorStoreMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -24101,15 +24101,15 @@ func ParseGetVectorStoreResponse(rsp *http.Response) (*GetVectorStoreResponse, e
 	return response, nil
 }
 
-// ParseModifyVectorStoreResponse parses an HTTP response from a ModifyVectorStoreWithResponse call
-func ParseModifyVectorStoreResponse(rsp *http.Response) (*ModifyVectorStoreResponse, error) {
+// ParseModifyVectorStoreMsg parses an HTTP response from a ModifyVectorStoreWithResponse call
+func ParseModifyVectorStoreMsg(rsp *http.Response) (*ModifyVectorStoreMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ModifyVectorStoreResponse{
+	response := &ModifyVectorStoreMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -24127,15 +24127,15 @@ func ParseModifyVectorStoreResponse(rsp *http.Response) (*ModifyVectorStoreRespo
 	return response, nil
 }
 
-// ParseCreateVectorStoreFileBatchResponse parses an HTTP response from a CreateVectorStoreFileBatchWithResponse call
-func ParseCreateVectorStoreFileBatchResponse(rsp *http.Response) (*CreateVectorStoreFileBatchResponse, error) {
+// ParseCreateVectorStoreFileBatchMsg parses an HTTP response from a CreateVectorStoreFileBatchWithResponse call
+func ParseCreateVectorStoreFileBatchMsg(rsp *http.Response) (*CreateVectorStoreFileBatchMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateVectorStoreFileBatchResponse{
+	response := &CreateVectorStoreFileBatchMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -24153,15 +24153,15 @@ func ParseCreateVectorStoreFileBatchResponse(rsp *http.Response) (*CreateVectorS
 	return response, nil
 }
 
-// ParseGetVectorStoreFileBatchResponse parses an HTTP response from a GetVectorStoreFileBatchWithResponse call
-func ParseGetVectorStoreFileBatchResponse(rsp *http.Response) (*GetVectorStoreFileBatchResponse, error) {
+// ParseGetVectorStoreFileBatchMsg parses an HTTP response from a GetVectorStoreFileBatchWithResponse call
+func ParseGetVectorStoreFileBatchMsg(rsp *http.Response) (*GetVectorStoreFileBatchMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetVectorStoreFileBatchResponse{
+	response := &GetVectorStoreFileBatchMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -24179,15 +24179,15 @@ func ParseGetVectorStoreFileBatchResponse(rsp *http.Response) (*GetVectorStoreFi
 	return response, nil
 }
 
-// ParseCancelVectorStoreFileBatchResponse parses an HTTP response from a CancelVectorStoreFileBatchWithResponse call
-func ParseCancelVectorStoreFileBatchResponse(rsp *http.Response) (*CancelVectorStoreFileBatchResponse, error) {
+// ParseCancelVectorStoreFileBatchMsg parses an HTTP response from a CancelVectorStoreFileBatchWithResponse call
+func ParseCancelVectorStoreFileBatchMsg(rsp *http.Response) (*CancelVectorStoreFileBatchMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CancelVectorStoreFileBatchResponse{
+	response := &CancelVectorStoreFileBatchMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -24205,15 +24205,15 @@ func ParseCancelVectorStoreFileBatchResponse(rsp *http.Response) (*CancelVectorS
 	return response, nil
 }
 
-// ParseListFilesInVectorStoreBatchResponse parses an HTTP response from a ListFilesInVectorStoreBatchWithResponse call
-func ParseListFilesInVectorStoreBatchResponse(rsp *http.Response) (*ListFilesInVectorStoreBatchResponse, error) {
+// ParseListFilesInVectorStoreBatchMsg parses an HTTP response from a ListFilesInVectorStoreBatchWithResponse call
+func ParseListFilesInVectorStoreBatchMsg(rsp *http.Response) (*ListFilesInVectorStoreBatchMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListFilesInVectorStoreBatchResponse{
+	response := &ListFilesInVectorStoreBatchMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -24231,15 +24231,15 @@ func ParseListFilesInVectorStoreBatchResponse(rsp *http.Response) (*ListFilesInV
 	return response, nil
 }
 
-// ParseListVectorStoreFilesResponse parses an HTTP response from a ListVectorStoreFilesWithResponse call
-func ParseListVectorStoreFilesResponse(rsp *http.Response) (*ListVectorStoreFilesResponse, error) {
+// ParseListVectorStoreFilesMsg parses an HTTP response from a ListVectorStoreFilesWithResponse call
+func ParseListVectorStoreFilesMsg(rsp *http.Response) (*ListVectorStoreFilesMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListVectorStoreFilesResponse{
+	response := &ListVectorStoreFilesMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -24257,15 +24257,15 @@ func ParseListVectorStoreFilesResponse(rsp *http.Response) (*ListVectorStoreFile
 	return response, nil
 }
 
-// ParseCreateVectorStoreFileResponse parses an HTTP response from a CreateVectorStoreFileWithResponse call
-func ParseCreateVectorStoreFileResponse(rsp *http.Response) (*CreateVectorStoreFileResponse, error) {
+// ParseCreateVectorStoreFileMsg parses an HTTP response from a CreateVectorStoreFileWithResponse call
+func ParseCreateVectorStoreFileMsg(rsp *http.Response) (*CreateVectorStoreFileMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateVectorStoreFileResponse{
+	response := &CreateVectorStoreFileMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -24283,15 +24283,15 @@ func ParseCreateVectorStoreFileResponse(rsp *http.Response) (*CreateVectorStoreF
 	return response, nil
 }
 
-// ParseDeleteVectorStoreFileResponse parses an HTTP response from a DeleteVectorStoreFileWithResponse call
-func ParseDeleteVectorStoreFileResponse(rsp *http.Response) (*DeleteVectorStoreFileResponse, error) {
+// ParseDeleteVectorStoreFileMsg parses an HTTP response from a DeleteVectorStoreFileWithResponse call
+func ParseDeleteVectorStoreFileMsg(rsp *http.Response) (*DeleteVectorStoreFileMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DeleteVectorStoreFileResponse{
+	response := &DeleteVectorStoreFileMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -24309,15 +24309,15 @@ func ParseDeleteVectorStoreFileResponse(rsp *http.Response) (*DeleteVectorStoreF
 	return response, nil
 }
 
-// ParseGetVectorStoreFileResponse parses an HTTP response from a GetVectorStoreFileWithResponse call
-func ParseGetVectorStoreFileResponse(rsp *http.Response) (*GetVectorStoreFileResponse, error) {
+// ParseGetVectorStoreFileMsg parses an HTTP response from a GetVectorStoreFileWithResponse call
+func ParseGetVectorStoreFileMsg(rsp *http.Response) (*GetVectorStoreFileMsg, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetVectorStoreFileResponse{
+	response := &GetVectorStoreFileMsg{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
