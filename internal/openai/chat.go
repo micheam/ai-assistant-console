@@ -1,7 +1,9 @@
 package openai
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 )
 
@@ -17,7 +19,7 @@ var chatAvailableModels = []string{
 	"gpt-3.5-turbo",
 }
 
-var defaultChatModel = "gpt-4o"
+const DefaultChatModel = "gpt-4o"
 
 func ChatAvailableModels() []string {
 	return chatAvailableModels
@@ -40,7 +42,7 @@ func (c *ChatClient) Do(ctx context.Context, req *ChatRequest) (*ChatResponse, e
 	}
 
 	if req.Model == "" {
-		req.Model = defaultChatModel
+		req.Model = DefaultChatModel
 	}
 
 	resp := &ChatResponse{}
@@ -55,12 +57,24 @@ func (c *ChatClient) DoStream(ctx context.Context, req *ChatRequest, onReceive f
 	if !req.Stream {
 		req.Stream = true
 	}
-
 	if req.Model == "" {
-		req.Model = defaultChatModel
+		req.Model = DefaultChatModel
 	}
 
-	return c.client.ChatSubscribe(ctx, chatEndpoint, req, onReceive)
+	jsonBody, err := json.Marshal(req)
+	if err != nil {
+		return fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	onReceive_ := func(resp []byte) error {
+		var chatResp ChatResponse
+		err := json.Unmarshal(resp, &chatResp)
+		if err != nil {
+			return fmt.Errorf("failed to unmarshal response: %w", err)
+		}
+		return onReceive(&chatResp)
+	}
+	return c.client.doStream(ctx, chatEndpoint, bytes.NewReader(jsonBody), onReceive_)
 }
 
 // ChatRequest is used to make a request to the Chat API

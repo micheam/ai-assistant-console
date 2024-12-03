@@ -3,9 +3,13 @@
 package openai_test
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"micheam.com/aico/internal/openai"
 )
@@ -22,9 +26,10 @@ func TestChat_Do_EndToEnd(t *testing.T) {
 	defer cancel()
 
 	req := openai.NewChatRequest(
-		"",
+		openai.DefaultChatModel,
 		[]openai.Message{
-			{Role: openai.RoleUser, Content: "Hello, How are you?"},
+			{Role: openai.RoleUser, Content: fmt.Sprintf("Today is %s", time.Now().Format("01/02"))},
+			{Role: openai.RoleUser, Content: "What is the day after tomorrow?"},
 		},
 	)
 
@@ -34,6 +39,13 @@ func TestChat_Do_EndToEnd(t *testing.T) {
 	}
 
 	t.Logf("Response: %+v", res)
+	for _, choice := range res.Choices {
+		b := &bytes.Buffer{}
+		if err := json.NewEncoder(b).Encode(choice); err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("Choice: %s", b.String())
+	}
 }
 
 func TestChat_DoStream_EndToEnd(t *testing.T) {
@@ -48,17 +60,26 @@ func TestChat_DoStream_EndToEnd(t *testing.T) {
 	defer cancel()
 
 	req := openai.NewChatRequest(
-		"",
+		openai.DefaultChatModel,
 		[]openai.Message{
-			{Role: openai.RoleUser, Content: "Hello, How are you?"},
+			{Role: openai.RoleUser, Content: fmt.Sprintf("Today is %s", time.Now().Format("01/02"))},
+			{Role: openai.RoleUser, Content: "What is the day after tomorrow?"},
 		},
 	)
 
 	err := chat.DoStream(ctx, req, func(resp *openai.ChatResponse) error {
-		t.Logf("%s: %+v", resp.Choices[0].Delta.Content, resp.Choices[0])
+		t.Logf("Response: %+v", resp)
+		for _, choice := range resp.Choices {
+			b := &bytes.Buffer{}
+			if err := json.NewEncoder(b).Encode(choice); err != nil {
+				t.Fatal(err)
+			}
+			t.Logf("Choice: %s", b.String())
+		}
 		return nil
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
+
 }
