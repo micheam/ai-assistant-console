@@ -2,17 +2,16 @@ package main
 
 import (
 	"bufio"
-	"context"
 	_ "embed"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"strings"
 
 	"github.com/urfave/cli/v2"
 
 	"micheam.com/aico/internal/config"
+	"micheam.com/aico/internal/logging"
 	"micheam.com/aico/internal/openai"
 	"micheam.com/aico/internal/theme"
 	tui "micheam.com/aico/internal/tui/chat"
@@ -63,23 +62,13 @@ func app() *cli.App {
 			}
 
 			// Setup logger
-			logger := log.New(io.Discard, "", log.LstdFlags|log.LUTC)
+			logger, err := logging.SetupLogger(c.Bool("debug"), cfg.Logfile())
+			if err != nil {
+				return fmt.Errorf("setup logger: %w", err)
+			}
 			if c.Bool("debug") {
-				lfile := cfg.Logfile()
-				f, err := os.OpenFile(
-					lfile,
-					os.O_APPEND|os.O_CREATE|os.O_WRONLY,
-					0644,
-				)
-				if os.IsNotExist(err) {
-					if f, err = os.Create(lfile); err != nil {
-						return fmt.Errorf("prepare log file(%q): %w", lfile, err)
-					}
-				}
-
-				logger.SetOutput(f)
 				fmt.Println(theme.Info("Debug mode is on")) // TODO: promote to Logger or Presenter
-				fmt.Printf(theme.Info("You can find logs in %q\n"), lfile)
+				fmt.Printf(theme.Info("You can find logs in %q\n"), cfg.Logfile())
 				fmt.Println()
 			}
 
@@ -92,80 +81,56 @@ func app() *cli.App {
 			}
 
 			// Setup context
-			ctx = WithConfig(ctx, cfg)
-			ctx = WithLogger(ctx, logger)
-
+			ctx = config.WithConfig(ctx, cfg)
+			ctx = logging.WithLogger(ctx, logger)
 			c.Context = ctx
+
 			return nil
 		},
-		Commands: []*cli.Command{
-
-			{
-				Name:        "config",
-				Usage:       "Show config file path",
-				Description: "Show config file path",
-				Action: func(c *cli.Context) error {
-					path := config.ConfigFilePath(c.Context)
-					fmt.Println(path)
-					return nil
-				},
-			},
-
-			{
-				Name:        "tui",
-				Usage:       "Chat with AI in TUI",
-				Description: "Start TUI application to chat with AI",
-				Action: func(c *cli.Context) error {
-					ctx := c.Context
-					cfg := ConfigFrom(ctx)
-					logger := LoggerFrom(ctx)
-					logger.SetPrefix("[CHAT][TUI] ")
-
-					handler := tui.New(cfg, logger)
-					if persona, ok := cfg.Chat.GetPersona(c.String("persona")); ok {
-						handler = handler.WithPersona(persona)
-					}
-					return handler.Run(ctx)
-				},
-			},
-
-			SendMessageCommand,
-		},
+		Commands: commands,
 	}
-}
-
-// --------------------------------------------------------------------
-// Handle context
-// --------------------------------------------------------------------
-
-type contextKey int
-
-const (
-	contextKeyConfig contextKey = iota
-	contextKeyLogger
-)
-
-func WithConfig(ctx context.Context, cfg *config.Config) context.Context {
-	return context.WithValue(ctx, contextKeyConfig, cfg)
-}
-
-func ConfigFrom(ctx context.Context) *config.Config {
-	return ctx.Value(contextKeyConfig).(*config.Config)
-}
-
-func WithLogger(ctx context.Context, logger *log.Logger) context.Context {
-	return context.WithValue(ctx, contextKeyLogger, logger)
-}
-
-func LoggerFrom(ctx context.Context) *log.Logger {
-	return ctx.Value(contextKeyLogger).(*log.Logger)
 }
 
 // --------------------------------------------------------------------
 // Commands
 // --------------------------------------------------------------------
 
-var SendMessageCommand = &cli.Command{
+var commands = []*cli.Command{
+	configCommand,
+	startTUICommand,
+	sendMessageCommand,
+}
+
+var configCommand = &cli.Command{
+	Name:        "config",
+	Usage:       "Show config file path",
+	Description: "Show config file path",
+	Action: func(c *cli.Context) error {
+		path := config.ConfigFilePath(c.Context)
+		fmt.Println(path)
+		return nil
+	},
+}
+
+var startTUICommand = &cli.Command{
+	Name:        "tui",
+	Usage:       "Chat with AI in TUI",
+	Description: "Start TUI application to chat with AI",
+	Action: func(c *cli.Context) error {
+		ctx := c.Context
+		cfg := config.ConfigFrom(ctx)
+		logger := logging.LoggerFrom(ctx)
+		logger.SetPrefix("[CHAT][TUI] ")
+
+		handler := tui.New(cfg, logger)
+		if persona, ok := cfg.Chat.GetPersona(c.String("persona")); ok {
+			handler = handler.WithPersona(persona)
+		}
+		return handler.Run(ctx)
+	},
+}
+
+var sendMessageCommand = &cli.Command{
 	Name:        "send",
 	Usage:       "Send message to AI",
 	Description: "Send message to AI and get response",
@@ -178,101 +143,98 @@ var SendMessageCommand = &cli.Command{
 			TakesFile: true,
 		},
 	},
-	Action: sendMessage,
-}
+	Action: func(c *cli.Context) error {
+		var (
+			ctx       = c.Context
+			conf      = config.ConfigFrom(ctx)
+			logger    = logging.LoggerFrom(ctx)
+			fileInput = c.String("input")
+			msg       = c.Args().First()
+			persona   = c.String("persona")
+		)
 
-func sendMessage(c *cli.Context) error {
-	var (
-		ctx  = c.Context
-		conf = ConfigFrom(ctx)
+		logger.SetPrefix("[CHAT][CLI] ")
 
-		fileInput = c.String("input")
-		msg       = c.Args().First()
-		persona   = c.String("persona")
-	)
-
-	logger := LoggerFrom(ctx)
-	logger.SetPrefix("[CHAT][CLI] ")
-
-	var chat *openai.ChatClient
-	{
-		var apikey string
-		if apikey = os.Getenv(authEnvKey); apikey == "" {
-			logger.Printf("[ERROR] API Key (env: %s) is not set", authEnvKey)
-			return fmt.Errorf("API Key is not set, please set %s", authEnvKey)
+		var chat *openai.ChatClient
+		{
+			var apikey string
+			if apikey = os.Getenv(authEnvKey); apikey == "" {
+				logger.Printf("[ERROR] API Key (env: %s) is not set", authEnvKey)
+				return fmt.Errorf("API Key is not set, please set %s", authEnvKey)
+			}
+			client := openai.NewClient(apikey)
+			chat = openai.NewChatClient(client)
 		}
-		client := openai.NewClient(apikey)
-		chat = openai.NewChatClient(client)
-	}
 
-	messages := make([]openai.Message, 0)
+		messages := make([]openai.Message, 0)
 
-	// System messages from persona
-	if persona, ok := conf.Chat.GetPersona(persona); ok {
-		for _, msg := range persona.Messages {
-			messages = append(messages, openai.Message{
-				Role:    openai.RoleSystem,
-				Content: msg,
-			})
+		// System messages from persona
+		if persona, ok := conf.Chat.GetPersona(persona); ok {
+			for _, msg := range persona.Messages {
+				messages = append(messages, openai.Message{
+					Role:    openai.RoleSystem,
+					Content: msg,
+				})
+			}
 		}
-	}
 
-	// Handle user message
-	var inputMsg io.Reader
-	if msg != "" {
-		inputMsg = strings.NewReader(msg)
+		// Handle user message
+		var inputMsg io.Reader
+		if msg != "" {
+			inputMsg = strings.NewReader(msg)
 
-	} else if fileInput != "" {
-		f, err := os.Open(fileInput)
-		if err != nil {
-			return fmt.Errorf("open input file: %w", err)
+		} else if fileInput != "" {
+			f, err := os.Open(fileInput)
+			if err != nil {
+				return fmt.Errorf("open input file: %w", err)
+			}
+			defer f.Close()
+			inputMsg = f
+
+		} else if !isStdinEmpty() {
+			inputMsg = os.Stdin
+
+		} else {
+			return fmt.Errorf("no input message")
 		}
-		defer f.Close()
-		inputMsg = f
 
-	} else if !isStdinEmpty() {
-		inputMsg = os.Stdin
+		msgs := ParseInputMessage(inputMsg)
+		messages = append(messages, msgs...)
 
-	} else {
-		return fmt.Errorf("no input message")
-	}
+		// Send chat request
+		model := conf.Chat.Model
+		req := openai.NewChatRequest(model, messages)
+		req.Temperature = conf.Chat.Temperature
 
-	msgs := ParseInputMessage(inputMsg)
-	messages = append(messages, msgs...)
+		logger.Printf("ChatCompletion request: %+v", req)
 
-	// Send chat request
-	model := conf.Chat.Model
-	req := openai.NewChatRequest(model, messages)
-	req.Temperature = conf.Chat.Temperature
-
-	logger.Printf("ChatCompletion request: %+v", req)
-
-	cnt := 0
-	err := chat.DoStream(ctx, req, func(resp *openai.ChatResponse) error {
-		logger.Printf("ChatCompletion response: %+v", resp)
-		if cnt == 0 {
-			fmt.Println("Assistant:")
-			fmt.Println()
-		}
-		if len(resp.Choices) == 0 {
+		cnt := 0
+		err := chat.DoStream(ctx, req, func(resp *openai.ChatResponse) error {
+			logger.Printf("ChatCompletion response: %+v", resp)
+			if cnt == 0 {
+				fmt.Println("Assistant:")
+				fmt.Println()
+			}
+			if len(resp.Choices) == 0 {
+				return nil
+			}
+			if len(resp.Choices) > 1 {
+				logger.Printf("[WARN]: Got %d choices", len(resp.Choices))
+			}
+			if msg := resp.Choices[0].Delta; msg != nil {
+				fmt.Fprintf(os.Stdout, "%s", msg.Content)
+			}
+			cnt++
 			return nil
-		}
-		if len(resp.Choices) > 1 {
-			logger.Printf("[WARN]: Got %d choices", len(resp.Choices))
-		}
-		if msg := resp.Choices[0].Delta; msg != nil {
-			fmt.Fprintf(os.Stdout, "%s", msg.Content)
-		}
-		cnt++
-		return nil
-	})
-	fmt.Println()
+		})
+		fmt.Println()
 
-	if err != nil {
-		logger.Printf("Got error: %+v", err)
-		return fmt.Errorf("chat: %w", err)
-	}
-	return nil
+		if err != nil {
+			logger.Printf("Got error: %+v", err)
+			return fmt.Errorf("chat: %w", err)
+		}
+		return nil
+	},
 }
 
 // --------------------------------------------------------------------
