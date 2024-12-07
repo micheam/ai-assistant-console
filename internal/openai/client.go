@@ -144,6 +144,8 @@ type DebugTransport struct {
 	Transport http.RoundTripper
 }
 
+var _ http.RoundTripper = (*DebugTransport)(nil)
+
 func (d *DebugTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	var requestDump, responseDump []byte
 	defer func() {

@@ -171,8 +171,7 @@ var sendMessageCommand = &cli.Command{
 		// System messages from persona
 		if persona, ok := conf.Chat.GetPersona(persona); ok {
 			for _, msg := range persona.Messages {
-				messages = append(messages, openai.Message{
-					Role:    openai.RoleSystem,
+				messages = append(messages, &openai.SystemMessage{
 					Content: msg,
 				})
 			}
@@ -270,10 +269,24 @@ func ParseInputMessage(src io.Reader) []openai.Message {
 		}
 
 		if line == "" && content != "" { // empty line means end of message section
-			messages = append(messages, openai.Message{
-				Role:    role,
-				Content: content,
-			})
+			switch role {
+			case openai.RoleUser:
+				messages = append(messages, &openai.UserMessage{
+					Content: []openai.Content{
+						&openai.TextContent{Text: content},
+					},
+				})
+			case openai.RoleAssistant:
+				messages = append(messages, &openai.AssistantMessage{
+					Content: []openai.Content{
+						&openai.TextContent{Text: content},
+					},
+				})
+			case openai.RoleSystem:
+				messages = append(messages, &openai.SystemMessage{
+					Content: content,
+				})
+			}
 			content = ""
 			continue
 		}
@@ -284,10 +297,24 @@ func ParseInputMessage(src io.Reader) []openai.Message {
 	}
 
 	if content != "" {
-		messages = append(messages, openai.Message{
-			Role:    role,
-			Content: content,
-		})
+		switch role {
+		case openai.RoleUser:
+			messages = append(messages, &openai.UserMessage{
+				Content: []openai.Content{
+					&openai.TextContent{Text: content},
+				},
+			})
+		case openai.RoleAssistant:
+			messages = append(messages, &openai.AssistantMessage{
+				Content: []openai.Content{
+					&openai.TextContent{Text: content},
+				},
+			})
+		case openai.RoleSystem:
+			messages = append(messages, &openai.SystemMessage{
+				Content: content,
+			})
+		}
 	}
 
 	return messages

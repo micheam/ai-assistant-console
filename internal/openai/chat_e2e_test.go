@@ -1,15 +1,12 @@
-//go:build e2e
-
 package openai_test
 
 import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
+	"net/http"
 	"os"
 	"testing"
-	"time"
 
 	"micheam.com/aico/internal/openai"
 )
@@ -20,6 +17,8 @@ func TestChat_Do_EndToEnd(t *testing.T) {
 		t.Fatal("OPENAI_API_KEY is not set")
 	}
 	client := openai.NewClient(apikey)
+	httpClient := &http.Client{Transport: &openai.DebugTransport{Transport: http.DefaultTransport}}
+	client.SetHTTPClient(httpClient)
 	chat := openai.NewChatClient(client)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -28,8 +27,12 @@ func TestChat_Do_EndToEnd(t *testing.T) {
 	req := openai.NewChatRequest(
 		openai.DefaultChatModel,
 		[]openai.Message{
-			{Role: openai.RoleUser, Content: fmt.Sprintf("Today is %s", time.Now().Format("01/02"))},
-			{Role: openai.RoleUser, Content: "What is the day after tomorrow?"},
+			&openai.SystemMessage{Content: "Today is 01/02 and the weather is nice."},
+			&openai.UserMessage{
+				Content: []openai.Content{
+					&openai.TextContent{"What is the day after tomorrow?"},
+				},
+			},
 		},
 	)
 
@@ -54,6 +57,8 @@ func TestChat_DoStream_EndToEnd(t *testing.T) {
 		t.Fatal("OPENAI_API_KEY is not set")
 	}
 	client := openai.NewClient(apikey)
+	httpClient := &http.Client{Transport: &openai.DebugTransport{Transport: http.DefaultTransport}}
+	client.SetHTTPClient(httpClient)
 	chat := openai.NewChatClient(client)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -62,8 +67,12 @@ func TestChat_DoStream_EndToEnd(t *testing.T) {
 	req := openai.NewChatRequest(
 		openai.DefaultChatModel,
 		[]openai.Message{
-			{Role: openai.RoleUser, Content: fmt.Sprintf("Today is %s", time.Now().Format("01/02"))},
-			{Role: openai.RoleUser, Content: "What is the day after tomorrow?"},
+			&openai.SystemMessage{Content: "Today is 01/02 and the weather is nice."},
+			&openai.UserMessage{
+				Content: []openai.Content{
+					&openai.TextContent{"What is the day after tomorrow?"},
+				},
+			},
 		},
 	)
 
@@ -81,5 +90,4 @@ func TestChat_DoStream_EndToEnd(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
 }
