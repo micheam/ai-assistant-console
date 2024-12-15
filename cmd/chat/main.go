@@ -2,17 +2,17 @@ package main
 
 import (
 	"bufio"
-	"context"
 	_ "embed"
 	"fmt"
 	"io"
-	"log"
+	"net/url"
 	"os"
 	"strings"
 
 	"github.com/urfave/cli/v2"
 
 	"micheam.com/aico/internal/config"
+	"micheam.com/aico/internal/logging"
 	"micheam.com/aico/internal/openai"
 	"micheam.com/aico/internal/theme"
 	tui "micheam.com/aico/internal/tui/chat"
@@ -63,23 +63,13 @@ func app() *cli.App {
 			}
 
 			// Setup logger
-			logger := log.New(io.Discard, "", log.LstdFlags|log.LUTC)
+			logger, err := logging.SetupLogger(c.Bool("debug"), cfg.Logfile())
+			if err != nil {
+				return fmt.Errorf("setup logger: %w", err)
+			}
 			if c.Bool("debug") {
-				lfile := cfg.Logfile()
-				f, err := os.OpenFile(
-					lfile,
-					os.O_APPEND|os.O_CREATE|os.O_WRONLY,
-					0644,
-				)
-				if os.IsNotExist(err) {
-					if f, err = os.Create(lfile); err != nil {
-						return fmt.Errorf("prepare log file(%q): %w", lfile, err)
-					}
-				}
-
-				logger.SetOutput(f)
 				fmt.Println(theme.Info("Debug mode is on")) // TODO: promote to Logger or Presenter
-				fmt.Printf(theme.Info("You can find logs in %q\n"), lfile)
+				fmt.Printf(theme.Info("You can find logs in %q\n"), cfg.Logfile())
 				fmt.Println()
 			}
 
@@ -92,187 +82,187 @@ func app() *cli.App {
 			}
 
 			// Setup context
-			ctx = WithConfig(ctx, cfg)
-			ctx = WithLogger(ctx, logger)
-
+			ctx = config.WithConfig(ctx, cfg)
+			ctx = logging.WithLogger(ctx, logger)
 			c.Context = ctx
+
 			return nil
 		},
-		Commands: []*cli.Command{
-
-			{
-				Name:        "config",
-				Usage:       "Show config file path",
-				Description: "Show config file path",
-				Action: func(c *cli.Context) error {
-					path := config.ConfigFilePath(c.Context)
-					fmt.Println(path)
-					return nil
-				},
-			},
-
-			{
-				Name:        "tui",
-				Usage:       "Chat with AI in TUI",
-				Description: "Start TUI application to chat with AI",
-				Action: func(c *cli.Context) error {
-					ctx := c.Context
-					cfg := ConfigFrom(ctx)
-					logger := LoggerFrom(ctx)
-					logger.SetPrefix("[CHAT][TUI] ")
-
-					handler := tui.New(cfg, logger)
-					if persona, ok := cfg.Chat.GetPersona(c.String("persona")); ok {
-						handler = handler.WithPersona(persona)
-					}
-					return handler.Run(ctx)
-				},
-			},
-
-			SendMessageCommand,
-		},
+		Commands: commands,
 	}
-}
-
-// --------------------------------------------------------------------
-// Handle context
-// --------------------------------------------------------------------
-
-type contextKey int
-
-const (
-	contextKeyConfig contextKey = iota
-	contextKeyLogger
-)
-
-func WithConfig(ctx context.Context, cfg *config.Config) context.Context {
-	return context.WithValue(ctx, contextKeyConfig, cfg)
-}
-
-func ConfigFrom(ctx context.Context) *config.Config {
-	return ctx.Value(contextKeyConfig).(*config.Config)
-}
-
-func WithLogger(ctx context.Context, logger *log.Logger) context.Context {
-	return context.WithValue(ctx, contextKeyLogger, logger)
-}
-
-func LoggerFrom(ctx context.Context) *log.Logger {
-	return ctx.Value(contextKeyLogger).(*log.Logger)
 }
 
 // --------------------------------------------------------------------
 // Commands
 // --------------------------------------------------------------------
 
-var SendMessageCommand = &cli.Command{
+var commands = []*cli.Command{
+	configCommand,
+	startTUICommand,
+	sendMessageCommand,
+}
+
+var configCommand = &cli.Command{
+	Name:        "config",
+	Usage:       "Show config file path",
+	Description: "Show config file path",
+	Action: func(c *cli.Context) error {
+		path := config.ConfigFilePath(c.Context)
+		fmt.Println(path)
+		return nil
+	},
+}
+
+var startTUICommand = &cli.Command{
+	Name:        "tui",
+	Usage:       "Chat with AI in TUI",
+	Description: "Start TUI application to chat with AI",
+	Action: func(c *cli.Context) error {
+		ctx := c.Context
+		cfg := config.ConfigFrom(ctx)
+		logger := logging.LoggerFrom(ctx)
+		logger.SetPrefix("[CHAT][TUI] ")
+
+		handler := tui.New(cfg, logger)
+		if persona, ok := cfg.Chat.GetPersona(c.String("persona")); ok {
+			handler = handler.WithPersona(persona)
+		}
+		return handler.Run(ctx)
+	},
+}
+
+var sendMessageCommand = &cli.Command{
 	Name:        "send",
 	Usage:       "Send message to AI",
-	Description: "Send message to AI and get response",
+	Description: "Send message to AI and get response.",
 	ArgsUsage:   "MESSAGE",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:      "input",
 			Aliases:   []string{"i"},
-			Usage:     "Input file path",
+			Usage:     "Input file path. If not set, read from stdin.",
 			TakesFile: true,
 		},
+		&cli.BoolFlag{
+			Name:  "show-input-format",
+			Usage: "Show the expected input format and exit.",
+		},
 	},
-	Action: sendMessage,
-}
+	Action: func(c *cli.Context) error {
+		var (
+			ctx       = c.Context
+			conf      = config.ConfigFrom(ctx)
+			logger    = logging.LoggerFrom(ctx)
+			fileInput = c.String("input")
+			msg       = c.Args().First()
+			persona   = c.String("persona")
+		)
 
-func sendMessage(c *cli.Context) error {
-	var (
-		ctx  = c.Context
-		conf = ConfigFrom(ctx)
+		// Show input format and exit
+		if c.Bool("show-input-format") {
+			msg := `
+Expected input format:
 
-		fileInput = c.String("input")
-		msg       = c.Args().First()
-		persona   = c.String("persona")
-	)
+[Role]:
+[Message]
 
-	logger := LoggerFrom(ctx)
-	logger.SetPrefix("[CHAT][CLI] ")
+	Roles can be 'User:', 'Assistant:', or 'System:'.
 
-	var chat *openai.ChatClient
-	{
-		var apikey string
-		if apikey = os.Getenv(authEnvKey); apikey == "" {
-			logger.Printf("[ERROR] API Key (env: %s) is not set", authEnvKey)
-			return fmt.Errorf("API Key is not set, please set %s", authEnvKey)
-		}
-		client := openai.NewClient(apikey)
-		chat = openai.NewChatClient(client)
-	}
+Example:
 
-	messages := make([]openai.Message, 0)
+	System:
+	語尾に『にゃ』をつけて、可愛い猫ちゃんのように話すにゃ。
 
-	// System messages from persona
-	if persona, ok := conf.Chat.GetPersona(persona); ok {
-		for _, msg := range persona.Messages {
-			messages = append(messages, openai.Message{
-				Role:    openai.RoleSystem,
-				Content: msg,
-			})
-		}
-	}
+	User:
+	この画像には、何が写っていますか？
 
-	// Handle user message
-	var inputMsg io.Reader
-	if msg != "" {
-		inputMsg = strings.NewReader(msg)
-
-	} else if fileInput != "" {
-		f, err := os.Open(fileInput)
-		if err != nil {
-			return fmt.Errorf("open input file: %w", err)
-		}
-		defer f.Close()
-		inputMsg = f
-
-	} else if !isStdinEmpty() {
-		inputMsg = os.Stdin
-
-	} else {
-		return fmt.Errorf("no input message")
-	}
-
-	msgs := ParseInputMessage(inputMsg)
-	messages = append(messages, msgs...)
-
-	// Send chat request
-	model := conf.Chat.Model
-	req := openai.NewChatRequest(model, messages)
-	req.Temperature = conf.Chat.Temperature
-
-	logger.Printf("ChatCompletion request: %+v", req)
-
-	cnt := 0
-	err := chat.DoStream(ctx, req, func(resp *openai.ChatResponse) error {
-		logger.Printf("ChatCompletion response: %+v", resp)
-		if cnt == 0 {
-			fmt.Println("Assistant:")
-			fmt.Println()
-		}
-		if len(resp.Choices) == 0 {
+    <https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg>
+`
+			fmt.Fprintf(os.Stdout, "%s\n", msg)
 			return nil
 		}
-		if len(resp.Choices) > 1 {
-			logger.Printf("[WARN]: Got %d choices", len(resp.Choices))
-		}
-		if msg := resp.Choices[0].Delta; msg != nil {
-			fmt.Fprintf(os.Stdout, "%s", msg.Content)
-		}
-		cnt++
-		return nil
-	})
-	fmt.Println()
 
-	if err != nil {
-		logger.Printf("Got error: %+v", err)
-		return fmt.Errorf("chat: %w", err)
-	}
-	return nil
+		logger.SetPrefix("[CHAT][CLI] ")
+
+		var chat *openai.ChatClient
+		{
+			var apikey string
+			if apikey = os.Getenv(authEnvKey); apikey == "" {
+				logger.Printf("[ERROR] API Key (env: %s) is not set", authEnvKey)
+				return fmt.Errorf("API Key is not set, please set %s", authEnvKey)
+			}
+			client := openai.NewClient(apikey)
+			chat = openai.NewChatClient(client)
+		}
+
+		messages := make([]openai.Message, 0)
+
+		// System messages from persona
+		if persona, ok := conf.Chat.GetPersona(persona); ok {
+			for _, msg := range persona.Messages {
+				messages = append(messages, &openai.SystemMessage{
+					Content: msg,
+				})
+			}
+		}
+
+		// Handle user message
+		var inputMsg io.Reader
+		if msg != "" {
+			inputMsg = strings.NewReader(msg)
+
+		} else if fileInput != "" {
+			f, err := os.Open(fileInput)
+			if err != nil {
+				return fmt.Errorf("open input file: %w", err)
+			}
+			defer f.Close()
+			inputMsg = f
+
+		} else if !isStdinEmpty() {
+			inputMsg = os.Stdin
+
+		} else {
+			return fmt.Errorf("no input message")
+		}
+
+		msgs := ParseInputMessage(inputMsg)
+		messages = append(messages, msgs...)
+
+		// Send chat request
+		model := conf.Chat.Model
+		req := openai.NewChatRequest(model, messages)
+		req.Temperature = conf.Chat.Temperature
+
+		logger.Printf("ChatCompletion request: %+v", req)
+
+		cnt := 0
+		err := chat.DoStream(ctx, req, func(resp *openai.ChatResponse) error {
+			logger.Printf("ChatCompletion response: %+v", resp)
+			if cnt == 0 {
+				fmt.Println("Assistant:")
+				fmt.Println()
+			}
+			if len(resp.Choices) == 0 {
+				return nil
+			}
+			if len(resp.Choices) > 1 {
+				logger.Printf("[WARN]: Got %d choices", len(resp.Choices))
+			}
+			if msg := resp.Choices[0].Delta; msg != nil {
+				fmt.Fprintf(os.Stdout, "%s", msg.Content)
+			}
+			cnt++
+			return nil
+		})
+		fmt.Println()
+
+		if err != nil {
+			logger.Printf("Got error: %+v", err)
+			return fmt.Errorf("chat: %w", err)
+		}
+		return nil
+	},
 }
 
 // --------------------------------------------------------------------
@@ -281,13 +271,11 @@ func sendMessage(c *cli.Context) error {
 
 // ParseInputMessage parses input messages.
 func ParseInputMessage(src io.Reader) []openai.Message {
-
 	var (
 		messages = make([]openai.Message, 0)
 		scanner  = bufio.NewScanner(src)
-
-		role    = openai.RoleUser
-		content = ""
+		role     = openai.RoleUser
+		content  []openai.Content
 	)
 
 	for scanner.Scan() {
@@ -296,38 +284,71 @@ func ParseInputMessage(src io.Reader) []openai.Message {
 		switch { // detect Role with prompt
 		case strings.HasPrefix(line, "User:"):
 			role = openai.RoleUser
+			content = nil
 			continue
-
 		case strings.HasPrefix(line, "Assistant:"):
 			role = openai.RoleAssistant
+			content = nil
 			continue
-
 		case strings.HasPrefix(line, "System:"):
 			role = openai.RoleSystem
+			content = nil
 			continue
 		}
 
-		if line == "" && content != "" { // empty line means end of message section
-			messages = append(messages, openai.Message{
-				Role:    role,
-				Content: content,
-			})
-			content = ""
+		// Detect image URL
+		if strings.HasPrefix(line, "<") && strings.HasSuffix(line, ">") {
+			urlStr := line[1 : len(line)-1]
+			if u, err := url.Parse(urlStr); err == nil {
+				content = append(content, &openai.ImageContent{URL: *u})
+			}
 			continue
 		}
-		if content != "" { // soft break
-			content += "\n"
+
+		// Detect end of message section
+		if line == "" && len(content) > 0 {
+			switch role {
+			case openai.RoleUser:
+				messages = append(messages, &openai.UserMessage{Content: content})
+			case openai.RoleAssistant:
+				messages = append(messages, &openai.AssistantMessage{Content: content})
+			case openai.RoleSystem:
+				if len(content) == 1 {
+					if textContent, ok := content[0].(*openai.TextContent); ok {
+						messages = append(messages, &openai.SystemMessage{Content: textContent.Text})
+					}
+				}
+			}
+			content = nil
+			continue
 		}
-		content += line
+
+		// Append text content
+		if len(content) > 0 {
+			if last, ok := content[len(content)-1].(*openai.TextContent); ok {
+				last.Text += "\n" + line
+			} else {
+				content = append(content, &openai.TextContent{Text: line})
+			}
+		} else {
+			content = append(content, &openai.TextContent{Text: line})
+		}
 	}
 
-	if content != "" {
-		messages = append(messages, openai.Message{
-			Role:    role,
-			Content: content,
-		})
+	if len(content) > 0 {
+		switch role {
+		case openai.RoleUser:
+			messages = append(messages, &openai.UserMessage{Content: content})
+		case openai.RoleAssistant:
+			messages = append(messages, &openai.AssistantMessage{Content: content})
+		case openai.RoleSystem:
+			if len(content) == 1 {
+				if textContent, ok := content[0].(*openai.TextContent); ok {
+					messages = append(messages, &openai.SystemMessage{Content: textContent.Text})
+				}
+			}
+		}
 	}
-
 	return messages
 }
 

@@ -10,6 +10,20 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type contextKey int
+
+const (
+	contextKeyConfig contextKey = iota
+)
+
+func WithConfig(ctx context.Context, cfg *Config) context.Context {
+	return context.WithValue(ctx, contextKeyConfig, cfg)
+}
+
+func ConfigFrom(ctx context.Context) *Config {
+	return ctx.Value(contextKeyConfig).(*Config)
+}
+
 // Config is the configuration for the application
 type Config struct {
 	Chat Chat `yaml:"chat"`

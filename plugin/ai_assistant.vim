@@ -3,12 +3,11 @@ vim9script
 # g:ai_assistant_model
 #
 # The model of the Assistant, e.g. `gpt-4`, `gpt-4-turbo`, `gpt-4o`, etc.
-# The default value is `gpt-4-turbo`.
 def AssistantModel(): string
     if exists('g:ai_assistant_model')
         return g:ai_assistant_model
     endif
-    return 'gpt-4o'
+    return 'chatgpt-4o-latest'
 enddef
 
 # buffer local variables

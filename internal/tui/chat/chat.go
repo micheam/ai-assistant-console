@@ -6,6 +6,7 @@ import (
 	_ "embed"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -44,10 +45,7 @@ func (h *Handler) Run(ctx context.Context) error {
 
 	// System messages from persona
 	for _, msg := range h.persona.Messages {
-		messages = append(messages, openai.Message{
-			Role:    openai.RoleSystem,
-			Content: msg,
-		})
+		messages = append(messages, &openai.SystemMessage{Content: msg})
 	}
 
 	// Spinner settings
@@ -80,14 +78,24 @@ func (h *Handler) Run(ctx context.Context) error {
 
 		default: // store user input
 			h.logger.Printf("Input text: %s\n", text)
-			role := openai.RoleUser
 			if strings.HasPrefix(text, "SYSTEM:") {
-				role = openai.RoleSystem
+				messages = append(messages, &openai.SystemMessage{Content: text})
+			} else {
+				// Handle image URL
+				if strings.HasPrefix(text, "<") && strings.HasSuffix(text, ">") {
+					urlStr := text[1 : len(text)-1]
+					if u, err := url.Parse(urlStr); err == nil {
+						messages = append(messages, &openai.UserMessage{
+							Content: []openai.Content{&openai.ImageContent{URL: *u}},
+						})
+					}
+					continue
+				}
+				// Handle plain text
+				messages = append(messages, &openai.UserMessage{
+					Content: []openai.Content{&openai.TextContent{Text: text}},
+				})
 			}
-			messages = append(messages, openai.Message{
-				Role:    role,
-				Content: text,
-			})
 
 		case "": // empty input
 			continue
@@ -153,11 +161,9 @@ func (h *Handler) Run(ctx context.Context) error {
 			}
 			fmt.Printf("\n\n")
 
-			messages = append(messages, openai.Message{
-				Role:    openai.RoleAssistant,
-				Content: content.String(),
+			messages = append(messages, &openai.AssistantMessage{
+				Content: []openai.Content{&openai.TextContent{Text: content.String()}},
 			})
-
 		}
 	}
 }
