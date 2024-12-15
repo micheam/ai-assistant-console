@@ -133,14 +133,18 @@ var startTUICommand = &cli.Command{
 var sendMessageCommand = &cli.Command{
 	Name:        "send",
 	Usage:       "Send message to AI",
-	Description: "Send message to AI and get response",
+	Description: "Send message to AI and get response.",
 	ArgsUsage:   "MESSAGE",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:      "input",
 			Aliases:   []string{"i"},
-			Usage:     "Input file path",
+			Usage:     "Input file path. If not set, read from stdin.",
 			TakesFile: true,
+		},
+		&cli.BoolFlag{
+			Name:  "show-input-format",
+			Usage: "Show the expected input format and exit.",
 		},
 	},
 	Action: func(c *cli.Context) error {
@@ -152,6 +156,28 @@ var sendMessageCommand = &cli.Command{
 			msg       = c.Args().First()
 			persona   = c.String("persona")
 		)
+
+		// Show input format and exit
+		if c.Bool("show-input-format") {
+			msg := `
+Expected input format:
+
+[Role]:
+[Message]
+
+	Roles can be 'User:', 'Assistant:', or 'System:'.
+
+Example:
+
+	System:
+	語尾に『にゃ』をつけて、可愛い猫ちゃんのように話すにゃ。
+
+	User:
+	こんにちは、元気ですか？
+`
+			fmt.Fprintf(os.Stdout, "%s\n", msg)
+			return nil
+		}
 
 		logger.SetPrefix("[CHAT][CLI] ")
 
