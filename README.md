@@ -5,7 +5,7 @@
 
 ![screenshot](screenshot.png)
 
-AICO is an AI-powered text generation tool using OpenAI's GPT-4.
+AICO is an AI-powered text generation tool using OpenAI's GPT-4 and other supported models.
 
 ## Install
 
@@ -45,7 +45,7 @@ Once you have an API key, you can set it in the `OPENAI_API_KEY` environment var
 export OPENAI_API_KEY=<your API key>
 ```
 
-## Usage of `chat` Command
+## Usage of the `chat` Command
 
 After building the binary, you can run `chat` to start chatting with AI.
 
@@ -57,7 +57,7 @@ USAGE:
    chat [global options] command [command options] [arguments...]
 
 VERSION:
-   0.0.7
+   0.0.11
 
 
 COMMANDS:
@@ -94,6 +94,23 @@ Conversation with gpt-4-1106-preview
 > ;;
 
 Hello, world.
+```
+
+You can input Image URL to get the description of the image.
+(with `chatgpt-4o-latest` model)
+
+```bash
+$ chat --model=chatgpt-4o-latest tui
+Conversation with chatgpt-4o-latest
+------------------------------
+> What is in this image?
+> 
+> <https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg>
+> ;;
+
+This image shows a serene natural landscape with a wooden boardwalk path extending through a lush green
+ field. The sky is bright and blue with scattered clouds, creating a peaceful and vibrant outdoor scene.
+ Trees and bushes are visible in the background, adding to the natural beauty of the setting.
 ```
 
 ### Batch Mode
