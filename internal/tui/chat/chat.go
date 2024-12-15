@@ -6,6 +6,7 @@ import (
 	_ "embed"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -80,6 +81,17 @@ func (h *Handler) Run(ctx context.Context) error {
 			if strings.HasPrefix(text, "SYSTEM:") {
 				messages = append(messages, &openai.SystemMessage{Content: text})
 			} else {
+				// Handle image URL
+				if strings.HasPrefix(text, "<") && strings.HasSuffix(text, ">") {
+					urlStr := text[1 : len(text)-1]
+					if u, err := url.Parse(urlStr); err == nil {
+						messages = append(messages, &openai.UserMessage{
+							Content: []openai.Content{&openai.ImageContent{URL: *u}},
+						})
+					}
+					continue
+				}
+				// Handle plain text
 				messages = append(messages, &openai.UserMessage{
 					Content: []openai.Content{&openai.TextContent{Text: text}},
 				})

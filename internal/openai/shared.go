@@ -240,7 +240,7 @@ var _ Content = (*AudioContent)(nil)
 var _ Content = (*RefusalContent)(nil)
 
 func (c TextContent) Type() string    { return "text" }
-func (c ImageContent) Type() string   { return "image" }
+func (c ImageContent) Type() string   { return "image_url" }
 func (c AudioContent) Type() string   { return "audio" }
 func (c RefusalContent) Type() string { return "refusal" }
 
@@ -253,8 +253,8 @@ func (c TextContent) MarshalJSON() ([]byte, error) {
 
 func (c ImageContent) MarshalJSON() ([]byte, error) {
 	return json.Marshal(map[string]string{
-		"type":    c.Type(),
-		"content": c.URL.String(),
+		"type":      c.Type(),
+		"image_url": c.URL.String(),
 	})
 }
 

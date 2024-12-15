@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"strings"
 
@@ -173,7 +174,9 @@ Example:
 	語尾に『にゃ』をつけて、可愛い猫ちゃんのように話すにゃ。
 
 	User:
-	こんにちは、元気ですか？
+	この画像には、何が写っていますか？
+
+    <https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg>
 `
 			fmt.Fprintf(os.Stdout, "%s\n", msg)
 			return nil
@@ -268,13 +271,11 @@ Example:
 
 // ParseInputMessage parses input messages.
 func ParseInputMessage(src io.Reader) []openai.Message {
-
 	var (
 		messages = make([]openai.Message, 0)
 		scanner  = bufio.NewScanner(src)
-
-		role    = openai.RoleUser
-		content = ""
+		role     = openai.RoleUser
+		content  []openai.Content
 	)
 
 	for scanner.Scan() {
@@ -283,66 +284,71 @@ func ParseInputMessage(src io.Reader) []openai.Message {
 		switch { // detect Role with prompt
 		case strings.HasPrefix(line, "User:"):
 			role = openai.RoleUser
+			content = nil
 			continue
-
 		case strings.HasPrefix(line, "Assistant:"):
 			role = openai.RoleAssistant
+			content = nil
 			continue
-
 		case strings.HasPrefix(line, "System:"):
 			role = openai.RoleSystem
+			content = nil
 			continue
 		}
 
-		if line == "" && content != "" { // empty line means end of message section
+		// Detect image URL
+		if strings.HasPrefix(line, "<") && strings.HasSuffix(line, ">") {
+			urlStr := line[1 : len(line)-1]
+			if u, err := url.Parse(urlStr); err == nil {
+				content = append(content, &openai.ImageContent{URL: *u})
+			}
+			continue
+		}
+
+		// Detect end of message section
+		if line == "" && len(content) > 0 {
 			switch role {
 			case openai.RoleUser:
-				messages = append(messages, &openai.UserMessage{
-					Content: []openai.Content{
-						&openai.TextContent{Text: content},
-					},
-				})
+				messages = append(messages, &openai.UserMessage{Content: content})
 			case openai.RoleAssistant:
-				messages = append(messages, &openai.AssistantMessage{
-					Content: []openai.Content{
-						&openai.TextContent{Text: content},
-					},
-				})
+				messages = append(messages, &openai.AssistantMessage{Content: content})
 			case openai.RoleSystem:
-				messages = append(messages, &openai.SystemMessage{
-					Content: content,
-				})
+				if len(content) == 1 {
+					if textContent, ok := content[0].(*openai.TextContent); ok {
+						messages = append(messages, &openai.SystemMessage{Content: textContent.Text})
+					}
+				}
 			}
-			content = ""
+			content = nil
 			continue
 		}
-		if content != "" { // soft break
-			content += "\n"
+
+		// Append text content
+		if len(content) > 0 {
+			if last, ok := content[len(content)-1].(*openai.TextContent); ok {
+				last.Text += "\n" + line
+			} else {
+				content = append(content, &openai.TextContent{Text: line})
+			}
+		} else {
+			content = append(content, &openai.TextContent{Text: line})
 		}
-		content += line
 	}
 
-	if content != "" {
+	if len(content) > 0 {
 		switch role {
 		case openai.RoleUser:
-			messages = append(messages, &openai.UserMessage{
-				Content: []openai.Content{
-					&openai.TextContent{Text: content},
-				},
-			})
+			messages = append(messages, &openai.UserMessage{Content: content})
 		case openai.RoleAssistant:
-			messages = append(messages, &openai.AssistantMessage{
-				Content: []openai.Content{
-					&openai.TextContent{Text: content},
-				},
-			})
+			messages = append(messages, &openai.AssistantMessage{Content: content})
 		case openai.RoleSystem:
-			messages = append(messages, &openai.SystemMessage{
-				Content: content,
-			})
+			if len(content) == 1 {
+				if textContent, ok := content[0].(*openai.TextContent); ok {
+					messages = append(messages, &openai.SystemMessage{Content: textContent.Text})
+				}
+			}
 		}
 	}
-
 	return messages
 }
 

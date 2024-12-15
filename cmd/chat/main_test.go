@@ -20,14 +20,12 @@ func TestParseInputMessages(t *testing.T) {
 			want:  []openai.Message{},
 		},
 		"without prompt": {
-			input: `
-Hello, I'm a human.
+			input: `Hello, I'm a human.
 Nice to meet you.
 How are you?`,
 			want: []openai.Message{
-				{
-					Role:    openai.RoleUser,
-					Content: "Hello, I'm a human.\nNice to meet you.\nHow are you?",
+				&openai.UserMessage{
+					Content: []openai.Content{&openai.TextContent{Text: "Hello, I'm a human.\nNice to meet you.\nHow are you?"}},
 				},
 			},
 		},
@@ -38,14 +36,8 @@ Nice to meet you.
 How are you?
 `,
 			want: []openai.Message{
-				{
-					Role:    openai.RoleUser,
-					Content: "Hello, I'm a human.\nNice to meet you.",
-				},
-				{
-					Role:    openai.RoleUser,
-					Content: "How are you?",
-				},
+				&openai.UserMessage{Content: []openai.Content{&openai.TextContent{Text: "Hello, I'm a human.\nNice to meet you."}}},
+				&openai.UserMessage{Content: []openai.Content{&openai.TextContent{Text: "How are you?"}}},
 			},
 		},
 		"prompt line with role": {
@@ -60,17 +52,14 @@ User:
 What is the weather today?
 `,
 			want: []openai.Message{
-				{
-					Role:    openai.RoleUser,
-					Content: "Hello, I'm a human.\nNice to meet you.",
+				&openai.UserMessage{
+					Content: []openai.Content{&openai.TextContent{Text: "Hello, I'm a human.\nNice to meet you."}},
 				},
-				{
-					Role:    openai.RoleAssistant,
-					Content: "Hello! Nice to meet you too. How can I assist you today?",
+				&openai.AssistantMessage{
+					Content: []openai.Content{&openai.TextContent{Text: "Hello! Nice to meet you too. How can I assist you today?"}},
 				},
-				{
-					Role:    openai.RoleUser,
-					Content: "What is the weather today?",
+				&openai.UserMessage{
+					Content: []openai.Content{&openai.TextContent{Text: "What is the weather today?"}},
 				},
 			},
 		},
@@ -80,24 +69,20 @@ Hello, I'm a human.
 Nice to meet you.
 
 Assistant: -----------------------------------
-
 Hello! Nice to meet you too. How can I assist you today?
 
 User: --------------------------------
 What is the weather today?
 `,
 			want: []openai.Message{
-				{
-					Role:    openai.RoleUser,
-					Content: "Hello, I'm a human.\nNice to meet you.",
+				&openai.UserMessage{
+					Content: []openai.Content{&openai.TextContent{Text: "Hello, I'm a human.\nNice to meet you."}},
 				},
-				{
-					Role:    openai.RoleAssistant,
-					Content: "Hello! Nice to meet you too. How can I assist you today?",
+				&openai.AssistantMessage{
+					Content: []openai.Content{&openai.TextContent{Text: "Hello! Nice to meet you too. How can I assist you today?"}},
 				},
-				{
-					Role:    openai.RoleUser,
-					Content: "What is the weather today?",
+				&openai.UserMessage{
+					Content: []openai.Content{&openai.TextContent{Text: "What is the weather today?"}},
 				},
 			},
 		},

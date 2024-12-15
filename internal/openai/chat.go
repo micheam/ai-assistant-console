@@ -13,13 +13,16 @@ const chatEndpoint = "https://api.openai.com/v1/chat/completions"
 //
 // https://platform.openai.com/docs/models/model-endpoint-compatibility#model-endpoint-compatibility
 var chatAvailableModels = []string{
-	"apt-4o",
+	"gpt-4o",
 	"gpt-4o-mini",
+	"gpt-4-turbo",
 	"gpt-4",
 	"gpt-3.5-turbo",
+
+	"chatgpt-4o-latest", // continuously points to the version of GPT-4o used in ChatGPT
 }
 
-const DefaultChatModel = "gpt-4o"
+const DefaultChatModel = "chatgpt-4o-latest"
 
 func ChatAvailableModels() []string {
 	return chatAvailableModels
