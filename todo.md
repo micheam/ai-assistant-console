@@ -14,3 +14,4 @@
     * [Edit Image](https://platform.openai.com/docs/guides/images#edits-dall-e-2-only) (DALL-E 2 only)
     * [Variations](https://platform.openai.com/docs/guides/images#variations-dall-e-2-only) (DALL-E 2 only)
 
+- Add support for managing chat history (or thread)
