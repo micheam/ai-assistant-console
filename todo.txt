@@ -1,0 +1,8 @@
+(A) Support PLaMoAPI +PlaMo
+(A) Support PerplexityAPI +Perplexity
+(A) Support GeminiAPI +Gemini
+(B) Support [Image Generation](https://platform.openai.com/docs/guides/images?lang=curl) +OpenAI
+(B) Support [ImageGeneration](https://platform.openai.com/docs/guides/images?lang=curl#example-dall-e-3-generations) +OpenAI
+(B) Support [EditImage](https://platform.openai.com/docs/guides/images#edits-dall-e-2-only) +OpenAI
+(B) Support [Variations](https://platform.openai.com/docs/guides/images#variations-dall-e-2-only) +OpenAI
+(C) Add support for managing chat history +Common
