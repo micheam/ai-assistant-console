@@ -22,27 +22,34 @@ def AssistantModel(): string
     return 'chatgpt-4o-latest'
 enddef
 
+# ======================
 # buffer local variables
+# ======================
 #
-# b:context_bufs - the buffer numbers. This is used to get the context of the
-#                  chat with AI-Assistant. Index 0 (primary context) is the
-#                  buffer number when StartChatWindow is called.
+# * `b:aico_src_buf` number - the buffer number of the source buffer.
+#
+# * `b:aico_context_bufs` list<number> - a list of buffer numbers.
+#
+#     the buffer numbers. This is used to get the context of the
+#     chat with AI-Assistant. Index 0 (primary context) is the
+#     buffer number when StartChatWindow is called.
 #
 
 def StartChatWindow()
-    const src_buf = bufnr('%') # Use current buffer as a primary context source
+    const src_buf_nr = bufnr('%')
 
     new # Create a new buffer
     setlocal buftype=nofile bufhidden=wipe noswapfile
     setlocal filetype=markdown
-    b:context_bufs = [src_buf]
+    b:aico_src_buf = src_buf_nr
+    b:aico_context_bufs = [src_buf_nr] # Use as the primary context buffer.
     b:chat_window = true # Mark this buffer as a chat window
 
     # Set the buffer name
     # The buffer name is the name of the current file
     # with the extension replaced by `.chat`
     # e.g. `foo.txt` -> `foo.chat`
-    execute $"file {bufname(src_buf)}.chat"
+    execute $"file {bufname(src_buf_nr)}.chat"
 
     # Set buffer local commands
     command! -buffer          Send          SendThread()
@@ -69,30 +76,30 @@ def StartChatWindow()
 enddef
 
 def AppendContextBuf(bufnr: number): void
-    if !exists('b:context_bufs')
-        b:context_bufs = []
+    if !exists('b:aico_context_bufs')
+        b:aico_context_bufs = []
     endif
-    b:context_bufs->add(bufnr)
+    b:aico_context_bufs->add(bufnr)
 enddef
 
 def SyncContextBufs(): void
-    # * b:context_bufs[0] is the primary context buffer, so we don't want to clear it.
+    # * b:aico_context_bufs[0] is the primary context buffer, so we don't want to clear it.
     # * skip chat window buffer
-    const primary_buf = b:context_bufs[0]
-    b:context_bufs = [primary_buf]
+    const primary_buf = b:aico_context_bufs[0]
+    b:aico_context_bufs = [primary_buf]
     for bufnr in filter(range(1, bufnr('$')), 'v:val->buflisted()')
         if bufnr == primary_buf || bufnr->getbufvar('&buftype') ==# 'nofile'
             continue
         endif
         if bufnr->bufexists()
-            b:context_bufs->add(bufnr)
+            b:aico_context_bufs->add(bufnr)
         endif
     endfor
 enddef
 
 def ListContextBufs()
-    if exists('b:context_bufs')
-       for bufnr in b:context_bufs
+    if exists('b:aico_context_bufs')
+       for bufnr in b:aico_context_bufs
            echo $"{bufnr}: {bufname(bufnr)}"
         endfor
     else
@@ -124,7 +131,7 @@ def SendThread()
     #
     #   Context of this chat is below:
     #
-    #   <for each buffer in b:context_bufs>
+    #   <for each buffer in b:aico_context_bufs>
     #
     #   <filename of the buffer>
     #
@@ -141,7 +148,7 @@ def SendThread()
     add(messages, "Context of this chat is below:")
     add(messages, "")
 
-    for context_buf in b:context_bufs
+    for context_buf in b:aico_context_bufs
         add(messages, bufname(context_buf))
         add(messages, "")
         add(messages, "~~~" .. getbufvar(context_buf, '&filetype'))
