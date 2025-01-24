@@ -12,6 +12,10 @@ vim9script
 #
 #===============================================================================
 
+# XXX: Want to use autoload, but it seems not working with Vim9Script...
+#      https://github.com/vim/vim/issues/15031
+import autoload './uiwidget.vim'
+
 # g:ai_assistant_model
 #
 # The model of the Assistant, e.g. `gpt-4`, `gpt-4-turbo`, `gpt-4o`, etc.
@@ -45,8 +49,6 @@ def StartChatWindow()
     b:aico_context_bufs = [src_buf_nr] # Use as the primary context buffer.
     b:aico_chat_window = true # Mark this buffer as a chat window
 
-    # Set the buffer name
-    # The buffer name is the name of the current file
     # with the extension replaced by `.chat`
     # e.g. `foo.txt` -> `foo.chat`
     execute $"file {bufname(src_buf_nr)}.chat"
@@ -63,6 +65,9 @@ def StartChatWindow()
     }
     command! -buffer          ContextClear  {
         b:aico_context_bufs = []
+    }
+    command! -buffer          ContextSelect {
+        SelectContextBufUI()
     }
     command! -buffer          ContextList   ListContextBufs()
 
@@ -104,6 +109,20 @@ enddef
 # ListedBufs returns a list of buffer numbers that are listed.
 def ListedBufs(): list<number>
     return range(1, bufnr('$'))->filter((_, bufnr) => buflisted(bufnr))
+enddef
+
+def SelectContextBufUI(): void
+    const buf_list = ListedBufs()
+    const buf_names = buf_list->mapnew((_, bufnr) => {
+            const bufnm = bufname(bufnr)
+            const dispnm = bufnm ==# "" ? $"[No Name]" : bufnm
+            return $'{printf("%3d", bufnr)}: {dispnm}'
+        })
+    const ui = uiwidget.MultiSelect.new(buf_names, (selected_indices): bool => {
+            b:aico_context_bufs = selected_indices->mapnew((_, selected: number) => buf_list[selected])
+            return true
+        })
+    ui.Render()
 enddef
 
 def ListContextBufs()
@@ -256,7 +275,5 @@ def HrLine(): string
     # fill the current window with `-`
     return repeat("-", winwidth(0) - 5)
 enddef
-
-defcompile
 
 command! -nargs=? Assistant StartChatWindow(<f-args>)
