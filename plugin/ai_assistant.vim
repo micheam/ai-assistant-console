@@ -61,6 +61,9 @@ def StartChatWindow()
         echo "Context buffers are updated"
         ListContextBufs()
     }
+    command! -buffer          ContextClear  {
+        b:aico_context_bufs = []
+    }
     command! -buffer          ContextList   ListContextBufs()
 
     # Set buffer local mappings
