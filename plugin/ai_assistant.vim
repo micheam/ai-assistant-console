@@ -43,7 +43,7 @@ def StartChatWindow()
     setlocal filetype=markdown
     b:aico_src_buf = src_buf_nr
     b:aico_context_bufs = [src_buf_nr] # Use as the primary context buffer.
-    b:chat_window = true # Mark this buffer as a chat window
+    b:aico_chat_window = true # Mark this buffer as a chat window
 
     # Set the buffer name
     # The buffer name is the name of the current file
@@ -85,16 +85,22 @@ enddef
 def SyncContextBufs(): void
     # * b:aico_context_bufs[0] is the primary context buffer, so we don't want to clear it.
     # * skip chat window buffer
-    const primary_buf = b:aico_context_bufs[0]
-    b:aico_context_bufs = [primary_buf]
-    for bufnr in filter(range(1, bufnr('$')), 'v:val->buflisted()')
-        if bufnr == primary_buf || bufnr->getbufvar('&buftype') ==# 'nofile'
-            continue
+    b:aico_context_bufs = [b:aico_src_buf]
+    for nr in ListedBufs()
+        if nr == b:aico_src_buf
+            continue # primary_buf is already added
+        elseif nr == bufnr('%')
+            continue # NEVER SENd chat window buffer itself
         endif
-        if bufnr->bufexists()
-            b:aico_context_bufs->add(bufnr)
+        if nr->bufexists()
+            b:aico_context_bufs->add(nr)
         endif
     endfor
+enddef
+
+# ListedBufs returns a list of buffer numbers that are listed.
+def ListedBufs(): list<number>
+    return range(1, bufnr('$'))->filter((_, bufnr) => buflisted(bufnr))
 enddef
 
 def ListContextBufs()
@@ -110,7 +116,7 @@ enddef
 def SendThread()
 
     # Gurd: check if the current buffer is a chat window
-    if !exists('b:chat_window')
+    if !exists('b:aico_chat_window')
         echoerr $"The current buffer is not a chat window"
         return
     endif
@@ -206,7 +212,7 @@ enddef
 
 def ClearThread()
     # Gurd: check if the current buffer is a chat window
-    if !exists('b:chat_window')
+    if !exists('b:aico_chat_window')
         echoerr $"The current buffer is not a chat window"
         return
     endif
