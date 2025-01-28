@@ -6,7 +6,7 @@ vim9script
 # Author: Michito Maeda <michto.maeda@gmail.com>
 # License: MIT
 # Created: 2025-01-20
-# Last Updated: 2025-01-29T01:51:18+09:00
+# Last Updated: 2025-01-29T02:47:51+09:00
 # Version: 0.1.0
 # Dependencies: 
 #   - Vim 9.0 or higher
@@ -102,6 +102,10 @@ export class MultiSelect
         endif
     enddef
 
+    def SetSelectedIndices(selected_indices: list<number>)
+        this.selected_indices = selected_indices
+    enddef
+
     # Handle key press event, return true to consume the key
     def _handleKeyPress(winid: number, key: string): bool
         const linenum = getcurpos(winid)[1] # 1-based line number
@@ -140,4 +144,3 @@ export class MultiSelect
         this.selected_indices->remove(found_at)
     enddef
 endclass
-

@@ -119,14 +119,18 @@ enddef
 def SelectContextBufUI(): void
     const buf_list = ListedBufs()
     const buf_names = buf_list->mapnew((_, bufnr) => {
-            const bufnm = bufname(bufnr)
-            const dispnm = bufnm ==# "" ? $"[No Name]" : bufnm
-            return $'{printf("%3d", bufnr)}: {dispnm}'
-        })
+        const bufnm = bufname(bufnr)
+        const dispnm = bufnm ==# "" ? $"[No Name]" : bufnm
+        return $'{printf("%3d", bufnr)}: {dispnm}'
+    })
     const ui = uiwidget.MultiSelect.new(buf_names, (selected_indices): bool => {
-            b:aico_context_bufs = selected_indices->mapnew((_, selected: number) => buf_list[selected])
-            return true
-        })
+        b:aico_context_bufs = selected_indices->mapnew((_, selected: number) => buf_list[selected])
+        return true
+    })
+    if exists('b:aico_context_bufs') && len(b:aico_context_bufs) > 0 
+        echomsg $"{typename(b:aico_context_bufs)}: {b:aico_context_bufs}"
+        ui.SetSelectedIndices(b:aico_context_bufs->mapnew((_, bufnr) => buf_list->index(bufnr)))
+    endif
     ui.Render()
 enddef
 
