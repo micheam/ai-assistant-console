@@ -14,6 +14,7 @@ vim9script
 
 # XXX: Want to use autoload, but it seems not working with Vim9Script...
 #      https://github.com/vim/vim/issues/15031
+#      https://github.com/vim/vim/pull/16521
 import autoload './uiwidget.vim'
 
 # g:ai_assistant_model
