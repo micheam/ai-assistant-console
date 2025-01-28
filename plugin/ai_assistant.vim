@@ -43,8 +43,12 @@ def StartChatWindow()
     const src_buf_nr = bufnr('%')
 
     new # Create a new buffer
-    setlocal buftype=nofile bufhidden=wipe noswapfile
+    setlocal buftype=nofile
+    setlocal bufhidden=wipe
+    setlocal noswapfile
+    setlocal nobuflisted
     setlocal filetype=markdown
+
     b:aico_src_buf = src_buf_nr
     b:aico_context_bufs = [src_buf_nr] # Use as the primary context buffer.
     b:aico_chat_window = true # Mark this buffer as a chat window
