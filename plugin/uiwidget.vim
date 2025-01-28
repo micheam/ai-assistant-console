@@ -6,7 +6,7 @@ vim9script
 # Author: Michito Maeda <michto.maeda@gmail.com>
 # License: MIT
 # Created: 2025-01-20
-# Last Updated: 2025-01-24T13:05:43+09:00
+# Last Updated: 2025-01-29T01:28:54+09:00
 # Version: 0.1.0
 # Dependencies: 
 #   - Vim 9.0 or higher
@@ -48,9 +48,14 @@ export class MultiSelect
 
     var Handler: func(list<number>): bool
 
+    # Internal state
     var items: list<string>
     var winid: number = -1
     var selected_indices: list<number> # elements are 0-based indices
+
+    # Style settings
+    public var borderchars = ['─', '│', '─', '│', '╭', '╮', '╯', '╰']
+    public var border = [1, 1, 1, 1]
 
     def new(this.items, this.Handler)
     enddef
@@ -79,8 +84,9 @@ export class MultiSelect
             filter: this._handleKeyPress,
             drag: true,
             cursorline: true,
-            border: [1, 1, 1, 1],
-            borderchars: ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
+
+            border: this.border,
+            borderchars: this.borderchars,
         })
         this.winid = winid
     enddef
