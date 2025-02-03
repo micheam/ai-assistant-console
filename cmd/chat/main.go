@@ -232,7 +232,9 @@ Example:
 		// Send chat request
 		model := conf.Chat.Model
 		req := openai.NewChatRequest(model, messages)
-		req.Temperature = conf.Chat.Temperature
+		if t := conf.Chat.Temperature; t != nil {
+			req.Temperature = *t
+		}
 
 		logger.Printf("ChatCompletion request: %+v", req)
 

@@ -109,7 +109,9 @@ func (h *Handler) Run(ctx context.Context) error {
 			defer spinner.Stop()
 
 			req := openai.NewChatRequest(model, messages)
-			req.Temperature = h.cfg.Chat.Temperature
+			if t := h.cfg.Chat.Temperature; t != nil {
+				req.Temperature = *t
+			}
 			req.Model = h.cfg.Chat.Model
 			h.logger.Printf("ChatCompletion request: %+v\n", req)
 

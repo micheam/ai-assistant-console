@@ -41,7 +41,7 @@ type Chat struct {
 	Model string `yaml:"model"`
 
 	// Temperature is the temperature to use for the chat
-	Temperature float64 `yaml:"temperature"`
+	Temperature *float64 `yaml:"temperature"`
 
 	// Persona is the persona to use for the chat
 	Persona map[string]Personality `yaml:"persona"`
@@ -114,9 +114,6 @@ func logfilePath(_ context.Context) string {
 const (
 	// DefaultModel is the default model to use for the chat
 	DefaultModel = "gpt-4"
-
-	// DefaultTemperature is the default temperature to use for the chat
-	DefaultTemperature = 0.5
 
 	// ApplicationName is the name of the application
 	ApplicationName = "com.micheam.aico"
@@ -198,8 +195,7 @@ func DefaultConfig() *Config {
 	return &Config{
 		logfile: logfilePath(context.Background()),
 		Chat: Chat{
-			Model:       DefaultModel,
-			Temperature: DefaultTemperature,
+			Model: DefaultModel,
 			Persona: map[string]Personality{
 				"default": defaultPersona,
 			},

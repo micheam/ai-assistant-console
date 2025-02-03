@@ -6,13 +6,15 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/stretchr/testify/assert"
+
+	"micheam.com/aico/internal/pointer"
 )
 
 func TestLoadConfig(t *testing.T) {
 	want := &Config{
 		Chat: Chat{
 			Model:       "gpt-3.5-turbo",
-			Temperature: 0.5,
+			Temperature: pointer.Ptr(float64(0.5)),
 			Persona: map[string]Personality{
 				"default": {
 					Description: "Professional",
