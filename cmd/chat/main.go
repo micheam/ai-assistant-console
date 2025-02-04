@@ -63,15 +63,20 @@ func app() *cli.App {
 			}
 
 			// Setup logger
-			logger, err := logging.SetupLogger(c.Bool("debug"), cfg.Logfile())
-			if err != nil {
-				return fmt.Errorf("setup logger: %w", err)
-			}
+			level := logging.LevelInfo
+			logfile := cfg.Logfile()
 			if c.Bool("debug") {
+				level = logging.LevelDebug
 				fmt.Println(theme.Info("Debug mode is on")) // TODO: promote to Logger or Presenter
-				fmt.Printf(theme.Info("You can find logs in %q\n"), cfg.Logfile())
+				fmt.Printf(theme.Info("You can find logs in %q\n"), logfile)
 				fmt.Println()
 			}
+			f, err := os.OpenFile(logfile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+			if err != nil {
+				return fmt.Errorf("open log file: %w", err)
+			}
+			logger := logging.New(f, &logging.Options{Level: level, AddSource: true})
+			logger.Info("Starting chat application", "version", version)
 
 			// Override model if specified with flag
 			if model := c.String("model"); model != "" {
@@ -82,9 +87,7 @@ func app() *cli.App {
 			}
 
 			// Setup context
-			ctx = config.WithConfig(ctx, cfg)
-			ctx = logging.WithLogger(ctx, logger)
-			c.Context = ctx
+			c.Context = logging.ContextWith(config.WithConfig(ctx, cfg), logger)
 
 			return nil
 		},
@@ -120,8 +123,7 @@ var startTUICommand = &cli.Command{
 	Action: func(c *cli.Context) error {
 		ctx := c.Context
 		cfg := config.ConfigFrom(ctx)
-		logger := logging.LoggerFrom(ctx)
-		logger.SetPrefix("[CHAT][TUI] ")
+		logger := logging.LoggerFrom(ctx).With("component", "tui")
 
 		handler := tui.New(cfg, logger)
 		if persona, ok := cfg.Chat.GetPersona(c.String("persona")); ok {
@@ -152,7 +154,7 @@ var sendMessageCommand = &cli.Command{
 		var (
 			ctx       = c.Context
 			conf      = config.ConfigFrom(ctx)
-			logger    = logging.LoggerFrom(ctx)
+			logger    = logging.LoggerFrom(ctx).With("component", "chat")
 			fileInput = c.String("input")
 			msg       = c.Args().First()
 			persona   = c.String("persona")
@@ -182,13 +184,11 @@ Example:
 			return nil
 		}
 
-		logger.SetPrefix("[CHAT][CLI] ")
-
 		var chat *openai.ChatClient
 		{
 			var apikey string
 			if apikey = os.Getenv(authEnvKey); apikey == "" {
-				logger.Printf("[ERROR] API Key (env: %s) is not set", authEnvKey)
+				logger.Error(fmt.Sprintf("API Key (env: %s) is not set", authEnvKey))
 				return fmt.Errorf("API Key is not set, please set %s", authEnvKey)
 			}
 			client := openai.NewClient(apikey)
@@ -236,11 +236,11 @@ Example:
 			req.Temperature = *t
 		}
 
-		logger.Printf("ChatCompletion request: %+v", req)
+		logger.Debug("Sending ChatCompletion request", "request", req)
 
 		cnt := 0
 		err := chat.DoStream(ctx, req, func(resp *openai.ChatResponse) error {
-			logger.Printf("ChatCompletion response: %+v", resp)
+			logger.Debug("Got ChatCompletion response", "response", resp)
 			if cnt == 0 {
 				fmt.Println("Assistant:")
 				fmt.Println()
@@ -249,7 +249,7 @@ Example:
 				return nil
 			}
 			if len(resp.Choices) > 1 {
-				logger.Printf("[WARN]: Got %d choices", len(resp.Choices))
+				logger.Warn("Got multiple choices, using the first one", "choices", resp.Choices)
 			}
 			if msg := resp.Choices[0].Delta; msg != nil {
 				fmt.Fprintf(os.Stdout, "%s", msg.Content)
@@ -260,7 +260,6 @@ Example:
 		fmt.Println()
 
 		if err != nil {
-			logger.Printf("Got error: %+v", err)
 			return fmt.Errorf("chat: %w", err)
 		}
 		return nil

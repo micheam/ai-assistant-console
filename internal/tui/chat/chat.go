@@ -5,7 +5,7 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/url"
 	"os"
 	"strings"
@@ -31,10 +31,10 @@ type Handler struct {
 	cfg     *config.Config
 	persona *config.Personality
 
-	logger *log.Logger
+	logger *slog.Logger
 }
 
-func New(cfg *config.Config, logger *log.Logger) *Handler {
+func New(cfg *config.Config, logger *slog.Logger) *Handler {
 	return &Handler{cfg: cfg, logger: logger}
 }
 
@@ -67,7 +67,7 @@ func (h *Handler) Run(ctx context.Context) error {
 	model := h.cfg.Chat.Model
 	fmt.Printf(theme.Info("Conversation with %s\n"), model)
 	fmt.Println(theme.Info("------------------------------"))
-	h.logger.Printf("Conversation Starts with %s\n", model)
+	logger := h.logger.With("model", model)
 
 	for {
 		fmt.Print(theme.Info(prompt))
@@ -77,7 +77,7 @@ func (h *Handler) Run(ctx context.Context) error {
 		switch text {
 
 		default: // store user input
-			h.logger.Printf("Input text: %s\n", text)
+			logger.Debug("User input", "text", text)
 			if strings.HasPrefix(text, "SYSTEM:") {
 				messages = append(messages, &openai.SystemMessage{Content: text})
 			} else {
@@ -113,7 +113,7 @@ func (h *Handler) Run(ctx context.Context) error {
 				req.Temperature = *t
 			}
 			req.Model = h.cfg.Chat.Model
-			h.logger.Printf("ChatCompletion request: %+v\n", req)
+			logger.Debug("ChatRequest", "req", req)
 
 			// width of terminal
 			width, _, err := term.GetSize(0)
@@ -137,11 +137,9 @@ func (h *Handler) Run(ctx context.Context) error {
 				deltaWidth := runewidth.StringWidth(strings.ReplaceAll(deltaContent, "\n", ""))
 
 				if wrapped {
-					h.logger.Printf("receive new line\n")
 					cnt = 0
 				}
 				if cnt+deltaWidth > width {
-					h.logger.Printf("output width reached terminal width\n")
 					fmt.Printf("\n")
 					cnt = 0
 				}
@@ -151,13 +149,10 @@ func (h *Handler) Run(ctx context.Context) error {
 
 				_, err := content.WriteString(delta.Content)
 
-				h.logger.Printf("term width: %d, cnt: %d, content[%d]: %q\n",
-					width, cnt, deltaWidth, delta.Content)
-
 				return err
 			}); err != nil {
-				h.logger.Printf("ChatCompletion error: %v\n", err)
 				fmt.Printf(theme.Error("ChatCompletion error: %v\n"), err)
+				logger.Debug("ChatCompletion error", "err", err)
 				spinner.Stop()
 				continue
 			}
