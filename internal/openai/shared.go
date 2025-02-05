@@ -251,10 +251,19 @@ func (c TextContent) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// Example:
+//
+//	{
+//	  "type": "image_url",
+//	  "image_url": {
+//	    "url": "<url-or-base64-encoded-image-content>",
+//	    "details": "<optional-details>"
+//	  },
+//	}
 func (c ImageContent) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]string{
+	return json.Marshal(map[string]any{
 		"type":      c.Type(),
-		"image_url": c.URL.String(),
+		"image_url": map[string]string{"url": c.URL.String()},
 	})
 }
 

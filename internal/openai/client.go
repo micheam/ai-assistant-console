@@ -40,8 +40,8 @@ func (c *Client) SetHTTPClient(httpClient *http.Client) {
 	c.httpClient = httpClient
 }
 
-// doPost is used to make a POST request to the OpenAI API
-func (c *Client) doPost(_ context.Context, endpoint string, req any, resp any) error {
+// DoPost is used to make a POST request to the OpenAI API
+func (c *Client) DoPost(_ context.Context, endpoint string, req any, resp any) error {
 	body, err := json.Marshal(req)
 	if err != nil {
 		return fmt.Errorf("failed to marshal request: %w", err)
@@ -74,7 +74,7 @@ func (c *Client) doPost(_ context.Context, endpoint string, req any, resp any) e
 	return json.NewDecoder(httpResp.Body).Decode(resp)
 }
 
-func (c *Client) doStream(ctx context.Context, endpoint string, body *bytes.Reader, onReceive func(resp []byte) error) error {
+func (c *Client) DoStream(ctx context.Context, endpoint string, body *bytes.Reader, onReceive func(resp []byte) error) error {
 	httpReq, err := http.NewRequest(http.MethodPost, endpoint, body)
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)

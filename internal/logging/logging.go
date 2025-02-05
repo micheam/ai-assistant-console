@@ -22,9 +22,12 @@ const (
 )
 
 func New(out io.Writer, opts *Options) *slog.Logger {
+	if opts == nil {
+		opts = &Options{}
+	}
 	handler := slog.NewTextHandler(out, &slog.HandlerOptions{
 		AddSource: opts.AddSource,
-		Level:     slog.LevelDebug,
+		Level:     opts.Level,
 	})
 	return slog.New(handler)
 }
@@ -44,5 +47,8 @@ func ContextWith(ctx context.Context, logger *slog.Logger) context.Context {
 
 // LoggerFrom retrieves the logger from the context.
 func LoggerFrom(ctx context.Context) *slog.Logger {
-	return ctx.Value(contextKeyLogger).(*slog.Logger)
+	if logger, ok := ctx.Value(contextKeyLogger).(*slog.Logger); ok {
+		return logger
+	}
+	return New(io.Discard, nil)
 }

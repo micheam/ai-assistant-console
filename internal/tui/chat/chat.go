@@ -16,6 +16,7 @@ import (
 
 	"micheam.com/aico/internal/config"
 	"micheam.com/aico/internal/openai"
+	"micheam.com/aico/internal/openai/chat"
 	"micheam.com/aico/internal/spinner"
 	"micheam.com/aico/internal/theme"
 )
@@ -59,15 +60,16 @@ func (h *Handler) Run(ctx context.Context) error {
 		os.Exit(1)
 	}
 
-	client := openai.NewClient(authToken)
-	chat := openai.NewChatClient(client)
-
-	reader := bufio.NewReader(os.Stdin)
-
-	model := h.cfg.Chat.Model
+	client := chat.New(authToken)
+	model, err := chat.ParseModel(h.cfg.Chat.Model)
+	if err != nil {
+		return err
+	}
 	fmt.Printf(theme.Info("Conversation with %s\n"), model)
 	fmt.Println(theme.Info("------------------------------"))
-	logger := h.logger.With("model", model)
+	logger := h.logger.With("model", model.String())
+
+	reader := bufio.NewReader(os.Stdin)
 
 	for {
 		fmt.Print(theme.Info(prompt))
@@ -108,11 +110,7 @@ func (h *Handler) Run(ctx context.Context) error {
 			spinner.Start()
 			defer spinner.Stop()
 
-			req := openai.NewChatRequest(model, messages)
-			if t := h.cfg.Chat.Temperature; t != nil {
-				req.Temperature = *t
-			}
-			req.Model = h.cfg.Chat.Model
+			req := chat.NewRequest(messages, chat.WithModel(model))
 			logger.Debug("ChatRequest", "req", req)
 
 			// width of terminal
@@ -124,7 +122,7 @@ func (h *Handler) Run(ctx context.Context) error {
 			var cnt int // Current width of output
 			content := new(strings.Builder)
 
-			if err := chat.DoStream(ctx, req, func(resp *openai.ChatResponse) error { // Block until completion DONE
+			if err := client.DoStream(ctx, req, func(resp *chat.Response) error { // Block until completion DONE
 				spinner.Stop()
 				delta := resp.Choices[0].Delta
 				if delta == nil {

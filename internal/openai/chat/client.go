@@ -1,70 +1,62 @@
-package openai
+package chat
 
 import (
 	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"micheam.com/aico/internal/logging"
+	"micheam.com/aico/internal/openai"
 )
 
-const chatEndpoint = "https://api.openai.com/v1/chat/completions"
+const endpoint = "https://api.openai.com/v1/chat/completions"
 
-// chatAvailableModels is a list of models that are compatible with the Chat API
+// Client is used to access the Chat API
+type Client struct {
+	client *openai.Client
+}
+
+// NewWithOpenAIClient returns a new ChatClient
+func NewWithOpenAIClient(client *openai.Client) *Client {
+	return &Client{client: client}
+}
+
+// New returns a new ChatClient.
 //
-// https://platform.openai.com/docs/models/model-endpoint-compatibility#model-endpoint-compatibility
-var chatAvailableModels = []string{
-	"o3-mini",
-	"o1",
-	"o1-mini",
-	"gpt-4o",
-	"gpt-4o-mini",
-	"gpt-4-turbo",
-	"gpt-4",
-	"gpt-3.5-turbo",
-
-	"chatgpt-4o-latest", // continuously points to the version of GPT-4o used in ChatGPT
-}
-
-const DefaultChatModel = "chatgpt-4o-latest"
-
-func ChatAvailableModels() []string {
-	return chatAvailableModels
-}
-
-// ChatClient is used to access the Chat API
-type ChatClient struct {
-	client *Client
-}
-
-// NewChatClient returns a new ChatClient
-func NewChatClient(client *Client) *ChatClient {
-	return &ChatClient{client: client}
+// If you have an openai.Client already, use [NewWithOpenAIClient].
+func New(apikey string) *Client {
+	openapiClient := openai.NewClient(apikey)
+	return NewWithOpenAIClient(openapiClient)
 }
 
 // Do is used to make a request to the Chat API
-func (c *ChatClient) Do(ctx context.Context, req *ChatRequest) (*ChatResponse, error) {
+func (c *Client) Do(ctx context.Context, req *Request) (*Response, error) {
+	logger := logging.LoggerFrom(ctx)
 	if req.Stream {
 		return nil, fmt.Errorf("streaming is not supported with Do, use Stream")
 	}
-
-	if req.Model == "" {
-		req.Model = DefaultChatModel
+	if req.Model == ModelUnspecified {
+		logger.Warn(fmt.Sprintf("Model is not specified, using default model: %s", DefaultModel))
+		req.Model = DefaultModel
 	}
 
-	resp := &ChatResponse{}
-	err := c.client.doPost(ctx, chatEndpoint, req, resp)
+	resp := &Response{}
+	err := c.client.DoPost(ctx, endpoint, req, resp)
 	if err != nil {
 		return nil, err
 	}
 	return resp, nil
 }
 
-func (c *ChatClient) DoStream(ctx context.Context, req *ChatRequest, onReceive func(resp *ChatResponse) error) error {
+func (c *Client) DoStream(ctx context.Context, req *Request, onReceive func(resp *Response) error) error {
+	logger := logging.LoggerFrom(ctx)
 	if !req.Stream {
 		req.Stream = true
 	}
-	if req.Model == "" {
-		req.Model = DefaultChatModel
+	if req.Model == ModelUnspecified {
+		logger.Warn(fmt.Sprintf("Model is not specified, using default model: %s", DefaultModel))
+		req.Model = DefaultModel
 	}
 
 	jsonBody, err := json.Marshal(req)
@@ -72,29 +64,29 @@ func (c *ChatClient) DoStream(ctx context.Context, req *ChatRequest, onReceive f
 		return fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	onReceive_ := func(resp []byte) error {
-		var chatResp ChatResponse
-		err := json.Unmarshal(resp, &chatResp)
+	onReceive_ := func(b []byte) error {
+		var resp Response
+		err := json.Unmarshal(b, &resp)
 		if err != nil {
 			return fmt.Errorf("failed to unmarshal response: %w", err)
 		}
-		return onReceive(&chatResp)
+		return onReceive(&resp)
 	}
-	return c.client.doStream(ctx, chatEndpoint, bytes.NewReader(jsonBody), onReceive_)
+	return c.client.DoStream(ctx, endpoint, bytes.NewReader(jsonBody), onReceive_)
 }
 
-// ChatRequest is used to make a request to the Chat API
-type ChatRequest struct {
+// Request is used to make a request to the Chat API
+type Request struct {
 	// model string Required
 	//
 	// ID of the model to use. See the model endpoint compatibility table for
 	// details on which models work with the Chat API.
-	Model string `json:"model"`
+	Model Model `json:"model"`
 
 	// messages array Required
 	//
 	// A list of messages describing the conversation so far.
-	Messages []Message `json:"messages"`
+	Messages []openai.Message `json:"messages"`
 
 	// temperature number Optional Defaults to 1
 	//
@@ -173,24 +165,27 @@ type ChatRequest struct {
 	User string `json:"user,omitempty"`
 }
 
-// NewChatRequest returns a new ChatRequest.
-//
-// If model is empty, [defaultChatModel] will be used.
-// Use [DefaultChatModel] to get the default model.
-// Use [ChatAvailableModels] to get a list of available models.
-func NewChatRequest(model string, messages []Message) *ChatRequest {
-	return &ChatRequest{
-		Model:    model,
-		Messages: messages,
+// NewRequest returns a new Request.
+func NewRequest(msgs []openai.Message, opts ...func(*Request)) *Request {
+	req := &Request{Messages: msgs, Model: DefaultModel}
+	for _, opt := range opts {
+		opt(req)
+	}
+	return req
+}
+
+func WithModel(model Model) func(*Request) {
+	return func(req *Request) {
+		req.Model = model
 	}
 }
 
-// ChatResponse is the response from the Chat API
-type ChatResponse struct {
-	ID      string   `json:"id"`
-	Object  string   `json:"object"`
-	Created int64    `json:"created"`
-	Model   string   `json:"model"`
-	Usage   Usage    `json:"usage"`
-	Choices []Choice `json:"choices"`
+// Response is the response from the Chat API
+type Response struct {
+	ID      string          `json:"id"`
+	Object  string          `json:"object"`
+	Created int64           `json:"created"`
+	Model   string          `json:"model"`
+	Usage   openai.Usage    `json:"usage"`
+	Choices []openai.Choice `json:"choices"`
 }
