@@ -1,4 +1,4 @@
-////go:build e2e
+//go:build e2e
 
 package chat_test
 
@@ -15,6 +15,7 @@ import (
 
 	"micheam.com/aico/internal/openai"
 	"micheam.com/aico/internal/openai/chat"
+	"micheam.com/aico/internal/openai/models"
 )
 
 func TestChat_Do_EndToEnd(t *testing.T) {
@@ -39,8 +40,7 @@ func TestChat_Do_EndToEnd(t *testing.T) {
 				&openai.ImageContent{URL: *url},
 			},
 		},
-	})
-	req.Model = chat.ModelGPT4oMini
+	}, chat.WithModel(models.GPT4OMini))
 
 	res, err := client.Do(ctx, req)
 	require.NoError(t, err)
@@ -75,8 +75,7 @@ func TestChat_DoStream_EndToEnd(t *testing.T) {
 				&openai.TextContent{Text: "What is the day after tomorrow?"},
 			},
 		},
-	})
-	req.Model = chat.ModelGPT4oMini
+	}, chat.WithModel(models.GPT4OMini))
 
 	err := client.DoStream(ctx, req, func(resp *chat.Response) error {
 		t.Logf("Response: %+v", resp)

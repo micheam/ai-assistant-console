@@ -15,6 +15,7 @@ import (
 	"micheam.com/aico/internal/logging"
 	"micheam.com/aico/internal/openai"
 	"micheam.com/aico/internal/openai/chat"
+	"micheam.com/aico/internal/openai/models"
 	"micheam.com/aico/internal/theme"
 	tui "micheam.com/aico/internal/tui/chat"
 )
@@ -230,12 +231,11 @@ Example:
 		messages = append(messages, msgs...)
 
 		// Send chat request
-		model, err := chat.ParseModel(conf.Chat.Model)
-		if err != nil {
-			return fmt.Errorf("parse model: %w", err)
+		model := models.Model(conf.Chat.Model)
+		if !chat.IsAvailableModel(model) {
+			return fmt.Errorf("model %q is not available", model)
 		}
 		req := chat.NewRequest(messages, chat.WithModel(model))
-		req.Model = model
 		if t := conf.Chat.Temperature; t != nil {
 			req.Temperature = *t
 		}
@@ -243,7 +243,7 @@ Example:
 		logger.Debug("Sending ChatCompletion request", "request", req)
 
 		cnt := 0
-		err = client.DoStream(ctx, req, func(resp *chat.Response) error {
+		err := client.DoStream(ctx, req, func(resp *chat.Response) error {
 			logger.Debug("Got ChatCompletion response", "response", resp)
 			if cnt == 0 {
 				fmt.Println("Assistant:")

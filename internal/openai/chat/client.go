@@ -8,6 +8,7 @@ import (
 
 	"micheam.com/aico/internal/logging"
 	"micheam.com/aico/internal/openai"
+	"micheam.com/aico/internal/openai/models"
 )
 
 const endpoint = "https://api.openai.com/v1/chat/completions"
@@ -36,7 +37,7 @@ func (c *Client) Do(ctx context.Context, req *Request) (*Response, error) {
 	if req.Stream {
 		return nil, fmt.Errorf("streaming is not supported with Do, use Stream")
 	}
-	if req.Model == ModelUnspecified {
+	if req.Model.IsEmpty() {
 		logger.Warn(fmt.Sprintf("Model is not specified, using default model: %s", DefaultModel))
 		req.Model = DefaultModel
 	}
@@ -54,7 +55,7 @@ func (c *Client) DoStream(ctx context.Context, req *Request, onReceive func(resp
 	if !req.Stream {
 		req.Stream = true
 	}
-	if req.Model == ModelUnspecified {
+	if req.Model.IsEmpty() {
 		logger.Warn(fmt.Sprintf("Model is not specified, using default model: %s", DefaultModel))
 		req.Model = DefaultModel
 	}
@@ -81,7 +82,7 @@ type Request struct {
 	//
 	// ID of the model to use. See the model endpoint compatibility table for
 	// details on which models work with the Chat API.
-	Model Model `json:"model"`
+	Model models.Model `json:"model"`
 
 	// messages array Required
 	//
@@ -174,7 +175,7 @@ func NewRequest(msgs []openai.Message, opts ...func(*Request)) *Request {
 	return req
 }
 
-func WithModel(model Model) func(*Request) {
+func WithModel(model models.Model) func(*Request) {
 	return func(req *Request) {
 		req.Model = model
 	}

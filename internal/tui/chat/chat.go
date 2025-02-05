@@ -17,6 +17,7 @@ import (
 	"micheam.com/aico/internal/config"
 	"micheam.com/aico/internal/openai"
 	"micheam.com/aico/internal/openai/chat"
+	"micheam.com/aico/internal/openai/models"
 	"micheam.com/aico/internal/spinner"
 	"micheam.com/aico/internal/theme"
 )
@@ -61,10 +62,11 @@ func (h *Handler) Run(ctx context.Context) error {
 	}
 
 	client := chat.New(authToken)
-	model, err := chat.ParseModel(h.cfg.Chat.Model)
-	if err != nil {
-		return err
+	model := models.Model(h.cfg.Chat.Model)
+	if !chat.IsAvailableModel(model) {
+		return fmt.Errorf("model %s is not available", model)
 	}
+
 	fmt.Printf(theme.Info("Conversation with %s\n"), model)
 	fmt.Println(theme.Info("------------------------------"))
 	logger := h.logger.With("model", model.String())
