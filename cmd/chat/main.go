@@ -151,6 +151,13 @@ var sendMessageCommand = &cli.Command{
 			Name:  "show-input-format",
 			Usage: "Show the expected input format and exit.",
 		},
+		&cli.BoolFlag{
+			Name: "stream",
+			Usage: "Stream the response. " +
+				"By default, only the first response is shown." +
+				"Note that some models may not support streaming.",
+			Value: false,
+		},
 	},
 	Action: func(c *cli.Context) error {
 		var (
@@ -242,29 +249,48 @@ Example:
 
 		logger.Debug("Sending ChatCompletion request", "request", req)
 
-		cnt := 0
-		err := client.DoStream(ctx, req, func(resp *chat.Response) error {
-			logger.Debug("Got ChatCompletion response", "response", resp)
-			if cnt == 0 {
-				fmt.Println("Assistant:")
-				fmt.Println()
-			}
-			if len(resp.Choices) == 0 {
+		if c.Bool("stream") {
+			cnt := 0
+			err := client.DoStream(ctx, req, func(resp *chat.Response) error {
+				logger.Debug("Got ChatCompletion response", "response", resp)
+				if cnt == 0 {
+					fmt.Println("Assistant:")
+					fmt.Println()
+				}
+				if len(resp.Choices) == 0 {
+					return nil
+				}
+				if len(resp.Choices) > 1 {
+					logger.Warn("Got multiple choices, using the first one", "choices", resp.Choices)
+				}
+				if msg := resp.Choices[0].Delta; msg != nil {
+					fmt.Fprintf(os.Stdout, "%s", msg.Content)
+				}
+				cnt++
 				return nil
+			})
+			fmt.Println()
+			if err != nil {
+				return fmt.Errorf("chat: %w", err)
 			}
-			if len(resp.Choices) > 1 {
-				logger.Warn("Got multiple choices, using the first one", "choices", resp.Choices)
-			}
-			if msg := resp.Choices[0].Delta; msg != nil {
-				fmt.Fprintf(os.Stdout, "%s", msg.Content)
-			}
-			cnt++
 			return nil
-		})
-		fmt.Println()
+		}
 
+		resp, err := client.Do(ctx, req)
 		if err != nil {
 			return fmt.Errorf("chat: %w", err)
+		}
+		logger.Debug("Got ChatCompletion response", "response", resp)
+		fmt.Println("Assistant:")
+		fmt.Println()
+		if len(resp.Choices) == 0 {
+			return fmt.Errorf("no response")
+		}
+		if len(resp.Choices) > 1 {
+			logger.Warn("Got multiple choices, using the first one", "choices", resp.Choices)
+		}
+		if msg := resp.Choices[0].Delta; msg != nil {
+			fmt.Fprintf(os.Stdout, "%s", msg.Content)
 		}
 		return nil
 	},

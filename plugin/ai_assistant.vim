@@ -24,7 +24,7 @@ def AssistantModel(): string
     if exists('g:ai_assistant_model')
         return g:ai_assistant_model
     endif
-    return 'chatgpt-4o-latest'
+    return 'o3-mini'
 enddef
 
 # ======================
@@ -204,8 +204,9 @@ def SendThread()
         "chat", 
         "--model", AssistantModel(),
         "send",
-        "-i",
-        tempfile
+        "--stream",
+        "--input",
+        tempfile,
     ]
     const target_buf = bufnr('%')
 
