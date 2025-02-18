@@ -28,6 +28,10 @@ def AssistantModel(): string
     return 'o3-mini'
 enddef
 
+def SetAssistantModel(model_name: string): void
+    g:ai_assistant_model = model_name
+enddef
+
 # ======================
 # buffer local variables
 # ======================
@@ -74,6 +78,9 @@ def StartChatWindow()
     }
     command! -buffer          ListContext   ListContextBufs()
 
+    # Model management commands
+    command! -buffer Models ShowModelSelector()
+
     # Set buffer local mappings
     # <CR> - send the message to the Assistant
     # <C-c> - stop the running job
@@ -85,6 +92,8 @@ def StartChatWindow()
     ShowWelcomeMessage(bufnr('%'), 1)
     execute 'normal! G'
 enddef
+
+# Context management functions {{{
 
 def AppendContextBuf(bufnr: number): void
     if !exists('b:aico_context_bufs')
@@ -126,6 +135,39 @@ def ListContextBufs()
     endif
 enddef
 
+# }}}
+
+# Models management functions {{{
+def ShowModelSelector(): void
+    const cmd = [
+        "chat", 
+        "--model", AssistantModel(),
+        "models",
+        "--json",
+    ]
+
+    var models: list<dict<any>> = []
+    for line in systemlist(cmd->join(' '))
+        const model = json_decode(line)
+        models->add(model)
+    endfor
+
+    const model_names = models->mapnew((_, model) => model["name"])
+    const ui = uiwidget.Select.new(model_names, (selected_index: number) => {
+        const selectedModel = models[selected_index]
+        SetAssistantModel(selectedModel["name"])
+        echom "Selected model: " .. selectedModel["name"]
+        return true
+    })
+    const currentModelIndex = indexof(models, (_, model) => model["name"] == AssistantModel())
+    if currentModelIndex != -1
+        ui.SetSelectedIndex(currentModelIndex)
+    endif
+    ui.Render()
+enddef
+# }}}
+
+# SendThread sends the current buffer as a thread to the Assistant {{{
 def SendThread()
 
     # Gurd: check if the current buffer is a chat window
