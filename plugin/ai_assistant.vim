@@ -11,11 +11,12 @@ vim9script
 # Last Change: 2022-10-10
 #
 #===============================================================================
+import autoload 'uiwidget.vim'
 
-# XXX: Want to use autoload, but it seems not working with Vim9Script...
-#      https://github.com/vim/vim/issues/15031
-#      https://github.com/vim/vim/pull/16521
-import autoload './uiwidget.vim'
+if !has('patch-9.1.1119')
+    echoerr "This plugin requires Vim patch 9.1.1119 or higher. Please update your Vim 🙇"
+    finish
+endif
 
 # g:ai_assistant_model
 #

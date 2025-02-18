@@ -6,15 +6,10 @@ vim9script
 # Author: Michito Maeda <michto.maeda@gmail.com>
 # License: MIT
 # Created: 2025-01-20
-# Last Updated: 2025-01-29T02:47:51+09:00
+# Last Updated: 2025-02-18T10:28:31+09:00
 # Version: 0.1.0
 # Dependencies: 
-#   - Vim 9.0 or higher
-#   - ./widget.vim (imported as a dependency)
-#
-# XXX: Want to use autoload, but it seems not working with Vim9Script...
-#      https://github.com/vim/vim/issues/15031
-#      https://github.com/vim/vim/pull/16521
+#   - Vim patch 9.1.1119 or higher
 #==============================================================================
 
 # MultiSelect is a popup menu widget that allows users to select multiple items.
