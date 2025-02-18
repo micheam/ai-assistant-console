@@ -1,6 +1,6 @@
 module micheam.com/aico
 
-go 1.20
+go 1.24.0
 
 require (
 	github.com/fatih/color v1.15.0
