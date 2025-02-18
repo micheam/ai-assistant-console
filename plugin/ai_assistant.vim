@@ -63,19 +63,16 @@ def StartChatWindow()
     command! -buffer          Send          SendThread()
     command! -buffer          Clear         ClearThread()
     command! -buffer          Stop          StopJob()
-    command! -buffer -nargs=1 ContextAdd    AppendContextBuf(str2nr(<q-args>))
-    command! -buffer          ContextAddAll {
-        SyncContextBufs()
-        echo "Context buffers are updated"
-        ListContextBufs()
-    }
-    command! -buffer          ContextClear  {
+
+    # Context management commands
+    command! -buffer -nargs=1 AppendContext    AppendContextBuf(str2nr(<q-args>))
+    command! -buffer          ClearContext  {
         b:aico_context_bufs = []
     }
-    command! -buffer          ContextSelect {
+    command! -buffer          SelectContext {
         SelectContextBufUI()
     }
-    command! -buffer          ContextList   ListContextBufs()
+    command! -buffer          ListContext   ListContextBufs()
 
     # Set buffer local mappings
     # <CR> - send the message to the Assistant
@@ -94,22 +91,6 @@ def AppendContextBuf(bufnr: number): void
         b:aico_context_bufs = []
     endif
     b:aico_context_bufs->add(bufnr)
-enddef
-
-def SyncContextBufs(): void
-    # * b:aico_context_bufs[0] is the primary context buffer, so we don't want to clear it.
-    # * skip chat window buffer
-    b:aico_context_bufs = [b:aico_src_buf]
-    for nr in ListedBufs()
-        if nr == b:aico_src_buf
-            continue # primary_buf is already added
-        elseif nr == bufnr('%')
-            continue # NEVER SENd chat window buffer itself
-        endif
-        if nr->bufexists()
-            b:aico_context_bufs->add(nr)
-        endif
-    endfor
 enddef
 
 # ListedBufs returns a list of buffer numbers that are listed.
