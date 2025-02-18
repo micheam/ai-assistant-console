@@ -1,7 +1,8 @@
 > [!WARNING]
 > This project is still in development and is not ready for use.
 
-# AICO - AI Assistant Console 
+# AICO - AI Assistant Console
+[![Go](https://github.com/micheam/ai-assistant-console/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/micheam/ai-assistant-console/actions/workflows/go.yml)
 
 ![screenshot](screenshot.png)
 
