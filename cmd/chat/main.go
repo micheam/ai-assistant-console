@@ -105,6 +105,7 @@ var commands = []*cli.Command{
 	configCommand,
 	startTUICommand,
 	sendMessageCommand,
+	modelsCommand,
 }
 
 var configCommand = &cli.Command{
@@ -291,6 +292,33 @@ Example:
 		}
 		if msg := resp.Choices[0].Delta; msg != nil {
 			fmt.Fprintf(os.Stdout, "%s", msg.Content)
+		}
+		return nil
+	},
+}
+
+var modelsCommand = &cli.Command{
+	Name:        "models",
+	Usage:       "List available models for chat",
+	Description: "List available models for chat",
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "json",
+			Usage: "Output in JSON format",
+		},
+	},
+	Action: func(c *cli.Context) error {
+		conf := config.ConfigFrom(c.Context)
+		defaultModel := models.Model(conf.Chat.Model)
+		renderer := models.ModelTextRenderer
+		if c.Bool("json") {
+			renderer = models.ModelJSONRenderer
+		}
+		for _, m := range chat.AvailableModels() {
+			if err := renderer(os.Stdout, m, m == defaultModel); err != nil {
+				return fmt.Errorf("render model: %w", err)
+			}
+			fmt.Println()
 		}
 		return nil
 	},
