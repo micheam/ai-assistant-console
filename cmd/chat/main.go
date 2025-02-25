@@ -290,9 +290,10 @@ Example:
 		if len(resp.Choices) > 1 {
 			logger.Warn("Got multiple choices, using the first one", "choices", resp.Choices)
 		}
-		if msg := resp.Choices[0].Delta; msg != nil {
-			fmt.Fprintf(os.Stdout, "%s", msg.Content)
+		for _, content := range resp.Choices[0].Message.Content {
+			fmt.Fprintf(os.Stdout, "%s", content.(*chat.TextContent).Text)
 		}
+		fmt.Println()
 		return nil
 	},
 }
