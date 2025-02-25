@@ -7,25 +7,25 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"micheam.com/aico/internal/openai"
+	"micheam.com/aico/internal/chat"
 )
 
 func TestParseInputMessages(t *testing.T) {
 	testcases := map[string]struct {
 		input string
-		want  []openai.Message
+		want  []chat.Message
 	}{
 		"empty": {
 			input: "",
-			want:  []openai.Message{},
+			want:  []chat.Message{},
 		},
 		"without prompt": {
 			input: `Hello, I'm a human.
 Nice to meet you.
 How are you?`,
-			want: []openai.Message{
-				&openai.UserMessage{
-					Content: []openai.Content{&openai.TextContent{Text: "Hello, I'm a human.\nNice to meet you.\nHow are you?"}},
+			want: []chat.Message{
+				&chat.UserMessage{
+					Content: []chat.Content{&chat.TextContent{Text: "Hello, I'm a human.\nNice to meet you.\nHow are you?"}},
 				},
 			},
 		},
@@ -35,9 +35,9 @@ Nice to meet you.
 
 How are you?
 `,
-			want: []openai.Message{
-				&openai.UserMessage{Content: []openai.Content{&openai.TextContent{Text: "Hello, I'm a human.\nNice to meet you."}}},
-				&openai.UserMessage{Content: []openai.Content{&openai.TextContent{Text: "How are you?"}}},
+			want: []chat.Message{
+				&chat.UserMessage{Content: []chat.Content{&chat.TextContent{Text: "Hello, I'm a human.\nNice to meet you."}}},
+				&chat.UserMessage{Content: []chat.Content{&chat.TextContent{Text: "How are you?"}}},
 			},
 		},
 		"prompt line with role": {
@@ -51,15 +51,15 @@ Hello! Nice to meet you too. How can I assist you today?
 User:
 What is the weather today?
 `,
-			want: []openai.Message{
-				&openai.UserMessage{
-					Content: []openai.Content{&openai.TextContent{Text: "Hello, I'm a human.\nNice to meet you."}},
+			want: []chat.Message{
+				&chat.UserMessage{
+					Content: []chat.Content{&chat.TextContent{Text: "Hello, I'm a human.\nNice to meet you."}},
 				},
-				&openai.AssistantMessage{
-					Content: []openai.Content{&openai.TextContent{Text: "Hello! Nice to meet you too. How can I assist you today?"}},
+				&chat.AssistantMessage{
+					Content: []chat.Content{&chat.TextContent{Text: "Hello! Nice to meet you too. How can I assist you today?"}},
 				},
-				&openai.UserMessage{
-					Content: []openai.Content{&openai.TextContent{Text: "What is the weather today?"}},
+				&chat.UserMessage{
+					Content: []chat.Content{&chat.TextContent{Text: "What is the weather today?"}},
 				},
 			},
 		},
@@ -74,15 +74,15 @@ Hello! Nice to meet you too. How can I assist you today?
 User: --------------------------------
 What is the weather today?
 `,
-			want: []openai.Message{
-				&openai.UserMessage{
-					Content: []openai.Content{&openai.TextContent{Text: "Hello, I'm a human.\nNice to meet you."}},
+			want: []chat.Message{
+				&chat.UserMessage{
+					Content: []chat.Content{&chat.TextContent{Text: "Hello, I'm a human.\nNice to meet you."}},
 				},
-				&openai.AssistantMessage{
-					Content: []openai.Content{&openai.TextContent{Text: "Hello! Nice to meet you too. How can I assist you today?"}},
+				&chat.AssistantMessage{
+					Content: []chat.Content{&chat.TextContent{Text: "Hello! Nice to meet you too. How can I assist you today?"}},
 				},
-				&openai.UserMessage{
-					Content: []openai.Content{&openai.TextContent{Text: "What is the weather today?"}},
+				&chat.UserMessage{
+					Content: []chat.Content{&chat.TextContent{Text: "What is the weather today?"}},
 				},
 			},
 		},

@@ -11,16 +11,16 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"micheam.com/aico/internal/chat"
 	"micheam.com/aico/internal/config"
 	"micheam.com/aico/internal/logging"
-	"micheam.com/aico/internal/openai"
-	"micheam.com/aico/internal/openai/chat"
+	openaichat "micheam.com/aico/internal/openai/chat"
 	"micheam.com/aico/internal/openai/models"
 	"micheam.com/aico/internal/theme"
 	tui "micheam.com/aico/internal/tui/chat"
 )
 
-const authEnvKey = "OPENAI_API_KEY"
+const ENV_KEY_OPENAI_API_KEY = "OPENAI_API_KEY"
 
 //go:embed version.txt
 var version string
@@ -194,22 +194,22 @@ Example:
 			return nil
 		}
 
-		var client *chat.Client
+		var client *openaichat.Client
 		{
 			var apikey string
-			if apikey = os.Getenv(authEnvKey); apikey == "" {
-				logger.Error(fmt.Sprintf("API Key (env: %s) is not set", authEnvKey))
-				return fmt.Errorf("API Key is not set, please set %s", authEnvKey)
+			if apikey = os.Getenv(ENV_KEY_OPENAI_API_KEY); apikey == "" {
+				logger.Error(fmt.Sprintf("API Key (env: %s) is not set", ENV_KEY_OPENAI_API_KEY))
+				return fmt.Errorf("API Key is not set, please set %s", ENV_KEY_OPENAI_API_KEY)
 			}
-			client = chat.New(apikey)
+			client = openaichat.New(apikey)
 		}
 
-		messages := make([]openai.Message, 0)
+		messages := make([]chat.Message, 0)
 
 		// System messages from persona
 		if persona, ok := conf.Chat.GetPersona(persona); ok {
 			for _, msg := range persona.Messages {
-				messages = append(messages, &openai.SystemMessage{
+				messages = append(messages, &chat.SystemMessage{
 					Content: msg,
 				})
 			}
@@ -240,10 +240,10 @@ Example:
 
 		// Send chat request
 		model := models.Model(conf.Chat.Model)
-		if !chat.IsAvailableModel(model) {
+		if !openaichat.IsAvailableModel(model) {
 			return fmt.Errorf("model %q is not available", model)
 		}
-		req := chat.NewRequest(messages, chat.WithModel(model))
+		req := openaichat.NewRequest(messages, openaichat.WithModel(model))
 		if t := conf.Chat.Temperature; t != nil {
 			req.Temperature = *t
 		}
@@ -252,7 +252,7 @@ Example:
 
 		if c.Bool("stream") {
 			cnt := 0
-			err := client.DoStream(ctx, req, func(resp *chat.Response) error {
+			err := client.DoStream(ctx, req, func(resp *openaichat.Response) error {
 				logger.Debug("Got ChatCompletion response", "response", resp)
 				if cnt == 0 {
 					fmt.Println("Assistant:")
@@ -314,7 +314,7 @@ var modelsCommand = &cli.Command{
 		if c.Bool("json") {
 			renderer = models.ModelJSONRenderer
 		}
-		for _, m := range chat.AvailableModels() {
+		for _, m := range openaichat.AvailableModels() {
 			if err := renderer(os.Stdout, m, m == defaultModel); err != nil {
 				return fmt.Errorf("render model: %w", err)
 			}
@@ -328,13 +328,12 @@ var modelsCommand = &cli.Command{
 // Helpers
 // --------------------------------------------------------------------
 
-// ParseInputMessage parses input messages.
-func ParseInputMessage(src io.Reader) []openai.Message {
+func ParseInputMessage(src io.Reader) []chat.Message {
 	var (
-		messages = make([]openai.Message, 0)
+		messages = make([]chat.Message, 0)
 		scanner  = bufio.NewScanner(src)
-		role     = openai.RoleUser
-		content  []openai.Content
+		role     = chat.RoleUser
+		content  []chat.Content
 	)
 
 	for scanner.Scan() {
@@ -342,15 +341,15 @@ func ParseInputMessage(src io.Reader) []openai.Message {
 
 		switch { // detect Role with prompt
 		case strings.HasPrefix(line, "User:"):
-			role = openai.RoleUser
+			role = chat.RoleUser
 			content = nil
 			continue
 		case strings.HasPrefix(line, "Assistant:"):
-			role = openai.RoleAssistant
+			role = chat.RoleAssistant
 			content = nil
 			continue
 		case strings.HasPrefix(line, "System:"):
-			role = openai.RoleSystem
+			role = chat.RoleSystem
 			content = nil
 			continue
 		}
@@ -359,7 +358,7 @@ func ParseInputMessage(src io.Reader) []openai.Message {
 		if strings.HasPrefix(line, "<") && strings.HasSuffix(line, ">") {
 			urlStr := line[1 : len(line)-1]
 			if u, err := url.Parse(urlStr); err == nil {
-				content = append(content, &openai.ImageContent{URL: *u})
+				content = append(content, &chat.ImageContent{URL: *u})
 			}
 			continue
 		}
@@ -367,14 +366,14 @@ func ParseInputMessage(src io.Reader) []openai.Message {
 		// Detect end of message section
 		if line == "" && len(content) > 0 {
 			switch role {
-			case openai.RoleUser:
-				messages = append(messages, &openai.UserMessage{Content: content})
-			case openai.RoleAssistant:
-				messages = append(messages, &openai.AssistantMessage{Content: content})
-			case openai.RoleSystem:
+			case chat.RoleUser:
+				messages = append(messages, &chat.UserMessage{Content: content})
+			case chat.RoleAssistant:
+				messages = append(messages, &chat.AssistantMessage{Content: content})
+			case chat.RoleSystem:
 				if len(content) == 1 {
-					if textContent, ok := content[0].(*openai.TextContent); ok {
-						messages = append(messages, &openai.SystemMessage{Content: textContent.Text})
+					if textContent, ok := content[0].(*chat.TextContent); ok {
+						messages = append(messages, &chat.SystemMessage{Content: textContent.Text})
 					}
 				}
 			}
@@ -384,26 +383,26 @@ func ParseInputMessage(src io.Reader) []openai.Message {
 
 		// Append text content
 		if len(content) > 0 {
-			if last, ok := content[len(content)-1].(*openai.TextContent); ok {
+			if last, ok := content[len(content)-1].(*chat.TextContent); ok {
 				last.Text += "\n" + line
 			} else {
-				content = append(content, &openai.TextContent{Text: line})
+				content = append(content, &chat.TextContent{Text: line})
 			}
 		} else {
-			content = append(content, &openai.TextContent{Text: line})
+			content = append(content, &chat.TextContent{Text: line})
 		}
 	}
 
 	if len(content) > 0 {
 		switch role {
-		case openai.RoleUser:
-			messages = append(messages, &openai.UserMessage{Content: content})
-		case openai.RoleAssistant:
-			messages = append(messages, &openai.AssistantMessage{Content: content})
-		case openai.RoleSystem:
+		case chat.RoleUser:
+			messages = append(messages, &chat.UserMessage{Content: content})
+		case chat.RoleAssistant:
+			messages = append(messages, &chat.AssistantMessage{Content: content})
+		case chat.RoleSystem:
 			if len(content) == 1 {
-				if textContent, ok := content[0].(*openai.TextContent); ok {
-					messages = append(messages, &openai.SystemMessage{Content: textContent.Text})
+				if textContent, ok := content[0].(*chat.TextContent); ok {
+					messages = append(messages, &chat.SystemMessage{Content: textContent.Text})
 				}
 			}
 		}

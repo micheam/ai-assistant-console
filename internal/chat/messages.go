@@ -1,4 +1,4 @@
-package openai
+package chat
 
 import (
 	"encoding/json"
@@ -7,18 +7,12 @@ import (
 	"reflect"
 )
 
-// Message is a message in the Chat API
-//
-//	> A list of messages comprising the conversation so far. Depending on the model you use,
-//	> different message types (modalities) are supported, like text, images, and audio.
-//	>
-//	> https://platform.openai.com/docs/api-reference/chat/create#chat-create-messages
+// Message is a message in the conversation.
 //
 // Message can be one of the following:
 //   - System message
 //   - User message
 //   - Assistant message
-//   - Tool message
 type Message interface {
 	Type() string
 	json.Marshaler

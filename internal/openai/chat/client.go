@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"micheam.com/aico/internal/chat"
 	"micheam.com/aico/internal/logging"
 	"micheam.com/aico/internal/openai"
 	"micheam.com/aico/internal/openai/models"
@@ -87,7 +88,7 @@ type Request struct {
 	// messages array Required
 	//
 	// A list of messages describing the conversation so far.
-	Messages []openai.Message `json:"messages"`
+	Messages []chat.Message `json:"messages"`
 
 	// temperature number Optional Defaults to 1
 	//
@@ -167,7 +168,7 @@ type Request struct {
 }
 
 // NewRequest returns a new Request.
-func NewRequest(msgs []openai.Message, opts ...func(*Request)) *Request {
+func NewRequest(msgs []chat.Message, opts ...func(*Request)) *Request {
 	req := &Request{Messages: msgs, Model: DefaultModel}
 	for _, opt := range opts {
 		opt(req)
@@ -183,10 +184,10 @@ func WithModel(model models.Model) func(*Request) {
 
 // Response is the response from the Chat API
 type Response struct {
-	ID      string          `json:"id"`
-	Object  string          `json:"object"`
-	Created int64           `json:"created"`
-	Model   string          `json:"model"`
-	Usage   openai.Usage    `json:"usage"`
-	Choices []openai.Choice `json:"choices"`
+	ID      string        `json:"id"`
+	Object  string        `json:"object"`
+	Created int64         `json:"created"`
+	Model   string        `json:"model"`
+	Usage   chat.Usage    `json:"usage"`
+	Choices []chat.Choice `json:"choices"`
 }

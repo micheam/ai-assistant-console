@@ -14,9 +14,9 @@ import (
 	"github.com/mattn/go-runewidth"
 	"golang.org/x/term"
 
+	"micheam.com/aico/internal/chat"
 	"micheam.com/aico/internal/config"
-	"micheam.com/aico/internal/openai"
-	"micheam.com/aico/internal/openai/chat"
+	openaichat "micheam.com/aico/internal/openai/chat"
 	"micheam.com/aico/internal/openai/models"
 	"micheam.com/aico/internal/spinner"
 	"micheam.com/aico/internal/theme"
@@ -43,11 +43,11 @@ func New(cfg *config.Config, logger *slog.Logger) *Handler {
 // Run starts the chat.
 func (h *Handler) Run(ctx context.Context) error {
 	// Prepare message with persona
-	messages := make([]openai.Message, 0)
+	messages := make([]chat.Message, 0)
 
 	// System messages from persona
 	for _, msg := range h.persona.Messages {
-		messages = append(messages, &openai.SystemMessage{Content: msg})
+		messages = append(messages, &chat.SystemMessage{Content: msg})
 	}
 
 	// Spinner settings
@@ -61,9 +61,9 @@ func (h *Handler) Run(ctx context.Context) error {
 		os.Exit(1)
 	}
 
-	client := chat.New(authToken)
+	client := openaichat.New(authToken)
 	model := models.Model(h.cfg.Chat.Model)
-	if !chat.IsAvailableModel(model) {
+	if !openaichat.IsAvailableModel(model) {
 		return fmt.Errorf("model %s is not available", model)
 	}
 
@@ -83,21 +83,21 @@ func (h *Handler) Run(ctx context.Context) error {
 		default: // store user input
 			logger.Debug("User input", "text", text)
 			if strings.HasPrefix(text, "SYSTEM:") {
-				messages = append(messages, &openai.SystemMessage{Content: text})
+				messages = append(messages, &chat.SystemMessage{Content: text})
 			} else {
 				// Handle image URL
 				if strings.HasPrefix(text, "<") && strings.HasSuffix(text, ">") {
 					urlStr := text[1 : len(text)-1]
 					if u, err := url.Parse(urlStr); err == nil {
-						messages = append(messages, &openai.UserMessage{
-							Content: []openai.Content{&openai.ImageContent{URL: *u}},
+						messages = append(messages, &chat.UserMessage{
+							Content: []chat.Content{&chat.ImageContent{URL: *u}},
 						})
 					}
 					continue
 				}
 				// Handle plain text
-				messages = append(messages, &openai.UserMessage{
-					Content: []openai.Content{&openai.TextContent{Text: text}},
+				messages = append(messages, &chat.UserMessage{
+					Content: []chat.Content{&chat.TextContent{Text: text}},
 				})
 			}
 
@@ -112,7 +112,7 @@ func (h *Handler) Run(ctx context.Context) error {
 			spinner.Start()
 			defer spinner.Stop()
 
-			req := chat.NewRequest(messages, chat.WithModel(model))
+			req := openaichat.NewRequest(messages, openaichat.WithModel(model))
 			logger.Debug("ChatRequest", "req", req)
 
 			// width of terminal
@@ -124,7 +124,7 @@ func (h *Handler) Run(ctx context.Context) error {
 			var cnt int // Current width of output
 			content := new(strings.Builder)
 
-			if err := client.DoStream(ctx, req, func(resp *chat.Response) error { // Block until completion DONE
+			if err := client.DoStream(ctx, req, func(resp *openaichat.Response) error { // Block until completion DONE
 				spinner.Stop()
 				delta := resp.Choices[0].Delta
 				if delta == nil {
@@ -158,8 +158,8 @@ func (h *Handler) Run(ctx context.Context) error {
 			}
 			fmt.Printf("\n\n")
 
-			messages = append(messages, &openai.AssistantMessage{
-				Content: []openai.Content{&openai.TextContent{Text: content.String()}},
+			messages = append(messages, &chat.AssistantMessage{
+				Content: []chat.Content{&chat.TextContent{Text: content.String()}},
 			})
 		}
 	}
