@@ -17,7 +17,6 @@ import (
 	"micheam.com/aico/internal/openai/chat"
 	"micheam.com/aico/internal/openai/models"
 	"micheam.com/aico/internal/theme"
-	tui "micheam.com/aico/internal/tui/chat"
 )
 
 const ENV_KEY_OPENAI_API_KEY = "OPENAI_API_KEY"
@@ -103,9 +102,7 @@ func app() *cli.App {
 
 var commands = []*cli.Command{
 	configCommand,
-	startTUICommand,
 	sendMessageCommand,
-	modelsCommand,
 }
 
 var configCommand = &cli.Command{
@@ -116,23 +113,6 @@ var configCommand = &cli.Command{
 		path := config.ConfigFilePath(c.Context)
 		fmt.Println(path)
 		return nil
-	},
-}
-
-var startTUICommand = &cli.Command{
-	Name:        "tui",
-	Usage:       "Chat with AI in TUI",
-	Description: "Start TUI application to chat with AI",
-	Action: func(c *cli.Context) error {
-		ctx := c.Context
-		cfg := config.ConfigFrom(ctx)
-		logger := logging.LoggerFrom(ctx).With("component", "tui")
-
-		handler := tui.New(cfg, logger)
-		if persona, ok := cfg.Chat.GetPersona(c.String("persona")); ok {
-			handler = handler.WithPersona(persona)
-		}
-		return handler.Run(ctx)
 	},
 }
 
@@ -235,7 +215,7 @@ Example:
 			return fmt.Errorf("no input message")
 		}
 
-		msgs := ParseInputMessage(inputMsg)
+		msgs := ParseTextRequest(inputMsg)
 		messages = append(messages, msgs...)
 
 		// Send chat request
@@ -297,39 +277,12 @@ Example:
 	},
 }
 
-var modelsCommand = &cli.Command{
-	Name:        "models",
-	Usage:       "List available models for chat",
-	Description: "List available models for chat",
-	Flags: []cli.Flag{
-		&cli.BoolFlag{
-			Name:  "json",
-			Usage: "Output in JSON format",
-		},
-	},
-	Action: func(c *cli.Context) error {
-		conf := config.ConfigFrom(c.Context)
-		defaultModel := models.Model(conf.Chat.Model)
-		renderer := models.ModelTextRenderer
-		if c.Bool("json") {
-			renderer = models.ModelJSONRenderer
-		}
-		for _, m := range chat.AvailableModels() {
-			if err := renderer(os.Stdout, m, m == defaultModel); err != nil {
-				return fmt.Errorf("render model: %w", err)
-			}
-			fmt.Println()
-		}
-		return nil
-	},
-}
-
 // --------------------------------------------------------------------
 // Helpers
 // --------------------------------------------------------------------
 
-// ParseInputMessage parses input messages.
-func ParseInputMessage(src io.Reader) []openai.Message {
+// ParseTextRequest parses input messages.
+func ParseTextRequest(src io.Reader) []openai.Message {
 	var (
 		messages = make([]openai.Message, 0)
 		scanner  = bufio.NewScanner(src)
