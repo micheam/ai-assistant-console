@@ -11,7 +11,7 @@ vim9script
 # Last Change: 2022-10-10
 #
 #===============================================================================
-import autoload 'uiwidget.vim'
+import '../autoload/uiwidget.vim' as uiwidget
 
 if !has('patch-9.1.1119')
     echoerr "This plugin requires Vim patch 9.1.1119 or higher. Please update your Vim 🙇"
