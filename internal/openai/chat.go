@@ -1,94 +1,55 @@
-package chat
+package openai
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"micheam.com/aico/internal/chat"
+	"micheam.com/aico/internal/assistant"
 	"micheam.com/aico/internal/logging"
-	"micheam.com/aico/internal/openai"
-	"micheam.com/aico/internal/openai/models"
 )
 
 const endpoint = "https://api.openai.com/v1/chat/completions"
 
-// Client is used to access the Chat API
-type Client struct {
-	client *openai.Client
+// AvailableModels returns a list of available models
+func AvailableModels() []string {
+	return []string{
+		"gpt-4o",
+		"gpt-4o-mini",
+		"o1",
+		"o1-mini",
+		"o3-mini",
+	}
 }
 
-// NewWithOpenAIClient returns a new ChatClient
-func NewWithOpenAIClient(client *openai.Client) *Client {
-	return &Client{client: client}
+// NewGenerativeModel creates a new instance of a generative model
+func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, error) {
+	switch modelName {
+	case "gpt-4o":
+		return NewGPT4O(apiKey), nil
+	case "gpt-4o-mini":
+		return NewGPT4OMini(apiKey), nil
+	case "o1":
+		return NewO1(apiKey), nil
+	case "o1-mini":
+		return NewO1Mini(apiKey), nil
+	case "o3-mini":
+		return NewO3Mini(apiKey), nil
+	}
+	return nil, fmt.Errorf("unsupported model name: %s", modelName)
 }
 
-// New returns a new ChatClient.
-//
-// If you have an openai.Client already, use [NewWithOpenAIClient].
-func New(apikey string) *Client {
-	openapiClient := openai.NewClient(apikey)
-	return NewWithOpenAIClient(openapiClient)
-}
-
-// Do is used to make a request to the Chat API
-func (c *Client) Do(ctx context.Context, req *Request) (*Response, error) {
-	logger := logging.LoggerFrom(ctx)
-	if req.Stream {
-		return nil, fmt.Errorf("streaming is not supported with Do, use Stream")
-	}
-	if req.Model.IsEmpty() {
-		logger.Warn(fmt.Sprintf("Model is not specified, using default model: %s", DefaultModel))
-		req.Model = DefaultModel
-	}
-
-	resp := &Response{}
-	err := c.client.DoPost(ctx, endpoint, req, resp)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-func (c *Client) DoStream(ctx context.Context, req *Request, onReceive func(resp *Response) error) error {
-	logger := logging.LoggerFrom(ctx)
-	if !req.Stream {
-		req.Stream = true
-	}
-	if req.Model.IsEmpty() {
-		logger.Warn(fmt.Sprintf("Model is not specified, using default model: %s", DefaultModel))
-		req.Model = DefaultModel
-	}
-
-	jsonBody, err := json.Marshal(req)
-	if err != nil {
-		return fmt.Errorf("failed to marshal request: %w", err)
-	}
-
-	onReceive_ := func(b []byte) error {
-		var resp Response
-		err := json.Unmarshal(b, &resp)
-		if err != nil {
-			return fmt.Errorf("failed to unmarshal response: %w", err)
-		}
-		return onReceive(&resp)
-	}
-	return c.client.DoStream(ctx, endpoint, bytes.NewReader(jsonBody), onReceive_)
-}
-
-// Request is used to make a request to the Chat API
-type Request struct {
+// ChatRequest is used to make a request to the Chat API
+type ChatRequest struct {
 	// model string Required
 	//
 	// ID of the model to use. See the model endpoint compatibility table for
 	// details on which models work with the Chat API.
-	Model models.Model `json:"model"`
+	Model string `json:"model"`
 
 	// messages array Required
 	//
 	// A list of messages describing the conversation so far.
-	Messages []chat.Message `json:"messages"`
+	Messages []Message `json:"messages"`
 
 	// temperature number Optional Defaults to 1
 	//
@@ -163,31 +124,71 @@ type Request struct {
 	// user string Optional
 	//
 	// A unique identifier representing your end-user, which can help OpenAI to monitor and
-	// detect abuse. [Learn more](https://platform.openai.com/docs/guides/safety-best-practices/end-user-ids).
+	// detect abuse. [Learn more](https://platform.com/docs/guides/safety-best-practices/end-user-ids).
 	User string `json:"user,omitempty"`
 }
 
-// NewRequest returns a new Request.
-func NewRequest(msgs []chat.Message, opts ...func(*Request)) *Request {
-	req := &Request{Messages: msgs, Model: DefaultModel}
-	for _, opt := range opts {
-		opt(req)
-	}
-	return req
+// ChatResponse is the response from the Chat API
+type ChatResponse struct {
+	ID      string   `json:"id"`
+	Object  string   `json:"object"`
+	Created int64    `json:"created"`
+	Model   string   `json:"model"`
+	Usage   Usage    `json:"usage"`
+	Choices []Choice `json:"choices"`
 }
 
-func WithModel(model models.Model) func(*Request) {
-	return func(req *Request) {
-		req.Model = model
+func buildChatRequest(ctx context.Context, modelName string, systemInstruction *assistant.TextContent, msgs []*assistant.Message) (*ChatRequest, error) {
+	if len(msgs) == 0 {
+		return nil, fmt.Errorf("no messages provided")
 	}
+	req := &ChatRequest{
+		Model:    modelName,
+		Messages: make([]Message, 0, len(msgs)+1),
+	}
+	if systemInstruction != nil {
+		req.Messages = append(req.Messages, &SystemMessage{
+			Content: systemInstruction.Text,
+		})
+	}
+	for _, msg := range msgs {
+		for _, content := range msg.Contents {
+			switch v := content.(type) {
+			case *assistant.TextContent:
+				switch msg.Author {
+				case "user":
+					req.Messages = append(req.Messages, &UserMessage{
+						Content: []Content{&TextContent{Text: v.Text}},
+					})
+				case "assistant":
+					req.Messages = append(req.Messages, &AssistantMessage{
+						Content: []Content{&TextContent{Text: v.Text}},
+					})
+				}
+			case *assistant.URLImageContent:
+				switch msg.Author {
+				case "user":
+					req.Messages = append(req.Messages, &UserMessage{
+						Content: []Content{&ImageContent{URL: v.URL}},
+					})
+				case "assistant":
+					req.Messages = append(req.Messages, &AssistantMessage{
+						Content: []Content{&ImageContent{URL: v.URL}},
+					})
+				}
+			default:
+				// fmt.Printf("Unsupported message content type: %s\n", reflect.TypeOf(v))
+				logging.LoggerFrom(ctx).Warn(fmt.Sprintf("Unsupported message content type: %T", v))
+			}
+		}
+	}
+	return req, nil
 }
 
-// Response is the response from the Chat API
-type Response struct {
-	ID      string        `json:"id"`
-	Object  string        `json:"object"`
-	Created int64         `json:"created"`
-	Model   string        `json:"model"`
-	Usage   chat.Usage    `json:"usage"`
-	Choices []chat.Choice `json:"choices"`
+func toGenerateContentResponse(src *ChatResponse) *assistant.GenerateContentResponse {
+	if len(src.Choices) > 0 {
+		text := src.Choices[0].Message.Content[0].(*TextContent).Text
+		return &assistant.GenerateContentResponse{Content: &assistant.TextContent{Text: text}}
+	}
+	return &assistant.GenerateContentResponse{Content: nil}
 }

@@ -1,0 +1,102 @@
+package commands_test
+
+import (
+	"bytes"
+	"path/filepath"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/urfave/cli/v2"
+
+	"micheam.com/aico/internal/commands"
+	"micheam.com/aico/internal/config"
+)
+
+func TestConfigCommand_NoArguments(t *testing.T) {
+	// Setup
+	t.Setenv(config.EnvKeyConfigPath, filepath.Join("testdata", "config.yaml"))
+	_, require := assert.New(t), require.New(t)
+
+	var buf bytes.Buffer
+	app := &cli.App{
+		Writer: &buf,
+		Commands: []*cli.Command{
+			commands.Config,
+		},
+	}
+
+	// Exercise
+	err := app.Run([]string{"chat", "config"})
+
+	// Verify
+	require.NoError(err)
+	expected := config.ConfigFilePath() + "\n"
+	require.Equal(expected, buf.String())
+}
+
+func TestConfigCommand_NotYetInitialized(t *testing.T) {
+	// Setup
+	t.Setenv(config.EnvKeyConfigPath, filepath.Join(t.TempDir(), "config.yaml"))
+	_, require := assert.New(t), require.New(t)
+
+	var buf bytes.Buffer
+	app := &cli.App{
+		Writer: &buf,
+		Commands: []*cli.Command{
+			commands.Config,
+		},
+	}
+
+	// Exercise
+	err := app.Run([]string{"chat", "config"})
+
+	// Verify
+	require.ErrorIs(err, config.ErrConfigFileNotFound)
+	require.Equal("Please run 'chat config init' to init the configuration file.\n", buf.String())
+}
+
+func TestConfigCommand_Initialize(t *testing.T) {
+	// Setup
+	configPath := filepath.Join(t.TempDir(), "config.yaml")
+	t.Setenv(config.EnvKeyConfigPath, configPath) // non-existent file
+	_, require := assert.New(t), require.New(t)
+
+	var buf bytes.Buffer
+	app := &cli.App{
+		Writer: &buf,
+		Commands: []*cli.Command{
+			commands.Config,
+		},
+	}
+
+	// Exercise
+	err := app.Run([]string{"chat", "config", "init"})
+
+	// Verify
+	require.NoError(err)
+	require.FileExists(configPath)
+	require.Contains(buf.String(), "Configuration file initialized\n")
+}
+
+func TestConfigCommand_InitializeWithSpecifiedPath(t *testing.T) {
+	// Setup
+	configPath := filepath.Join(t.TempDir(), "config2.yaml")
+	_, require := assert.New(t), require.New(t)
+
+	var buf bytes.Buffer
+	app := &cli.App{
+		Writer: &buf,
+		Commands: []*cli.Command{
+			commands.ConfigInit,
+		},
+	}
+
+	// Exercise
+	err := app.Run([]string{"config", "init", "-path", configPath})
+
+	// Verify
+	require.NoError(err)
+	require.FileExists(configPath)
+	require.Contains(buf.String(), "Configuration file initialized\n")
+}

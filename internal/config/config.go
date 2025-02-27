@@ -26,10 +26,9 @@ func ConfigFrom(ctx context.Context) *Config {
 
 // Config is the configuration for the application
 type Config struct {
-	Chat Chat `yaml:"chat"`
-
-	// logfile is the path to the logfile
-	logfile string `yaml:"logfile"`
+	Location string `yaml:"-"`
+	Chat     Chat   `yaml:"chat"`
+	logfile  string `yaml:"logfile"` // logfile is the path to the logfile
 }
 
 // Chat is the configuration for the chat
@@ -39,9 +38,6 @@ type Chat struct {
 	// This can be one of [openai.chatAvailableModels].
 	// If omitted, the default model for the application will be used.
 	Model string `yaml:"model"`
-
-	// Temperature is the temperature to use for the chat
-	Temperature *float64 `yaml:"temperature"`
 
 	// Persona is the persona to use for the chat
 	Persona map[string]Personality `yaml:"persona"`
@@ -62,7 +58,7 @@ var (
 
 func (c *Config) Logfile() string {
 	if c.logfile == "" {
-		return logfilePath(context.Background())
+		return defaultLogfilePath()
 	}
 	return c.logfile
 }
@@ -85,30 +81,30 @@ func load(path string) (*Config, error) {
 	if err := yaml.Unmarshal(b, &config); err != nil {
 		return nil, fmt.Errorf("unmarshal yaml: %w", err)
 	}
+	config.Location = path
 	return &config, nil
 }
 
+const EnvKeyConfigPath = "AI_ASSISTANT_CONFIG_PATH"
+
 // ConfigFilePath returns the path to the config file
-func ConfigFilePath(_ context.Context) string {
-	if os.Getenv("CONFIG_PATH") != "" {
-		return os.Getenv("CONFIG_PATH")
+func ConfigFilePath() string {
+	if os.Getenv(EnvKeyConfigPath) != "" {
+		return os.Getenv(EnvKeyConfigPath)
 	}
-	confDir, err := os.UserConfigDir()
+	if os.Getenv("XDG_CONFIG_HOME") != "" {
+		return filepath.Join(os.Getenv("XDG_CONFIG_HOME"), ApplicationName, ConfigFileName)
+	}
+	dir, err := os.UserConfigDir()
 	if err != nil {
 		return ""
 	}
-	return filepath.Join(confDir, ApplicationName, ConfigFileName)
+	return filepath.Join(dir, ApplicationName, ConfigFileName)
 }
 
-func logfilePath(_ context.Context) string {
-	if os.Getenv("LOGFILE_PATH") != "" {
-		return os.Getenv("LOGFILE_PATH")
-	}
-	confDir, err := os.UserConfigDir()
-	if err != nil {
-		return ""
-	}
-	return filepath.Join(confDir, ApplicationName, LogFileName)
+func defaultLogfilePath() string {
+	// Same directory as the config file
+	return filepath.Join(filepath.Dir(ConfigFilePath()), LogFileName)
 }
 
 const (
@@ -123,18 +119,21 @@ const (
 
 	// LogFileName is the name of the log file
 	LogFileName = "aico.log"
+
+	// SessionFilePattern is the pattern for the session file
+	SessionFilePattern = "{{.ID}}.pb"
 )
 
 // Load loads the configuration for the application
 //
-// This will load the configuration from the path specified by the CONFIG_PATH
+// This will load the configuration from the path specified by the AI_ASSISTANT_CONFIG_PATH
 // environment variable, or from the default location if the environment
 // variable is not set.
 //
 // This may return an error if the file cannot be read or parsed.
 // If the file does not exist, this will return [ErrConfigFileNotFound].
-func Load(ctx context.Context) (*Config, error) {
-	return load(ConfigFilePath(ctx))
+func Load(_ context.Context) (*Config, error) {
+	return load(ConfigFilePath())
 }
 
 // InitAndLoad initializes the configuration for the application
@@ -146,7 +145,7 @@ func InitAndLoad(ctx context.Context) (*Config, error) {
 	if errors.Is(err, ErrConfigFileNotFound) {
 		conf := DefaultConfig()
 		// mkdir for path
-		if err := os.MkdirAll(filepath.Dir(ConfigFilePath(ctx)), 0755); err != nil {
+		if err := os.MkdirAll(filepath.Dir(ConfigFilePath()), 0755); err != nil {
 			return nil, fmt.Errorf("mkdir: %w", err)
 		}
 
@@ -155,7 +154,7 @@ func InitAndLoad(ctx context.Context) (*Config, error) {
 		if err != nil {
 			return nil, fmt.Errorf("marshal yaml: %w", err)
 		}
-		if err := os.WriteFile(ConfigFilePath(ctx), b, 0644); err != nil {
+		if err := os.WriteFile(ConfigFilePath(), b, 0644); err != nil {
 			return nil, fmt.Errorf("write file: %w", err)
 		}
 
@@ -193,7 +192,7 @@ var defaultPersona Personality = Personality{
 
 func DefaultConfig() *Config {
 	return &Config{
-		logfile: logfilePath(context.Background()),
+		logfile: defaultLogfilePath(),
 		Chat: Chat{
 			Model: DefaultModel,
 			Persona: map[string]Personality{

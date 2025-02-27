@@ -5,6 +5,7 @@ go 1.24.0
 require (
 	github.com/fatih/color v1.15.0
 	github.com/google/go-cmp v0.6.0
+	github.com/google/uuid v1.6.0
 	github.com/mattn/go-runewidth v0.0.15
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.25.7
@@ -13,8 +14,8 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/google/generative-ai-go v0.19.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/tmaxmax/go-sse v0.10.0 // indirect
 )
 
 require (

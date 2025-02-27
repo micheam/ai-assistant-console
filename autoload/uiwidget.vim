@@ -6,7 +6,7 @@ vim9script
 # Author: Michito Maeda <michto.maeda@gmail.com>
 # License: MIT
 # Created: 2025-01-20
-# Last Updated: 2025-02-18T11:46:32+09:00
+# Last Updated: 2025-02-26T09:36:30+09:00
 # Version: 0.1.0
 # Dependencies: 
 #   - Vim patch 9.1.1119 or higher
@@ -247,3 +247,5 @@ export class Select
         return popup_filter_menu(winid, key)
     enddef
 endclass
+
+defcompile
