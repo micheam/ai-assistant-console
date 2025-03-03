@@ -33,6 +33,25 @@ func TestChatSendCommand(t *testing.T) {
 	require.Equal(expected, buf.String())
 }
 
+func TestChatSendCommand_WithNoArguments(t *testing.T) {
+	// Setup
+	t.Setenv(config.EnvKeyConfigPath, filepath.Join("testdata", "config.yaml"))
+	_, require := assert.New(t), require.New(t)
+
+	var buf bytes.Buffer
+	app := &cli.App{
+		Writer:   &buf,
+		Commands: []*cli.Command{commands.ChatSend},
+	}
+
+	// Exercise
+	err := app.Run([]string{"chat", "send"})
+
+	// Verify
+	require.Error(err)
+	require.Contains(err.Error(), "message")
+}
+
 func TestChatSendCommand_WithModel(t *testing.T) {
 	// Setup
 	t.Setenv(config.EnvKeyConfigPath, filepath.Join("testdata", "config.yaml"))

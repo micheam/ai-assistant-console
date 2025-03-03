@@ -27,6 +27,20 @@ var ChatSend = &cli.Command{
 	},
 	Before: loadConfig,
 	Action: func(c *cli.Context) error {
+		// Guard
+		msgs := c.Args().Slice()
+		if len(msgs) == 0 {
+			// Try to read from stdin
+			var err error
+			msgs, err = readLines(os.Stdin)
+			if err != nil {
+				return fmt.Errorf("read from stdin: %w", err)
+			}
+			if len(msgs) == 0 {
+				return fmt.Errorf("no message provided")
+			}
+		}
+
 		logger := logging.LoggerFrom(c.Context)
 		conf := config.MustFromContext(c.Context)
 
@@ -52,7 +66,7 @@ var ChatSend = &cli.Command{
 
 		// Send message to assistant
 		ctx := logging.ContextWith(c.Context, logger)
-		message := strings.Join(c.Args().Slice(), " ")
+		message := strings.Join(msgs, " ")
 		resp, err := sess.SendMessage(ctx, assistant.NewTextContent(message))
 		if err != nil {
 			return fmt.Errorf("send message: %w", err)
@@ -77,7 +91,7 @@ func setupGenerativeModel(conf config.Config) (assistant.GenerativeModel, error)
 	}
 	model, err := openai.NewGenerativeModel(conf.Chat.Model, openaiAPIKey)
 	if err != nil {
-		return nil, fmt.Errorf("create model: %w", err)
+		return nil, fmt.Errorf("OpenAI: %w", err)
 	}
 	return model, nil
 }

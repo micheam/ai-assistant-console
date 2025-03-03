@@ -1,8 +1,10 @@
 package commands
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"io"
 
 	"github.com/urfave/cli/v2"
 
@@ -37,4 +39,17 @@ func loadConfig(c *cli.Context) error {
 
 	c.Context = config.WithConfig(c.Context, conf)
 	return nil
+}
+
+// readLines reads lines from the given reader.
+func readLines(r io.Reader) ([]string, error) {
+	var lines []string
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, fmt.Errorf("scan lines: %w", err)
+	}
+	return lines, nil
 }
