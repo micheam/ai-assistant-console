@@ -1,15 +1,92 @@
 package commands
 
 import (
+	"fmt"
+	"os"
+	"strings"
+
 	"github.com/urfave/cli/v2"
+
+	"micheam.com/aico/internal/assistant"
+	"micheam.com/aico/internal/config"
+	"micheam.com/aico/internal/logging"
+	"micheam.com/aico/internal/openai"
 )
 
 var ChatSend = &cli.Command{
 	Name:      "send",
 	Usage:     "Send a message to the AI assistant",
 	ArgsUsage: "<message>",
-	Before:    loadConfig,
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:    "persona",
+			Aliases: []string{"p"},
+			Usage:   "The persona to use",
+		},
+		flagModel,
+	},
+	Before: loadConfig,
 	Action: func(c *cli.Context) error {
+		logger := logging.LoggerFrom(c.Context)
+		conf := config.MustFromContext(c.Context)
+
+		// Load GenerativeModel
+		m, err := setupGenerativeModel(*conf)
+		if err != nil {
+			return fmt.Errorf("create model: %w", err)
+		}
+
+		// Create new chat session
+		sess, err := assistant.StartChat(m)
+		if err != nil {
+			return fmt.Errorf("start chat: %w", err)
+		}
+
+		// Resolve persona
+		persona, found := resolvePersona(conf, c.String("persona"))
+		if !found {
+			return fmt.Errorf("persona not found: %s", c.String("persona"))
+		}
+		sess.SetSystemInstruction(
+			assistant.NewTextContent(strings.Join(persona.Messages, "\n")))
+
+		// Send message to assistant
+		ctx := logging.ContextWith(c.Context, logger)
+		message := strings.Join(c.Args().Slice(), " ")
+		resp, err := sess.SendMessage(ctx, assistant.NewTextContent(message))
+		if err != nil {
+			return fmt.Errorf("send message: %w", err)
+		}
+
+		// Print response
+		switch v := resp.Content.(type) {
+		case *assistant.TextContent:
+			fmt.Fprintln(c.App.Writer, v.Text)
+		default:
+			logger.Error("unexpected response type", "type", fmt.Sprintf("%T", v))
+		}
+
 		return nil
 	},
+}
+
+func setupGenerativeModel(conf config.Config) (assistant.GenerativeModel, error) {
+	openaiAPIKey, found := os.LookupEnv("OPENAI_API_KEY")
+	if !found {
+		return nil, fmt.Errorf("missing environment variable: OPENAI_API_KEY")
+	}
+	model, err := openai.NewGenerativeModel(conf.Chat.Model, openaiAPIKey)
+	if err != nil {
+		return nil, fmt.Errorf("create model: %w", err)
+	}
+	return model, nil
+}
+
+// resolvePersona resolves the persona to use for the chat
+// If the personaName is empty, the default persona will be used.
+func resolvePersona(conf *config.Config, personaName string) (*config.Personality, bool) {
+	if personaName != "" {
+		return conf.Chat.GetPersona(personaName)
+	}
+	return conf.Chat.GetDefaultPersona(), true
 }

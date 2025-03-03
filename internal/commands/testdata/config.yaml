@@ -1,12 +1,15 @@
 chat:
   model: "gpt-4o-mini"
-  temperature: 0.5
   persona:
     default:
-      description: "Professional"
+      description: "description for unit test"
       messages:
-        - "Message1 for Professional"
-        - "Message2 for Professional"
-        - "Message3 for Professional"
-        - "Message4 for Professional"
-
+        - "This is a message for unit test of our chat app"
+        - "I will send you 'Hello, How are you doing?'"
+        - "Please respond with 'I am doing great, thank you!'"
+    someotherpersona:
+      description: "description for unit test"
+      messages:
+        - "This is a message for unit test of our chat app"
+        - "I will send you 'Hello, who are you?'"
+        - "Please respond with 'I am a someotherpersona!'"

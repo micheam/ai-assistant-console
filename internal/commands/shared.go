@@ -9,6 +9,17 @@ import (
 	"micheam.com/aico/internal/config"
 )
 
+var flagModel = &cli.StringFlag{
+	Name:    "model",
+	Aliases: []string{"m"},
+	Usage:   "The model to use",
+}
+
+var flagJSON = &cli.BoolFlag{
+	Name:  "json",
+	Usage: "Output the models in JSON format",
+}
+
 // loadConfig is a helper function to load the configuration and attach it to the context.
 func loadConfig(c *cli.Context) error {
 	conf, err := config.Load()

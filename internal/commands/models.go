@@ -14,14 +14,8 @@ var ChatModels = &cli.Command{
 	Name:  "models",
 	Usage: "Show the available models",
 	Flags: []cli.Flag{
-		&cli.BoolFlag{
-			Name:  "json",
-			Usage: "Output the models in JSON format",
-		},
-		&cli.StringFlag{
-			Name:  "model",
-			Usage: "The model to use",
-		},
+		flagJSON,
+		flagModel,
 	},
 	Before: loadConfig,
 	Action: func(c *cli.Context) error {
