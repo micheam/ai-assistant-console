@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -59,16 +58,10 @@ var configInit = &cli.Command{
 }
 
 var configEdit = &cli.Command{
-	Name:  "edit",
-	Usage: "Edit the configuration file",
+	Name:   "edit",
+	Usage:  "Edit the configuration file",
+	Before: loadConfig,
 	Action: func(c *cli.Context) error {
-		conf, err := config.Load(c.Context)
-		if errors.Is(err, config.ErrConfigFileNotFound) {
-			fmt.Fprintln(c.App.Writer, "Please run 'chat config init' to init the configuration file.")
-		}
-		if err != nil {
-			return err
-		}
 		editor := os.Getenv("EDITOR")
 		if editor == "" {
 			editor = "vim"
@@ -76,6 +69,7 @@ var configEdit = &cli.Command{
 				editor = "notepad.exe"
 			}
 		}
+		conf := config.MustFromContext(c.Context)
 		cmd := exec.Command(editor, conf.Location)
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout

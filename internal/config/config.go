@@ -20,8 +20,17 @@ func WithConfig(ctx context.Context, cfg *Config) context.Context {
 	return context.WithValue(ctx, contextKeyConfig, cfg)
 }
 
-func ConfigFrom(ctx context.Context) *Config {
-	return ctx.Value(contextKeyConfig).(*Config)
+func FromContext(ctx context.Context) (*Config, bool) {
+	cfg, ok := ctx.Value(contextKeyConfig).(*Config)
+	return cfg, ok
+}
+
+func MustFromContext(ctx context.Context) *Config {
+	cfg, ok := FromContext(ctx)
+	if !ok {
+		panic("config not found in context")
+	}
+	return cfg
 }
 
 // Config is the configuration for the application
@@ -132,13 +141,13 @@ const (
 //
 // This may return an error if the file cannot be read or parsed.
 // If the file does not exist, this will return [ErrConfigFileNotFound].
-func Load(_ context.Context) (*Config, error) {
+func Load() (*Config, error) {
 	return load(ConfigFilePath())
 }
 
 // InitAndLoad initializes the configuration for the application
 func InitAndLoad(ctx context.Context) (*Config, error) {
-	config, err := Load(ctx)
+	config, err := Load()
 	if err == nil {
 		return config, nil // already initialized
 	}

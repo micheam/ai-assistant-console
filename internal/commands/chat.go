@@ -7,6 +7,9 @@ import (
 var ChatSend = &cli.Command{
 	Name:      "send",
 	Usage:     "Send a message to the AI assistant",
-	Action:    func(c *cli.Context) error { return nil },
 	ArgsUsage: "<message>",
+	Before:    loadConfig,
+	Action: func(c *cli.Context) error {
+		return nil
+	},
 }
