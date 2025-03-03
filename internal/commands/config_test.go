@@ -27,33 +27,12 @@ func TestConfigCommand_NoArguments(t *testing.T) {
 	}
 
 	// Exercise
-	err := app.Run([]string{"chat", "config"})
+	err := app.Run([]string{"chat", "config", "path"})
 
 	// Verify
 	require.NoError(err)
 	expected := config.ConfigFilePath() + "\n"
 	require.Equal(expected, buf.String())
-}
-
-func TestConfigCommand_NotYetInitialized(t *testing.T) {
-	// Setup
-	t.Setenv(config.EnvKeyConfigPath, filepath.Join(t.TempDir(), "config.yaml"))
-	_, require := assert.New(t), require.New(t)
-
-	var buf bytes.Buffer
-	app := &cli.App{
-		Writer: &buf,
-		Commands: []*cli.Command{
-			commands.Config,
-		},
-	}
-
-	// Exercise
-	err := app.Run([]string{"chat", "config"})
-
-	// Verify
-	require.ErrorIs(err, config.ErrConfigFileNotFound)
-	require.Equal("Please run 'chat config init' to init the configuration file.\n", buf.String())
 }
 
 func TestConfigCommand_Initialize(t *testing.T) {

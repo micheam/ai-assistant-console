@@ -11,3 +11,5 @@ chat:
         - "Message3 for Professional"
         - "Message4 for Professional"
 
+  session:
+    directory: "./sessions"

@@ -13,3 +13,5 @@ chat:
         - "This is a message for unit test of our chat app"
         - "I will send you 'Hello, who are you?'"
         - "Please respond with 'I am a someotherpersona!'"
+  session:
+    directory: "./sessions"

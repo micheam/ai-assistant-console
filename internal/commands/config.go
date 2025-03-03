@@ -52,7 +52,7 @@ var configInit = &cli.Command{
 			return err
 		}
 		fmt.Fprintln(c.App.Writer, "Configuration file initialized")
-		fmt.Fprintln(c.App.Writer, conf.Location)
+		fmt.Fprintln(c.App.Writer, conf.Location())
 		return nil
 	},
 }
@@ -70,7 +70,7 @@ var configEdit = &cli.Command{
 			}
 		}
 		conf := config.MustFromContext(c.Context)
-		cmd := exec.Command(editor, conf.Location)
+		cmd := exec.Command(editor, conf.Location())
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr

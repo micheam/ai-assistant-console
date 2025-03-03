@@ -31,6 +31,8 @@ func TestChatSendCommand(t *testing.T) {
 	require.NoError(err)
 	expected := "I am doing great, thank you!\n"
 	require.Equal(expected, buf.String())
+
+	// Verify: Session must be stored
 }
 
 func TestChatSendCommand_WithNoArguments(t *testing.T) {

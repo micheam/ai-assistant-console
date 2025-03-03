@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"micheam.com/aico/internal/assistant"
-	openai "micheam.com/aico/internal/openai/new"
+	openai "micheam.com/aico/internal/openai"
 )
 
 func ExampleGPT4O_GenerateContent() {
@@ -59,4 +59,5 @@ func ExampleGPT4O_GenerateContentStream() {
 	}
 
 	// Output:
+	// This is a test.
 }

@@ -1,9 +1,11 @@
 package config
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -35,9 +37,14 @@ func MustFromContext(ctx context.Context) *Config {
 
 // Config is the configuration for the application
 type Config struct {
-	Location string `yaml:"-"`
+	location string `yaml:"-"`
 	Chat     Chat   `yaml:"chat"`
 	logfile  string `yaml:"logfile"` // logfile is the path to the logfile
+}
+
+// Location returns the location of the configuration file
+func (c *Config) Location() string {
+	return c.location
 }
 
 // Chat is the configuration for the chat
@@ -50,6 +57,9 @@ type Chat struct {
 
 	// Persona is the persona to use for the chat
 	Persona map[string]Personality `yaml:"persona"`
+
+	// Session is the configuration for the chat session
+	Session Session `yaml:"session"`
 }
 
 // Personality is the personality to use for the chat
@@ -61,9 +71,24 @@ type Personality struct {
 	Messages []string `yaml:"messages"`
 }
 
-var (
-	ErrConfigFileNotFound = errors.New("config file not found")
-)
+// Session
+type Session struct {
+	// Directory is the directory to store the chat session files
+	// This can be a relative or absolute path.
+	// Environment variables can be used in the path.
+	// Sessions will be stored in this directory with the pattern [SessionFilePattern].
+	//
+	// e.g: "/Users/micheam/.aico/sessions"
+	Directory string `yaml:"directory"`
+
+	// DirectoryRaw is the raw directory path before environment variable expansion
+	// This is used to store the raw directory path before expansion
+	//
+	// e.g: "$HOME/.aico/sessions"
+	DirectoryRaw string `yaml:"-"`
+}
+
+var ErrConfigFileNotFound = errors.New("config file not found")
 
 func (c *Config) Logfile() string {
 	if c.logfile == "" {
@@ -81,16 +106,27 @@ func load(path string) (*Config, error) {
 	if os.IsNotExist(err) {
 		return nil, ErrConfigFileNotFound
 	}
-
 	b, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("read file: %w", err)
 	}
-	var config Config
-	if err := yaml.Unmarshal(b, &config); err != nil {
-		return nil, fmt.Errorf("unmarshal yaml: %w", err)
+	config, err := loadFromReader(bytes.NewReader(b))
+	if err != nil {
+		return nil, fmt.Errorf("load from reader: %w", err)
 	}
-	config.Location = path
+	config.location = path
+	return config, nil
+}
+
+func loadFromReader(r io.Reader) (*Config, error) {
+	var config Config
+	if err := yaml.NewDecoder(r).Decode(&config); err != nil {
+		return nil, fmt.Errorf("decode yaml: %w", err)
+	}
+
+	// Resolve environment variables
+	config.Chat.Session.DirectoryRaw = config.Chat.Session.Directory
+	config.Chat.Session.Directory = os.ExpandEnv(config.Chat.Session.Directory)
 	return &config, nil
 }
 
