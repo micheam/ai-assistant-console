@@ -11,27 +11,25 @@ import (
 )
 
 func main() {
-	err := newApp().Run(os.Args)
+	err := app.Run(os.Args)
 	if err != nil {
 		fmt.Fprint(os.Stderr, err)
 		os.Exit(1)
 	}
 }
 
-func newApp() *cli.App {
-	return &cli.App{
-		Name:           "chat",
-		Usage:          "Chat with an AI assistant",
-		Version:        assistantconsole.Version,
-		Description:    "",
-		DefaultCommand: "",
-		Commands: []*cli.Command{
-			commands.ChatSend,
-			commands.Config,
-		},
-		Flags:                []cli.Flag{},
-		EnableBashCompletion: true,
-		Authors:              []*cli.Author{},
-		Suggest:              true,
-	}
+var app = &cli.App{
+	Name:           "chat",
+	Usage:          "Chat with an AI assistant",
+	Version:        assistantconsole.Version,
+	Description:    "",
+	DefaultCommand: "",
+	Commands: []*cli.Command{
+		commands.ChatSend,
+		commands.Config,
+	},
+	Flags:                []cli.Flag{},
+	EnableBashCompletion: true,
+	Authors:              []*cli.Author{},
+	Suggest:              true,
 }
