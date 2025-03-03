@@ -26,6 +26,7 @@ var app = &cli.App{
 	DefaultCommand: "",
 	Commands: []*cli.Command{
 		commands.ChatSend,
+		commands.ChatModels,
 		commands.Config,
 	},
 	Flags:                []cli.Flag{},

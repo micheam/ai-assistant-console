@@ -1,6 +1,5 @@
-logfile: "/Users/foo/Library/Application Support/com.micheam.aico/aico.log"
 chat:
-  model: "gpt-3.5-turbo"
+  model: "gpt-4o-mini"
   temperature: 0.5
   persona:
     default:

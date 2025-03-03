@@ -18,6 +18,12 @@ func loadConfig(c *cli.Context) error {
 	if err != nil {
 		return fmt.Errorf("load config: %w", err)
 	}
+
+	// Overwrite Model with command-line flag (`-m, --model`)
+	if model := c.String("model"); model != "" {
+		conf.Chat.Model = model
+	}
+
 	c.Context = config.WithConfig(c.Context, conf)
 	return nil
 }

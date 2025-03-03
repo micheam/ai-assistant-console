@@ -21,6 +21,31 @@ func AvailableModels() []string {
 	}
 }
 
+func describeModel(modelName string) (desc string, found bool) {
+	m, ok := selectModel(modelName)
+	if !ok {
+		return "", false
+	}
+	return m.Description(), true
+}
+
+func selectModel(modelName string) (assistant.GenerativeModel, bool) {
+	switch modelName {
+	default:
+		return nil, false
+	case "gpt-4o":
+		return &GPT4O{}, true
+	case "gpt-4o-mini":
+		return &GPT4OMini{}, true
+	case "o1":
+		return &O1{}, true
+	case "o1-mini":
+		return &O1Mini{}, true
+	case "o3-mini":
+		return &O3Mini{}, true
+	}
+}
+
 // NewGenerativeModel creates a new instance of a generative model
 func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, error) {
 	switch modelName {
