@@ -15,21 +15,20 @@ import (
 var Config = &cli.Command{
 	Name:  "config",
 	Usage: "Manage the configuration for the AI assistant",
-	Action: func(c *cli.Context) error {
-		conf, err := config.Load(c.Context)
-		if errors.Is(err, config.ErrConfigFileNotFound) {
-			fmt.Fprintln(c.App.Writer, "Please run 'chat config init' to init the configuration file.")
-		}
-		if err != nil {
-			return err
-		}
-		fmt.Fprintln(c.App.Writer, conf.Location)
-		return nil
-	},
-
 	Subcommands: []*cli.Command{
+		configPath,
 		configInit,
 		configEdit,
+	},
+}
+
+var configPath = &cli.Command{
+	Name:  "path",
+	Usage: "Show the path to the configuration file",
+	Action: func(c *cli.Context) error {
+		path := config.ConfigFilePath()
+		_, err := fmt.Fprintln(c.App.Writer, path)
+		return err
 	},
 }
 
