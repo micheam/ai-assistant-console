@@ -27,7 +27,6 @@ var ChatSend = &cli.Command{
 	},
 	Before: loadConfig,
 	Action: func(c *cli.Context) error {
-		// Guard
 		msgs := c.Args().Slice()
 		if len(msgs) == 0 {
 			// Try to read from stdin
