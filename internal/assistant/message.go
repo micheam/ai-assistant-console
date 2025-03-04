@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/url"
 
-	assistantv1 "micheam.com/aico/internal/pb/assistant/v1"
+	assistantpb "micheam.com/aico/internal/pb/assistant/v1"
 )
 
 type Message struct {
@@ -16,30 +16,30 @@ type Message struct {
 	Contents []MessageContent
 }
 
-func (m *Message) toProto() (*assistantv1.Message, error) {
-	dest := &assistantv1.Message{}
+func (m *Message) toProto() (*assistantpb.Message, error) {
+	dest := &assistantpb.Message{}
 	switch m.Author {
 	case "assistant":
-		dest.Role = assistantv1.Message_ROLE_ASSISTANT
+		dest.Role = assistantpb.Message_ROLE_ASSISTANT
 	case "user":
-		dest.Role = assistantv1.Message_ROLE_USER
+		dest.Role = assistantpb.Message_ROLE_USER
 	default:
-		return nil, fmt.Errorf("unsupported message author: %s", m.Author)
+		return nil, fmt.Errorf("unsupported message author: %q", m.Author)
 	}
 	for _, c := range m.Contents {
 		switch c := c.(type) {
 		case *TextContent:
-			dest.Contents = append(dest.Contents, &assistantv1.MessageContent{
-				Content: &assistantv1.MessageContent_Text{
-					Text: &assistantv1.TextContent{
+			dest.Contents = append(dest.Contents, &assistantpb.MessageContent{
+				Content: &assistantpb.MessageContent_Text{
+					Text: &assistantpb.TextContent{
 						Text: c.Text,
 					},
 				},
 			})
 		case *URLImageContent:
-			dest.Contents = append(dest.Contents, &assistantv1.MessageContent{
-				Content: &assistantv1.MessageContent_Image{
-					Image: &assistantv1.URLImageContent{
+			dest.Contents = append(dest.Contents, &assistantpb.MessageContent{
+				Content: &assistantpb.MessageContent_Image{
+					Image: &assistantpb.URLImageContent{
 						Url: c.URL.String(),
 					},
 				},

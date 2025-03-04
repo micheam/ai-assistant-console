@@ -26,6 +26,8 @@ var ChatSend = &cli.Command{
 			Usage:   "The persona to use",
 		},
 		flagModel,
+		flagChatSession,
+		flagChatInstant,
 	},
 	Before: loadConfig,
 	Action: func(c *cli.Context) error {
@@ -45,17 +47,31 @@ var ChatSend = &cli.Command{
 		logger := logging.LoggerFrom(c.Context)
 		conf := config.MustFromContext(c.Context)
 
+		// Resolve session directory
+		confLocationDir := filepath.Dir(conf.Location())
+		sessStoreDir, err := filepath.Abs(path.Join(confLocationDir, conf.Chat.Session.Directory))
+		if err != nil {
+			return fmt.Errorf("resolve session directory: %w", err)
+		}
+
 		// Load GenerativeModel
 		m, err := setupGenerativeModel(*conf)
 		if err != nil {
 			return fmt.Errorf("create model: %w", err)
 		}
 
-		// Create new chat session
-		// TODO: Resolve existing session if argument specified
-		sess, err := assistant.StartChat(m)
-		if err != nil {
-			return fmt.Errorf("start chat: %w", err)
+		// Create or Restore ChatSession
+		var sess *assistant.ChatSession
+		if sessID := c.String("session"); sessID != "" {
+			sess, err = assistant.RestoreChat(sessStoreDir, sessID, m)
+			if err != nil {
+				return fmt.Errorf("restore chat: %s: %w", sessID, err)
+			}
+		} else {
+			sess, err = assistant.StartChat(m)
+			if err != nil {
+				return fmt.Errorf("start chat: %w", err)
+			}
 		}
 
 		// Resolve persona
@@ -75,13 +91,11 @@ var ChatSend = &cli.Command{
 		}
 
 		// Store session
-		confLocationDir := filepath.Dir(conf.Location())
-		dir, err := filepath.Abs(path.Join(confLocationDir, conf.Chat.Session.Directory))
-		if err != nil {
-			return fmt.Errorf("resolve session directory: %w", err)
-		}
-		if err := sess.Save(dir); err != nil {
-			return fmt.Errorf("save session: %w", err)
+		if !c.Bool("instant") {
+			if err := sess.Save(sessStoreDir); err != nil {
+				return fmt.Errorf("save session: %w", err)
+			}
+			fmt.Fprintf(c.App.Writer, "Session saved: %q\n", sess.ID())
 		}
 
 		// Print response

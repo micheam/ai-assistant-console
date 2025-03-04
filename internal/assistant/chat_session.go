@@ -5,7 +5,9 @@ package assistant
 import (
 	"context"
 	"fmt"
+	"io"
 	"iter"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -30,6 +32,11 @@ type ChatSession struct {
 	createdAt time.Time
 }
 
+// ID returns the chat session ID.
+func (c *ChatSession) ID() string {
+	return c.id
+}
+
 // StartChat starts a new chat session.
 func StartChat(m GenerativeModel) (*ChatSession, error) {
 	newid, err := newChatSessionID()
@@ -41,6 +48,33 @@ func StartChat(m GenerativeModel) (*ChatSession, error) {
 		model:     m,
 		createdAt: time.Now(),
 	}, nil
+}
+
+// RestoreChat restores a chat session from the given ID.
+func RestoreChat(dir, id string, m GenerativeModel) (*ChatSession, error) {
+	filepath := filepath.Join(dir, id+".pb")
+	f, err := os.Open(filepath)
+	if err != nil {
+		return nil, fmt.Errorf("open file: %w", err)
+	}
+	defer f.Close()
+
+	sessPB := &assistantv1.ChatSession{}
+	b, err := io.ReadAll(f)
+	if err != nil {
+		return nil, fmt.Errorf("read file: %w", err)
+	}
+	err = proto.Unmarshal(b, sessPB)
+	if err != nil {
+		return nil, fmt.Errorf("unmarshal: %w", err)
+	}
+	var sess = new(ChatSession)
+	err = sess.fromProto(sessPB)
+	if err != nil {
+		return nil, fmt.Errorf("from proto: %w", err)
+	}
+	sess.model = m
+	return sess, nil
 }
 
 func (c *ChatSession) SetSystemInstruction(text *TextContent) {
@@ -127,6 +161,44 @@ func (c *ChatSession) toProto() (*assistantv1.ChatSession, error) {
 		destPB.History = append(destPB.History, msgPB)
 	}
 	return destPB, nil
+}
+
+func (c *ChatSession) fromProto(src *assistantv1.ChatSession) error {
+	c.id = src.Id
+	c.createdAt = src.CreatedAt.AsTime()
+	if src.SystemInstruction != nil {
+		c.systemInstruction = NewTextContent(src.SystemInstruction.Text)
+	}
+	c.history = make([]*Message, 0, len(src.History))
+	for _, msgPB := range src.History {
+		var author string
+		switch msgPB.Role {
+		case assistantv1.Message_ROLE_USER:
+			author = "user"
+		case assistantv1.Message_ROLE_ASSISTANT:
+			author = "assistant"
+		default:
+			return fmt.Errorf("unknown role: %v", msgPB.Role)
+		}
+		msg := &Message{
+			Author:   author,
+			Contents: []MessageContent{},
+		}
+		for _, contentPB := range msgPB.Contents {
+			switch contentPB.Content.(type) {
+			case *assistantv1.MessageContent_Text:
+				msg.Contents = append(msg.Contents, NewTextContent(contentPB.GetText().Text))
+			case *assistantv1.MessageContent_Image:
+				url_, err := url.Parse(contentPB.GetImage().GetUrl())
+				if err != nil {
+					return fmt.Errorf("parse url: %w", err)
+				}
+				msg.Contents = append(msg.Contents, NewURLImageContent(*url_))
+			}
+		}
+		c.history = append(c.history, msg)
+	}
+	return nil
 }
 
 // addHistory adds a response to the chat session history.

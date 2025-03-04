@@ -22,6 +22,17 @@ var flagJSON = &cli.BoolFlag{
 	Usage: "Output the models in JSON format",
 }
 
+var flagChatSession = &cli.StringFlag{
+	Name:    "session",
+	Aliases: []string{"s"},
+	Usage:   "The chat session ID",
+}
+
+var flagChatInstant = &cli.BoolFlag{
+	Name:  "instant",
+	Usage: "Instantly send the message without storing it in the chat session",
+}
+
 // loadConfig is a helper function to load the configuration and attach it to the context.
 func loadConfig(c *cli.Context) error {
 	conf, err := config.Load()
