@@ -47,7 +47,7 @@ var configInit = &cli.Command{
 			// TODO: Make it configurable by other means than environment variables
 			os.Setenv(config.EnvKeyConfigPath, c.String("path"))
 		}
-		conf, err := config.InitAndLoad(c.Context)
+		conf, err := config.InitAndLoad()
 		if err != nil {
 			return err
 		}

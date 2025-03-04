@@ -3,6 +3,8 @@ package commands
 import (
 	"fmt"
 	"os"
+	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/urfave/cli/v2"
@@ -50,6 +52,7 @@ var ChatSend = &cli.Command{
 		}
 
 		// Create new chat session
+		// TODO: Resolve existing session if argument specified
 		sess, err := assistant.StartChat(m)
 		if err != nil {
 			return fmt.Errorf("start chat: %w", err)
@@ -69,6 +72,16 @@ var ChatSend = &cli.Command{
 		resp, err := sess.SendMessage(ctx, assistant.NewTextContent(message))
 		if err != nil {
 			return fmt.Errorf("send message: %w", err)
+		}
+
+		// Store session
+		confLocationDir := filepath.Dir(conf.Location())
+		dir, err := filepath.Abs(path.Join(confLocationDir, conf.Chat.Session.Directory))
+		if err != nil {
+			return fmt.Errorf("resolve session directory: %w", err)
+		}
+		if err := sess.Save(dir); err != nil {
+			return fmt.Errorf("save session: %w", err)
 		}
 
 		// Print response

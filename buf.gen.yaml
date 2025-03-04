@@ -1,0 +1,17 @@
+version: v2
+managed:
+  enabled: true
+  disable:
+    - file_option: go_package
+      module: buf.build/googleapis/googleapis
+  override:
+    - file_option: optimize_for
+      value: CODE_SIZE
+    - file_option: go_package_prefix
+      value: micheam.com/aico/internal/pb
+plugins:
+  - remote: buf.build/protocolbuffers/go
+    out: internal/pb
+    opt: paths=source_relative
+inputs:
+  - directory: proto

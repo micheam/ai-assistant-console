@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package assistant.v1;
+
+import "assistant/v1/message.proto";
+import "google/protobuf/timestamp.proto";
+
+// ChatSession represents a chat session.
+message ChatSession {
+  // Unique identifier for the session.
+  string id = 1;
+  // Timestamp when the session was created.
+  google.protobuf.Timestamp created_at = 2;
+  // System instruction applied to the session (if any).
+  TextContent system_instruction = 3;
+  // History of chat messages including user and assistant messages.
+  repeated Message history = 4;
+}

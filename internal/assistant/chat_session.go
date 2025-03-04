@@ -1,12 +1,21 @@
 package assistant
 
+// TODO: Rename file to chat_session.go
+
 import (
 	"context"
 	"fmt"
 	"iter"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/timestamppb"
+
+	assistantv1 "micheam.com/aico/internal/pb/assistant/v1"
 )
 
 // ChatSession represents a chat session with the assistant.
@@ -67,6 +76,59 @@ func (c *ChatSession) SendMessageStream(
 	return iter, nil
 }
 
+// Save saves the chat session.
+//
+// Note: This method will create the directory if it does not exist.
+func (c *ChatSession) Save(dir string) error {
+	// mkdir if not exists
+	err := os.MkdirAll(dir, 0755)
+	if err != nil {
+		return fmt.Errorf("mkdir: %w", err)
+	}
+	// save the session
+	sessPB, err := c.toProto()
+	if err != nil {
+		return fmt.Errorf("to proto: %w", err)
+	}
+	serialized, err := proto.Marshal(sessPB)
+	if err != nil {
+		return fmt.Errorf("marshal: %w", err)
+	}
+
+	filepath := filepath.Join(dir, c.id+".pb")
+	f, err := os.OpenFile(filepath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	if err != nil {
+		return fmt.Errorf("open file: %w", err)
+	}
+	defer f.Close()
+	_, err = f.Write(serialized)
+	if err != nil {
+		return fmt.Errorf("write file: %w", err)
+	}
+	return nil
+}
+
+func (c *ChatSession) toProto() (*assistantv1.ChatSession, error) {
+	destPB := &assistantv1.ChatSession{
+		Id:        c.id,
+		CreatedAt: timestamppb.New(c.createdAt),
+	}
+	if c.systemInstruction != nil {
+		destPB.SystemInstruction = &assistantv1.TextContent{
+			Text: c.systemInstruction.Text,
+		}
+	}
+	destPB.History = make([]*assistantv1.Message, 0, len(c.history))
+	for _, msg := range c.history {
+		msgPB, err := msg.toProto()
+		if err != nil {
+			return nil, fmt.Errorf("history.msg to proto: %w", err)
+		}
+		destPB.History = append(destPB.History, msgPB)
+	}
+	return destPB, nil
+}
+
 // addHistory adds a response to the chat session history.
 func (c *ChatSession) addHistory(resp *GenerateContentResponse) {
 	c.history = append(c.history, NewAssistantMessage(resp.Content))
@@ -78,17 +140,6 @@ func newChatSessionID() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return rawID.String(), nil
-}
-
-// GenerativeModel represents a generative model.
-type GenerativeModel interface {
-	Description() string
-	SetSystemInstruction(*TextContent)
-	GenerateContent(context.Context, ...*Message) (*GenerateContentResponse, error)
-	GenerateContentStream(context.Context, ...*Message) (iter.Seq[*GenerateContentResponse], error)
-}
-
-type GenerateContentResponse struct {
-	Content MessageContent
+	id := "sess-" + strings.ReplaceAll(rawID.String(), "-", "")
+	return id, nil
 }

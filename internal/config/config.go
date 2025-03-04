@@ -154,7 +154,7 @@ func defaultLogfilePath() string {
 
 const (
 	// DefaultModel is the default model to use for the chat
-	DefaultModel = "gpt-4"
+	DefaultModel = "gpt-4o-mini"
 
 	// ApplicationName is the name of the application
 	ApplicationName = "com.micheam.aico"
@@ -182,7 +182,7 @@ func Load() (*Config, error) {
 }
 
 // InitAndLoad initializes the configuration for the application
-func InitAndLoad(ctx context.Context) (*Config, error) {
+func InitAndLoad() (*Config, error) {
 	config, err := Load()
 	if err == nil {
 		return config, nil // already initialized
@@ -202,7 +202,7 @@ func InitAndLoad(ctx context.Context) (*Config, error) {
 		if err := os.WriteFile(ConfigFilePath(), b, 0644); err != nil {
 			return nil, fmt.Errorf("write file: %w", err)
 		}
-
+		conf.location = ConfigFilePath()
 		return conf, nil
 	}
 
@@ -242,6 +242,10 @@ func DefaultConfig() *Config {
 			Model: DefaultModel,
 			Persona: map[string]Personality{
 				"default": defaultPersona,
+			},
+			Session: Session{
+				Directory:    "./sessions",
+				DirectoryRaw: "./sessions",
 			},
 		},
 	}

@@ -1,6 +1,11 @@
 package assistant
 
-import "net/url"
+import (
+	"fmt"
+	"net/url"
+
+	assistantv1 "micheam.com/aico/internal/pb/assistant/v1"
+)
 
 type Message struct {
 	// Author is the author of the message.
@@ -9,6 +14,41 @@ type Message struct {
 
 	// Contents holds the contents of the message.
 	Contents []MessageContent
+}
+
+func (m *Message) toProto() (*assistantv1.Message, error) {
+	dest := &assistantv1.Message{}
+	switch m.Author {
+	case "assistant":
+		dest.Role = assistantv1.Message_ROLE_ASSISTANT
+	case "user":
+		dest.Role = assistantv1.Message_ROLE_USER
+	default:
+		return nil, fmt.Errorf("unsupported message author: %s", m.Author)
+	}
+	for _, c := range m.Contents {
+		switch c := c.(type) {
+		case *TextContent:
+			dest.Contents = append(dest.Contents, &assistantv1.MessageContent{
+				Content: &assistantv1.MessageContent_Text{
+					Text: &assistantv1.TextContent{
+						Text: c.Text,
+					},
+				},
+			})
+		case *URLImageContent:
+			dest.Contents = append(dest.Contents, &assistantv1.MessageContent{
+				Content: &assistantv1.MessageContent_Image{
+					Image: &assistantv1.URLImageContent{
+						Url: c.URL.String(),
+					},
+				},
+			})
+		default:
+			return nil, fmt.Errorf("unsupported message content type: %T", c)
+		}
+	}
+	return dest, nil
 }
 
 type MessageContent interface {

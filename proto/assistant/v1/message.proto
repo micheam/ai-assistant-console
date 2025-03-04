@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package assistant.v1;
+
+// Message represents a single message in the chat session.
+message Message {
+  // Role indicates the role of the message sender.
+  enum Role {
+    ROLE_UNSPECIFIED = 0;
+    ROLE_USER = 1;
+    ROLE_ASSISTANT = 2;
+  }
+  // The role of the message sender.
+  Role role = 1;
+  // Contents of the message which can include various types.
+  repeated MessageContent contents = 2;
+}
+
+// MessageContent supports different types of content in a message.
+message MessageContent {
+  oneof content {
+    // Text content.
+    TextContent text = 1;
+    // Image content represented by a URL.
+    URLImageContent image = 2;
+    // Future content types can be added here.
+  }
+}
+
+// TextContent wraps a piece of text.
+message TextContent {
+  string text = 1;
+}
+
+// URLImageContent holds the URL of an image.
+message URLImageContent {
+  string url = 1;
+}

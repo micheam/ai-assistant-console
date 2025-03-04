@@ -31,8 +31,6 @@ func TestChatSendCommand(t *testing.T) {
 	require.NoError(err)
 	expected := "I am doing great, thank you!\n"
 	require.Equal(expected, buf.String())
-
-	// Verify: Session must be stored
 }
 
 func TestChatSendCommand_WithNoArguments(t *testing.T) {
@@ -123,4 +121,28 @@ func TestChatSendCommand_WithPersona_Unknown(t *testing.T) {
 	// Verify
 	require.Error(err)
 	require.Contains(err.Error(), "unknownpersona")
+}
+
+func TestChatSendCommand_SessionCreation(t *testing.T) {
+	// Setup
+	conf := commands.PrepareConfig(t)
+	_, require := assert.New(t), require.New(t)
+
+	var buf bytes.Buffer
+	app := &cli.App{
+		Writer:   &buf,
+		Commands: []*cli.Command{commands.ChatSend},
+	}
+
+	// Exercise
+	err := app.Run([]string{
+		"chat", "send", "'Hello, How are you doing?'",
+	})
+
+	// Verify
+	require.NoError(err)
+
+	// Check if the session is created under
+	require.FileExists(conf.Location())
+	require.DirExists(filepath.Join(filepath.Dir(conf.Location()), conf.Chat.Session.Directory))
 }
