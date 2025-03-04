@@ -78,7 +78,7 @@ func NewAssistantMessage(contents ...MessageContent) *Message {
 //
 //	{ text: "Hello, how can I help you?" }
 type TextContent struct {
-	Text string
+	Text string `json:"text"`
 }
 
 var _ MessageContent = (*TextContent)(nil)
@@ -97,7 +97,7 @@ func NewTextContent(text string) *TextContent {
 //
 //	{ url: "https://example.com/image.jpg" }
 type URLImageContent struct {
-	URL url.URL
+	URL url.URL `json:"url"`
 }
 
 var _ MessageContent = (*URLImageContent)(nil)

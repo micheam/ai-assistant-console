@@ -1,7 +1,5 @@
 package assistant
 
-// TODO: Rename file to chat_session.go
-
 import (
 	"context"
 	"fmt"
@@ -22,19 +20,12 @@ import (
 
 // ChatSession represents a chat session with the assistant.
 type ChatSession struct {
-	id                string
-	systemInstruction *TextContent
-	history           []*Message
-
-	model GenerativeModel
-
-	title     string
-	createdAt time.Time
-}
-
-// ID returns the chat session ID.
-func (c *ChatSession) ID() string {
-	return c.id
+	ID                string          `json:"id"`
+	SystemInstruction *TextContent    `json:"system_instruction"`
+	History           []*Message      `json:"history"`
+	Model             GenerativeModel `json:"Model"`
+	Title             string          `json:"title"`
+	CreatedAt         time.Time       `json:"created_at"`
 }
 
 // StartChat starts a new chat session.
@@ -44,9 +35,9 @@ func StartChat(m GenerativeModel) (*ChatSession, error) {
 		return nil, err
 	}
 	return &ChatSession{
-		id:        newid,
-		model:     m,
-		createdAt: time.Now(),
+		ID:        newid,
+		Model:     m,
+		CreatedAt: time.Now(),
 	}, nil
 }
 
@@ -73,12 +64,14 @@ func RestoreChat(dir, id string, m GenerativeModel) (*ChatSession, error) {
 	if err != nil {
 		return nil, fmt.Errorf("from proto: %w", err)
 	}
-	sess.model = m
+	if m != nil {
+		sess.Model = m
+	}
 	return sess, nil
 }
 
 func (c *ChatSession) SetSystemInstruction(text *TextContent) {
-	c.systemInstruction = text
+	c.SystemInstruction = text
 }
 
 // SendMessage sends a message to the chat session.
@@ -86,9 +79,9 @@ func (c *ChatSession) SendMessage(
 	ctx context.Context,
 	m ...MessageContent,
 ) (*GenerateContentResponse, error) {
-	c.history = append(c.history, NewUserMessage(m...))
-	c.model.SetSystemInstruction(c.systemInstruction)
-	resp, err := c.model.GenerateContent(ctx, c.history...)
+	c.History = append(c.History, NewUserMessage(m...))
+	c.Model.SetSystemInstruction(c.SystemInstruction)
+	resp, err := c.Model.GenerateContent(ctx, c.History...)
 	if err != nil {
 		return nil, fmt.Errorf("generate content: %w", err)
 	}
@@ -101,9 +94,9 @@ func (c *ChatSession) SendMessageStream(
 	ctx context.Context,
 	m ...MessageContent,
 ) (iter.Seq[*GenerateContentResponse], error) {
-	c.history = append(c.history, NewUserMessage(m...))
-	c.model.SetSystemInstruction(c.systemInstruction)
-	iter, err := c.model.GenerateContentStream(ctx, c.history...)
+	c.History = append(c.History, NewUserMessage(m...))
+	c.Model.SetSystemInstruction(c.SystemInstruction)
+	iter, err := c.Model.GenerateContentStream(ctx, c.History...)
 	if err != nil {
 		return nil, fmt.Errorf("generate content stream: %w", err)
 	}
@@ -129,7 +122,7 @@ func (c *ChatSession) Save(dir string) error {
 		return fmt.Errorf("marshal: %w", err)
 	}
 
-	filepath := filepath.Join(dir, c.id+".pb")
+	filepath := filepath.Join(dir, c.ID+".pb")
 	f, err := os.OpenFile(filepath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		return fmt.Errorf("open file: %w", err)
@@ -144,16 +137,16 @@ func (c *ChatSession) Save(dir string) error {
 
 func (c *ChatSession) toProto() (*assistantv1.ChatSession, error) {
 	destPB := &assistantv1.ChatSession{
-		Id:        c.id,
-		CreatedAt: timestamppb.New(c.createdAt),
+		Id:        c.ID,
+		CreatedAt: timestamppb.New(c.CreatedAt),
 	}
-	if c.systemInstruction != nil {
+	if c.SystemInstruction != nil {
 		destPB.SystemInstruction = &assistantv1.TextContent{
-			Text: c.systemInstruction.Text,
+			Text: c.SystemInstruction.Text,
 		}
 	}
-	destPB.History = make([]*assistantv1.Message, 0, len(c.history))
-	for _, msg := range c.history {
+	destPB.History = make([]*assistantv1.Message, 0, len(c.History))
+	for _, msg := range c.History {
 		msgPB, err := msg.toProto()
 		if err != nil {
 			return nil, fmt.Errorf("history.msg to proto: %w", err)
@@ -164,12 +157,12 @@ func (c *ChatSession) toProto() (*assistantv1.ChatSession, error) {
 }
 
 func (c *ChatSession) fromProto(src *assistantv1.ChatSession) error {
-	c.id = src.Id
-	c.createdAt = src.CreatedAt.AsTime()
+	c.ID = src.Id
+	c.CreatedAt = src.CreatedAt.AsTime()
 	if src.SystemInstruction != nil {
-		c.systemInstruction = NewTextContent(src.SystemInstruction.Text)
+		c.SystemInstruction = NewTextContent(src.SystemInstruction.Text)
 	}
-	c.history = make([]*Message, 0, len(src.History))
+	c.History = make([]*Message, 0, len(src.History))
 	for _, msgPB := range src.History {
 		var author string
 		switch msgPB.Role {
@@ -196,14 +189,14 @@ func (c *ChatSession) fromProto(src *assistantv1.ChatSession) error {
 				msg.Contents = append(msg.Contents, NewURLImageContent(*url_))
 			}
 		}
-		c.history = append(c.history, msg)
+		c.History = append(c.History, msg)
 	}
 	return nil
 }
 
 // addHistory adds a response to the chat session history.
 func (c *ChatSession) addHistory(resp *GenerateContentResponse) {
-	c.history = append(c.history, NewAssistantMessage(resp.Content))
+	c.History = append(c.History, NewAssistantMessage(resp.Content))
 }
 
 // newChatSessionID generates a new chat session ID.
