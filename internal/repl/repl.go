@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -95,6 +96,23 @@ func (r *Repl) Run(ctx context.Context) error {
 			continue
 		}
 
+		// Include a file as the context
+		// Currently, we support only the textual content.
+		if strings.HasPrefix(line, COMMAND_SOURCE_FILE) {
+			// Extract the file path (anything after [COMMAND_SOURCE_FILE])
+			fileLines, err := r.loadExternalFile(line)
+			if err != nil {
+				if err == ErrAbort {
+					continue
+				}
+				return err
+			}
+
+			// Append the sourced file lines to the current query lines.
+			lines = append(lines, fileLines...)
+			continue
+		}
+
 		// If the line indicates that the user wants to edit the current query.
 		if strings.HasSuffix(line, COMMAND_EDIT_QUERY) {
 			editedLines, err := r.editQuery(lines)
@@ -155,21 +173,64 @@ func (r *Repl) Run(ctx context.Context) error {
 	return nil
 }
 
+var ErrAbort = fmt.Errorf("aborted")
+
+func (r *Repl) loadExternalFile(line string) ([]string, error) {
+	filePath := strings.TrimSpace(strings.TrimPrefix(line, COMMAND_SOURCE_FILE))
+	if filePath == "" {
+		fmt.Fprintln(r.Err, theme.Error("No file path provided for source command."))
+		return nil, ErrAbort
+	}
+
+	// Read the file content
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		fmt.Fprintf(r.Err, theme.Error("[ERR] could not read file %s: %v\n"), filePath, err)
+		return nil, ErrAbort
+	}
+
+	// Split the file content into lines.
+	fileLines := strings.Split(string(content), "\n")
+	// Remove a trailing empty line if present.
+	if len(fileLines) > 0 && fileLines[len(fileLines)-1] == "" {
+		fileLines = fileLines[:len(fileLines)-1]
+	}
+
+	// sandwich with code block
+	//
+	// file: <file-path>
+	// ```<ext>
+	// ...
+	// <file-content>
+	// ...
+	// ```
+	//
+	fileLines = append([]string{
+		fmt.Sprintf("file: %s", filePath),
+		fmt.Sprintf("```%s", filepath.Ext(filePath)),
+	}, fileLines...)
+	fileLines = append(fileLines, "```")
+
+	return fileLines, nil
+}
+
 const (
 	COMMAND_END_QUERY   = `;;`
 	COMMAND_SHOW_HELP   = `\?`
 	COMMAND_QUIT        = `\q`
 	COMMAND_CLEAR_LINES = `\c`
 	COMMAND_EDIT_QUERY  = `\e`
+	COMMAND_SOURCE_FILE = `\i`
 )
 
 func (r *Repl) Help() {
 	fmt.Fprintln(r.Out)
-	fmt.Fprintln(r.Out, theme.Info(";; .. Execute the query"))
-	fmt.Fprintf(r.Out, theme.Info("%s .. Show this help message\n"), COMMAND_SHOW_HELP)
-	fmt.Fprintf(r.Out, theme.Info("%s .. Quit the application\n"), COMMAND_QUIT)
-	fmt.Fprintf(r.Out, theme.Info("%s .. Clear the query buffer\n"), COMMAND_CLEAR_LINES)
-	fmt.Fprintf(r.Out, theme.Info("%s .. Edit the current query\n"), COMMAND_EDIT_QUERY)
+	fmt.Fprintln(r.Out, theme.Info(";;          Execute the query"))
+	fmt.Fprintf(r.Out, theme.Info("%s          Show this help message\n"), COMMAND_SHOW_HELP)
+	fmt.Fprintf(r.Out, theme.Info("%s          Quit the application\n"), COMMAND_QUIT)
+	fmt.Fprintf(r.Out, theme.Info("%s          Clear the query buffer\n"), COMMAND_CLEAR_LINES)
+	fmt.Fprintf(r.Out, theme.Info("%s          Edit the current query\n"), COMMAND_EDIT_QUERY)
+	fmt.Fprintf(r.Out, theme.Info("%s <PATH>   include a file as the context\n"), COMMAND_SOURCE_FILE)
 	fmt.Fprintln(r.Out)
 }
 
