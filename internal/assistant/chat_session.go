@@ -90,10 +90,10 @@ func (c *ChatSession) SendMessage(
 }
 
 // SendMessageStream sends a message to the chat session.
-func (c *ChatSession) SendMessageStream(
-	ctx context.Context,
-	m ...MessageContent,
-) (iter.Seq[*GenerateContentResponse], error) {
+func (c *ChatSession) SendMessageStream(ctx context.Context, m ...MessageContent) (
+	iter.Seq[*GenerateContentResponse],
+	error,
+) {
 	c.History = append(c.History, NewUserMessage(m...))
 	c.Model.SetSystemInstruction(c.SystemInstruction)
 	iter, err := c.Model.GenerateContentStream(ctx, c.History...)

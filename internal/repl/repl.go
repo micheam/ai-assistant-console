@@ -13,111 +13,134 @@ import (
 	"micheam.com/aico/internal/logging"
 )
 
-var defaultUserPrompt = func(ctx context.Context) string { return "USER: " }
-var defaultAssistantPrompt = func(ctx context.Context) string { return "ASSISTANT: " }
+// PromptFunc generates the prompt string based on context.
+type PromptFunc func(ctx context.Context) string
 
+// Repl represents the interactive Read-Eval-Print Loop.
 type Repl struct {
-	Config          *config.Config
-	Model           assistant.GenerativeModel
-	PersonaName     string
-	UserPrompt      func(ctx context.Context) string
-	AssistantPrompt func(ctx context.Context) string
+	Config      *config.Config
+	Model       assistant.GenerativeModel
+	PersonaName string
 
+	Prompt1, Prompt2 PromptFunc
+
+	In  io.Reader
 	Out io.Writer
 	Err io.Writer
 }
 
+// Init returns a new Repl configured with the given settings.
 func Init(conf *config.Config, personaName string, model assistant.GenerativeModel) *Repl {
 	return &Repl{
-		Config:          conf,
-		Model:           model,
-		PersonaName:     personaName,
-		UserPrompt:      defaultUserPrompt,
-		AssistantPrompt: defaultAssistantPrompt,
-
-		Out: os.Stdout,
-		Err: os.Stderr,
+		Config:      conf,
+		Model:       model,
+		PersonaName: personaName,
+		Prompt1:     func(ctx context.Context) string { return model.Name() + "=> " },
+		Prompt2:     func(ctx context.Context) string { return model.Name() + "-> " },
+		In:          os.Stdin,
+		Out:         os.Stdout,
+		Err:         os.Stderr,
 	}
 }
 
-// Run starts the interactive Read-Eval-Print Loop (REPL) mode.
-// This will block until the user sends EOF (Ctrl-D) or types :quit or :exit.
+// Run starts the interactive Read-Eval-Print Loop.
+// It blocks until the user sends EOF (Ctrl-D) or types \q.
 func (r *Repl) Run(ctx context.Context) error {
 	logger := logging.LoggerFrom(ctx)
+	fmt.Fprintln(r.Out, `type \? for help`)
+	fmt.Fprintln(r.Out)
 
-	r.outputf("Chat with an AI assistant.\n")
-	r.outputf("Type :quit or :exit to exit.\n")
-	r.outputf("Type a lessage and end with a double semicolon (;;).\n")
-
-	r.outputf("Model: %s\n", r.Config.Chat.Model)
-	r.outputf("Persona: %s\n", r.PersonaName)
-	r.outputf("\n")
-
-	reader := bufio.NewReader(os.Stdin)
+	reader := bufio.NewReader(r.In)
 	var lines []string
+
 	for {
-		fmt.Print(defaultUserPrompt(ctx))
+		// Print the appropriate prompt
+		r.printPrompt(ctx, lines)
+
 		line, err := reader.ReadString('\n')
 		if err == io.EOF {
 			break
 		} else if err != nil {
 			return err
 		}
+
 		line = strings.TrimSpace(line)
-		if line == ":quit" || line == ":exit" {
+
+		// Quit the application if requested
+		if line == `\q` {
 			return nil
 		}
-		if strings.HasSuffix(line, ";;") {
-			lines = append(lines, line)
-			query := strings.Join(lines, " ")
 
-			// Start New Chat Session
+		// If the line indicates the end of a query, process it.
+		if strings.HasSuffix(line, `;;`) {
+			lines = append(lines, line)
+			query := r.buildQuery(lines)
+
+			// Start a new chat session.
 			sess, err := assistant.StartChat(r.Model)
 			if err != nil {
 				return fmt.Errorf("start chat: %w", err)
 			}
-			sess.SetSystemInstruction(
-				assistant.NewTextContent(strings.Join(r.resolvePersona().Messages, "\n")))
-			// Send message to assistant
-			ctx := logging.ContextWith(ctx, logger)
-			resp, err := sess.SendMessage(ctx, assistant.NewTextContent(query))
+
+			// Prepare system instructions from the chosen persona.
+			persona := r.resolvePersona()
+			systemText := strings.Join(persona.Messages, "\n")
+			sess.SetSystemInstruction(assistant.NewTextContent(systemText))
+
+			// Use the same context with logger information.
+			ctxWithLogger := logging.ContextWith(ctx, logger)
+			iter, err := sess.SendMessageStream(ctxWithLogger, assistant.NewTextContent(query))
 			if err != nil {
-				r.errorf("send message: %v\n", err)
+				fmt.Fprintf(r.Err, "[ERR] send message: %v\n", err)
+			} else {
+				// Print streamed response.
+				for resp := range iter {
+					switch content := resp.Content.(type) {
+					case *assistant.TextContent:
+						fmt.Fprint(r.Out, content.Text)
+					default:
+						fmt.Fprintf(r.Out, "[ERR] unexpected response type: %T\n", content)
+					}
+				}
 			}
-
-			// Print response
-			switch v := resp.Content.(type) {
-			case *assistant.TextContent:
-				r.output(r.AssistantPrompt(ctx))
-				r.outputf("%s\n", v.Text)
-			default:
-				r.errorf("unexpected response type: %T\n", v)
-			}
-
-			lines = nil
-		} else {
-			lines = append(lines, line)
+			fmt.Fprint(r.Out, "\n\n")
+			lines = nil // Clear the collected lines for the next input
+			continue
 		}
+
+		// Append the line to the buffer and continue reading.
+		lines = append(lines, line)
 	}
+
 	return nil
 }
 
-func (r *Repl) resolvePersona() *config.Personality {
-	p, ok := r.Config.Chat.GetPersona(r.PersonaName)
-	if !ok {
-		return r.Config.Chat.GetDefaultPersona()
+// printPrompt prints the primary or secondary prompt based on whether we are in multiline mode.
+func (r *Repl) printPrompt(ctx context.Context, lines []string) {
+	if len(lines) == 0 {
+		fmt.Fprint(r.Out, r.Prompt1(ctx))
+	} else {
+		fmt.Fprint(r.Out, r.Prompt2(ctx))
 	}
-	return p
 }
 
-func (r *Repl) output(msg string) {
-	fmt.Fprint(r.Out, msg)
+// buildQuery uses a strings.Builder to join all the lines into one query.
+func (r *Repl) buildQuery(lines []string) string {
+	var builder strings.Builder
+	for i, line := range lines {
+		// Add a space between lines (or newline if preferable).
+		if i > 0 {
+			builder.WriteString(" ")
+		}
+		builder.WriteString(line)
+	}
+	return builder.String()
 }
 
-func (r *Repl) outputf(format string, a ...any) {
-	fmt.Fprintf(r.Out, format, a...)
-}
-
-func (r *Repl) errorf(format string, a ...any) {
-	fmt.Fprintf(r.Err, "ERROR: "+format, a...)
+// resolvePersona returns the matching personality or the default one.
+func (r *Repl) resolvePersona() *config.Personality {
+	if p, ok := r.Config.Chat.GetPersona(r.PersonaName); ok {
+		return p
+	}
+	return r.Config.Chat.GetDefaultPersona()
 }

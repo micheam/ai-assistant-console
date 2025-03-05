@@ -7,6 +7,7 @@ import (
 
 // GenerativeModel represents a generative model.
 type GenerativeModel interface {
+	Name() string
 	Description() string
 	SetSystemInstruction(*TextContent)
 	GenerateContent(context.Context, ...*Message) (*GenerateContentResponse, error)
