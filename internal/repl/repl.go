@@ -35,11 +35,17 @@ func Init(conf *config.Config, personaName string, model assistant.GenerativeMod
 		Config:      conf,
 		Model:       model,
 		PersonaName: personaName,
-		Prompt1:     func(ctx context.Context) string { return model.Name() + "=> " },
-		Prompt2:     func(ctx context.Context) string { return model.Name() + "-> " },
-		In:          os.Stdin,
-		Out:         os.Stdout,
-		Err:         os.Stderr,
+
+		Prompt1: func(ctx context.Context) string {
+			return fmt.Sprintf("%s%s%s=> ", bold, model.Name(), reset)
+		},
+		Prompt2: func(ctx context.Context) string {
+			return fmt.Sprintf("%s%s%s-> ", bold, model.Name(), reset)
+		},
+
+		In:  os.Stdin,
+		Out: os.Stdout,
+		Err: os.Stderr,
 	}
 }
 
@@ -47,6 +53,7 @@ func Init(conf *config.Config, personaName string, model assistant.GenerativeMod
 // It blocks until the user sends EOF (Ctrl-D) or types \q.
 func (r *Repl) Run(ctx context.Context) error {
 	logger := logging.LoggerFrom(ctx)
+
 	fmt.Fprintln(r.Out, `type \? for help`)
 	fmt.Fprintln(r.Out)
 
