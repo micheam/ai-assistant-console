@@ -20,16 +20,12 @@ var ChatSend = &cli.Command{
 	Usage:     "Send a message to the AI assistant",
 	ArgsUsage: "<message>",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
-			Name:    "persona",
-			Aliases: []string{"p"},
-			Usage:   "The persona to use",
-		},
+		flagPersona,
 		flagModel,
 		flagChatSession,
 		flagChatInstant,
 	},
-	Before: loadConfig,
+	Before: LoadConfig,
 	Action: func(c *cli.Context) error {
 		msgs := c.Args().Slice()
 		if len(msgs) == 0 {

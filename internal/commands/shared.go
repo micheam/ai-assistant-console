@@ -33,8 +33,15 @@ var flagChatInstant = &cli.BoolFlag{
 	Usage: "Instantly send the message without storing it in the chat session",
 }
 
-// loadConfig is a helper function to load the configuration and attach it to the context.
-func loadConfig(c *cli.Context) error {
+var flagPersona = &cli.StringFlag{
+	Name:    "persona",
+	Aliases: []string{"p"},
+	Usage:   "The persona to use",
+	Value:   "default",
+}
+
+// LoadConfig is a helper function to load the configuration and attach it to the context.
+func LoadConfig(c *cli.Context) error {
 	conf, err := config.Load()
 	if errors.Is(err, config.ErrConfigFileNotFound) {
 		fmt.Fprintln(c.App.Writer, "Please run 'chat config init' to init the configuration file.")

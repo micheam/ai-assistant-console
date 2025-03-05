@@ -60,7 +60,7 @@ var configInit = &cli.Command{
 var configEdit = &cli.Command{
 	Name:   "edit",
 	Usage:  "Edit the configuration file",
-	Before: loadConfig,
+	Before: LoadConfig,
 	Action: func(c *cli.Context) error {
 		editor := os.Getenv("EDITOR")
 		if editor == "" {

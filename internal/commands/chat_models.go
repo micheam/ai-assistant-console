@@ -17,7 +17,7 @@ var ChatModels = &cli.Command{
 		flagJSON,
 		flagModel,
 	},
-	Before: loadConfig,
+	Before: LoadConfig,
 	Action: func(c *cli.Context) error {
 		conf := config.MustFromContext(c.Context)
 		models := openai.AvailableModels()

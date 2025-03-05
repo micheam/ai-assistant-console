@@ -17,7 +17,7 @@ var ChatSession = &cli.Command{
 	Name:      "session",
 	Usage:     "Manage chat sessions",
 	ArgsUsage: "<subcommand>",
-	Before:    loadConfig,
+	Before:    LoadConfig,
 	Subcommands: []*cli.Command{
 		{
 			Name:    "list",

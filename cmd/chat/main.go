@@ -22,9 +22,9 @@ var app = &cli.App{
 	Name:           "chat",
 	Usage:          "Chat with an AI assistant",
 	Version:        assistantconsole.Version,
-	Description:    "",
-	DefaultCommand: "",
+	DefaultCommand: "repl",
 	Commands: []*cli.Command{
+		commands.ChatRepl,
 		commands.ChatSend,
 		commands.ChatSession,
 		commands.ChatModels,
