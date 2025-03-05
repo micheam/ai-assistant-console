@@ -7,10 +7,12 @@ import (
 	"io"
 	"os"
 	"strings"
+	"time"
 
 	"micheam.com/aico/internal/assistant"
 	"micheam.com/aico/internal/config"
 	"micheam.com/aico/internal/logging"
+	"micheam.com/aico/internal/spinner"
 	"micheam.com/aico/internal/theme"
 )
 
@@ -24,6 +26,7 @@ type Repl struct {
 	PersonaName string
 
 	Prompt1, Prompt2 PromptFunc
+	Spinner          *spinner.Spinner
 
 	In  io.Reader
 	Out io.Writer
@@ -32,6 +35,10 @@ type Repl struct {
 
 // Init returns a new Repl configured with the given settings.
 func Init(conf *config.Config, personaName string, model assistant.GenerativeModel) *Repl {
+	spinner := spinner.New(
+		100*time.Millisecond,
+		[]string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"},
+	)
 	return &Repl{
 		Config:      conf,
 		Model:       model,
@@ -39,6 +46,7 @@ func Init(conf *config.Config, personaName string, model assistant.GenerativeMod
 
 		Prompt1: func(ctx context.Context) string { return theme.Bold(model.Name() + "=> ") },
 		Prompt2: func(ctx context.Context) string { return theme.Bold(model.Name() + "-> ") },
+		Spinner: spinner,
 
 		In:  os.Stdin,
 		Out: os.Stdout,
@@ -87,7 +95,10 @@ func (r *Repl) Run(ctx context.Context) error {
 		}
 
 		// If the line indicates the end of a query, process it.
-		if strings.HasSuffix(line, `;;`) {
+		if strings.HasSuffix(line, COMMAND_END_QUERY) {
+			r.Spinner.Start()
+			defer r.Spinner.Stop()
+
 			lines = append(lines, line)
 			query := r.buildQuery(lines)
 
@@ -110,6 +121,8 @@ func (r *Repl) Run(ctx context.Context) error {
 			} else {
 				// Print streamed response.
 				for resp := range iter {
+					r.Spinner.Stop()
+
 					switch content := resp.Content.(type) {
 					case *assistant.TextContent:
 						fmt.Fprint(r.Out, theme.Reply(content.Text))
@@ -131,6 +144,7 @@ func (r *Repl) Run(ctx context.Context) error {
 }
 
 const (
+	COMMAND_END_QUERY   = `;;`
 	COMMAND_SHOW_HELP   = `\?`
 	COMMAND_QUIT        = `\q`
 	COMMAND_CLEAR_LINES = `\c`

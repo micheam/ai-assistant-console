@@ -7,17 +7,17 @@ import (
 	"time"
 )
 
-// spinner is a simple spinner
+// Spinner is a simple Spinner
 //
 // Example:
 //
-//	spinner := NewSpinner(100*time.Millisecond,
+//	Spinner := NewSpinner(100*time.Millisecond,
 //		[]string{ "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏", })
-//	spinner.Start()
+//	Spinner.Start()
 //	time.Sleep(5 * time.Second)
-//	spinner.Stop()
+//	Spinner.Stop()
 //	fmt.Println("Done.")
-type spinner struct {
+type Spinner struct {
 	running  bool
 	interval time.Duration
 	frames   []string
@@ -27,8 +27,8 @@ type spinner struct {
 }
 
 // New creates a new spinner
-func New(interval time.Duration, frames []string) *spinner {
-	return &spinner{
+func New(interval time.Duration, frames []string) *Spinner {
+	return &Spinner{
 		running:  false,
 		interval: interval,
 		frames:   frames,
@@ -37,7 +37,7 @@ func New(interval time.Duration, frames []string) *spinner {
 }
 
 // Start starts spinner
-func (s *spinner) Start() {
+func (s *Spinner) Start() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -56,7 +56,7 @@ func (s *spinner) Start() {
 }
 
 // Stop stops spinner
-func (s *spinner) Stop() {
+func (s *Spinner) Stop() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
