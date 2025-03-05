@@ -16,7 +16,7 @@ var (
 	Underline = color.New(color.Underline).SprintFunc()
 
 	// Color themes
-	Info  = white
+	Info  = gray
 	Reply = blue
 	Error = red
 )

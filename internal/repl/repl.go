@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -94,6 +95,17 @@ func (r *Repl) Run(ctx context.Context) error {
 			continue
 		}
 
+		// If the line indicates that the user wants to edit the current query.
+		if strings.HasSuffix(line, COMMAND_EDIT_QUERY) {
+			editedLines, err := r.editQuery(lines)
+			if err != nil {
+				fmt.Fprintf(r.Err, theme.Error("[ERR] editing query: %v\n"), err)
+			} else {
+				lines = editedLines
+			}
+			continue
+		}
+
 		// If the line indicates the end of a query, process it.
 		if strings.HasSuffix(line, COMMAND_END_QUERY) {
 			r.Spinner.Start()
@@ -148,14 +160,16 @@ const (
 	COMMAND_SHOW_HELP   = `\?`
 	COMMAND_QUIT        = `\q`
 	COMMAND_CLEAR_LINES = `\c`
+	COMMAND_EDIT_QUERY  = `\e`
 )
 
 func (r *Repl) Help() {
 	fmt.Fprintln(r.Out)
-	fmt.Fprintf(r.Out, ";;  Execute the query\n")
-	fmt.Fprintf(r.Out, "%s  Show this help message\n", COMMAND_SHOW_HELP)
-	fmt.Fprintf(r.Out, "%s  Quit the application\n", COMMAND_QUIT)
-	fmt.Fprintf(r.Out, "%s  Clear the query buffer\n", COMMAND_CLEAR_LINES)
+	fmt.Fprintln(r.Out, theme.Info(";; .. Execute the query"))
+	fmt.Fprintf(r.Out, theme.Info("%s .. Show this help message\n"), COMMAND_SHOW_HELP)
+	fmt.Fprintf(r.Out, theme.Info("%s .. Quit the application\n"), COMMAND_QUIT)
+	fmt.Fprintf(r.Out, theme.Info("%s .. Clear the query buffer\n"), COMMAND_CLEAR_LINES)
+	fmt.Fprintf(r.Out, theme.Info("%s .. Edit the current query\n"), COMMAND_EDIT_QUERY)
 	fmt.Fprintln(r.Out)
 }
 
@@ -170,15 +184,7 @@ func (r *Repl) printPrompt(ctx context.Context, lines []string) {
 
 // buildQuery uses a strings.Builder to join all the lines into one query.
 func (r *Repl) buildQuery(lines []string) string {
-	var builder strings.Builder
-	for i, line := range lines {
-		// Add a space between lines (or newline if preferable).
-		if i > 0 {
-			builder.WriteString(" ")
-		}
-		builder.WriteString(line)
-	}
-	return builder.String()
+	return strings.Join(lines, "\n")
 }
 
 // resolvePersona returns the matching personality or the default one.
@@ -187,4 +193,53 @@ func (r *Repl) resolvePersona() *config.Personality {
 		return p
 	}
 	return r.Config.Chat.GetDefaultPersona()
+}
+
+// editQuery opens the user's preferred editor to edit the query.
+func (r *Repl) editQuery(lines []string) ([]string, error) {
+	// Create a temporary file.
+	tmpFile, err := os.CreateTemp("", "AICO_CHAT_QUERY_*.txt")
+	if err != nil {
+		return nil, fmt.Errorf("create temp file: %w", err)
+	}
+	defer os.Remove(tmpFile.Name())
+
+	// Write current query into the temporary file.
+	initialQuery := r.buildQuery(lines)
+	if _, err := tmpFile.WriteString(initialQuery); err != nil {
+		tmpFile.Close()
+		return nil, fmt.Errorf("write to temp file: %w", err)
+	}
+	tmpFile.Close()
+
+	// Determine the editor from the environment variable; fallback to "vim"
+	editor, ok := os.LookupEnv("EDITOR")
+	if !ok {
+		editor = "vim"
+	}
+
+	// Launch the editor.
+	cmd := exec.Command(editor, tmpFile.Name())
+	// Connect the editor's stdio to the user's terminal.
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		return nil, fmt.Errorf("editor error: %w", err)
+	}
+
+	// Open the temporary file for reading the updated content.
+	editedContent, err := os.ReadFile(tmpFile.Name())
+	if err != nil {
+		return nil, fmt.Errorf("read edited file: %w", err)
+	}
+
+	// Split the edited content into lines. Adjust the separator if necessary.
+	editedLines := strings.Split(string(editedContent), "\n")
+	// Optionally remove any trailing empty element if the file ended with newline.
+	if len(editedLines) > 0 && editedLines[len(editedLines)-1] == "" {
+		editedLines = editedLines[:len(editedLines)-1]
+	}
+	return editedLines, nil
 }
