@@ -11,6 +11,10 @@ var (
 	blue   = color.New(color.FgBlue).SprintFunc()
 	yellow = color.New(color.FgYellow).SprintFunc()
 
+	// Text decorations
+	Bold      = color.New(color.Bold).SprintFunc()
+	Underline = color.New(color.Underline).SprintFunc()
+
 	// Color themes
 	Info  = white
 	Reply = blue

@@ -11,6 +11,7 @@ import (
 	"micheam.com/aico/internal/assistant"
 	"micheam.com/aico/internal/config"
 	"micheam.com/aico/internal/logging"
+	"micheam.com/aico/internal/theme"
 )
 
 // PromptFunc generates the prompt string based on context.
@@ -36,12 +37,8 @@ func Init(conf *config.Config, personaName string, model assistant.GenerativeMod
 		Model:       model,
 		PersonaName: personaName,
 
-		Prompt1: func(ctx context.Context) string {
-			return fmt.Sprintf("%s%s%s=> ", bold, model.Name(), reset)
-		},
-		Prompt2: func(ctx context.Context) string {
-			return fmt.Sprintf("%s%s%s-> ", bold, model.Name(), reset)
-		},
+		Prompt1: func(ctx context.Context) string { return theme.Bold(model.Name() + "=> ") },
+		Prompt2: func(ctx context.Context) string { return theme.Bold(model.Name() + "-> ") },
 
 		In:  os.Stdin,
 		Out: os.Stdout,
@@ -53,9 +50,7 @@ func Init(conf *config.Config, personaName string, model assistant.GenerativeMod
 // It blocks until the user sends EOF (Ctrl-D) or types \q.
 func (r *Repl) Run(ctx context.Context) error {
 	logger := logging.LoggerFrom(ctx)
-
-	fmt.Fprintln(r.Out, `type \? for help`)
-	fmt.Fprintln(r.Out)
+	fmt.Fprintf(r.Out, theme.Info("type %s for help\n"), COMMAND_SHOW_HELP)
 
 	reader := bufio.NewReader(r.In)
 	var lines []string
@@ -74,8 +69,21 @@ func (r *Repl) Run(ctx context.Context) error {
 		line = strings.TrimSpace(line)
 
 		// Quit the application if requested
-		if line == `\q` {
+		if strings.HasSuffix(line, COMMAND_QUIT) {
 			return nil
+		}
+
+		// Show help if requested
+		if strings.HasSuffix(line, COMMAND_SHOW_HELP) {
+			r.Help()
+			continue
+		}
+
+		// Clear the lines if requested
+		if strings.HasSuffix(line, COMMAND_CLEAR_LINES) {
+			fmt.Fprintln(r.Out)
+			lines = nil
+			continue
 		}
 
 		// If the line indicates the end of a query, process it.
@@ -98,15 +106,15 @@ func (r *Repl) Run(ctx context.Context) error {
 			ctxWithLogger := logging.ContextWith(ctx, logger)
 			iter, err := sess.SendMessageStream(ctxWithLogger, assistant.NewTextContent(query))
 			if err != nil {
-				fmt.Fprintf(r.Err, "[ERR] send message: %v\n", err)
+				fmt.Fprintf(r.Err, theme.Error("[ERR] send message: %v\n"), err)
 			} else {
 				// Print streamed response.
 				for resp := range iter {
 					switch content := resp.Content.(type) {
 					case *assistant.TextContent:
-						fmt.Fprint(r.Out, content.Text)
+						fmt.Fprint(r.Out, theme.Reply(content.Text))
 					default:
-						fmt.Fprintf(r.Out, "[ERR] unexpected response type: %T\n", content)
+						fmt.Fprintf(r.Err, theme.Error("[ERR] unexpected response type: %T\n"), content)
 					}
 				}
 			}
@@ -120,6 +128,21 @@ func (r *Repl) Run(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+const (
+	COMMAND_SHOW_HELP   = `\?`
+	COMMAND_QUIT        = `\q`
+	COMMAND_CLEAR_LINES = `\c`
+)
+
+func (r *Repl) Help() {
+	fmt.Fprintln(r.Out)
+	fmt.Fprintf(r.Out, ";;  Execute the query\n")
+	fmt.Fprintf(r.Out, "%s  Show this help message\n", COMMAND_SHOW_HELP)
+	fmt.Fprintf(r.Out, "%s  Quit the application\n", COMMAND_QUIT)
+	fmt.Fprintf(r.Out, "%s  Clear the query buffer\n", COMMAND_CLEAR_LINES)
+	fmt.Fprintln(r.Out)
 }
 
 // printPrompt prints the primary or secondary prompt based on whether we are in multiline mode.
