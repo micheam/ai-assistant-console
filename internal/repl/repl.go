@@ -61,9 +61,21 @@ func Init(conf *config.Config, personaName string, model assistant.GenerativeMod
 func (r *Repl) Run(ctx context.Context) error {
 	logger := logging.LoggerFrom(ctx)
 	fmt.Fprintf(r.Out, theme.Info("type %s for help\n"), COMMAND_SHOW_HELP)
-
 	reader := bufio.NewReader(r.In)
 	var lines []string
+
+	// Determine the session storage directory from configuration.
+	confLocationDir := filepath.Dir(r.Config.Location())
+	sessStoreDir, err := filepath.Abs(filepath.Join(confLocationDir, r.Config.Chat.Session.Directory))
+	if err != nil {
+		return fmt.Errorf("resolve session directory: %w", err)
+	}
+
+	// Start a persistent chat session.
+	sess, err := assistant.StartChat(r.Model)
+	if err != nil {
+		return fmt.Errorf("start chat session: %w", err)
+	}
 
 	for {
 		// Print the appropriate prompt
@@ -129,39 +141,48 @@ func (r *Repl) Run(ctx context.Context) error {
 			r.Spinner.Start()
 			defer r.Spinner.Stop()
 
-			lines = append(lines, line)
-			query := r.buildQuery(lines)
-
-			// Start a new chat session.
-			sess, err := assistant.StartChat(r.Model)
-			if err != nil {
-				return fmt.Errorf("start chat: %w", err)
-			}
-
-			// Prepare system instructions from the chosen persona.
 			persona := r.resolvePersona()
 			systemText := strings.Join(persona.Messages, "\n")
 			sess.SetSystemInstruction(assistant.NewTextContent(systemText))
 
-			// Use the same context with logger information.
+			lines = append(lines, line)
+			query := r.buildQuery(lines)
 			ctxWithLogger := logging.ContextWith(ctx, logger)
 			iter, err := sess.SendMessageStream(ctxWithLogger, assistant.NewTextContent(query))
 			if err != nil {
+				// NOTE: We don't return here, as we want to continue the REPL.
 				fmt.Fprintf(r.Err, theme.Error("[ERR] send message: %v\n"), err)
-			} else {
-				// Print streamed response.
-				for resp := range iter {
-					r.Spinner.Stop()
+				continue
+			}
 
-					switch content := resp.Content.(type) {
-					case *assistant.TextContent:
-						fmt.Fprint(r.Out, theme.Reply(content.Text))
-					default:
-						fmt.Fprintf(r.Err, theme.Error("[ERR] unexpected response type: %T\n"), content)
-					}
+			// Accumulate the stream response for storing
+			//
+			// TODO: Process the response stream and store only the final reply,
+			//       possibly within ChatSession.SendMessageStream.
+			var replyBuilder strings.Builder
+
+			// Handle response stream
+			for resp := range iter {
+				r.Spinner.Stop()
+				switch content := resp.Content.(type) {
+				case *assistant.TextContent:
+					fmt.Fprint(r.Out, theme.Reply(content.Text))
+					replyBuilder.WriteString(content.Text)
+				default:
+					fmt.Fprintf(r.Err, theme.Error("[ERR] unexpected response type: %T\n"), content)
 				}
 			}
+			// After streaming, add the complete reply to session history.
+			completeReply := replyBuilder.String()
+			c := assistant.NewTextContent(completeReply)
+			sess.AddHistory(&assistant.GenerateContentResponse{Content: c})
 			fmt.Fprint(r.Out, "\n\n")
+
+			// Save the conversation (inputs and replies)
+			if err := sess.Save(sessStoreDir); err != nil {
+				fmt.Fprintf(r.Err, theme.Error("[ERR] saving session: %v\n"), err)
+			}
+
 			lines = nil // Clear the collected lines for the next input
 			continue
 		}

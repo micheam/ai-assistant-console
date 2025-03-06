@@ -23,7 +23,7 @@ type ChatSession struct {
 	ID                string          `json:"id"`
 	SystemInstruction *TextContent    `json:"system_instruction"`
 	History           []*Message      `json:"history"`
-	Model             GenerativeModel `json:"Model"`
+	Model             GenerativeModel `json:"-"`
 	Title             string          `json:"title"`
 	CreatedAt         time.Time       `json:"created_at"`
 }
@@ -85,7 +85,7 @@ func (c *ChatSession) SendMessage(
 	if err != nil {
 		return nil, fmt.Errorf("generate content: %w", err)
 	}
-	c.addHistory(resp)
+	c.AddHistory(resp)
 	return resp, nil
 }
 
@@ -180,13 +180,15 @@ func (c *ChatSession) fromProto(src *assistantv1.ChatSession) error {
 		for _, contentPB := range msgPB.Contents {
 			switch contentPB.Content.(type) {
 			case *assistantv1.MessageContent_Text:
-				msg.Contents = append(msg.Contents, NewTextContent(contentPB.GetText().Text))
+				c := NewTextContent(contentPB.GetText().Text)
+				msg.Contents = append(msg.Contents, c)
 			case *assistantv1.MessageContent_Image:
 				url_, err := url.Parse(contentPB.GetImage().GetUrl())
 				if err != nil {
 					return fmt.Errorf("parse url: %w", err)
 				}
-				msg.Contents = append(msg.Contents, NewURLImageContent(*url_))
+				c := NewURLImageContent(*url_)
+				msg.Contents = append(msg.Contents, c)
 			}
 		}
 		c.History = append(c.History, msg)
@@ -194,8 +196,8 @@ func (c *ChatSession) fromProto(src *assistantv1.ChatSession) error {
 	return nil
 }
 
-// addHistory adds a response to the chat session history.
-func (c *ChatSession) addHistory(resp *GenerateContentResponse) {
+// AddHistory appends a response to the chat session history.
+func (c *ChatSession) AddHistory(resp *GenerateContentResponse) {
 	c.History = append(c.History, NewAssistantMessage(resp.Content))
 }
 
