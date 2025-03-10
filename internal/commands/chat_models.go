@@ -3,6 +3,7 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/urfave/cli/v2"
 
@@ -35,18 +36,37 @@ var ChatModels = &cli.Command{
 		}
 		defer cleanup()
 
-		for _, model := range availableModels() {
-			mv := modelView{
-				Name:     model,
-				Selected: model == conf.Chat.Model,
-			}
+		models := []modelView{}
+
+		// OpenAI Models
+		for _, model := range openai.AvailableModels() {
+			desc, _ := openai.DescribeModel(model)
+			models = append(models, modelView{
+				Name:        model,
+				Selected:    model == conf.Chat.Model,
+				Description: strings.ReplaceAll(desc, "\n", " "),
+			})
+		}
+
+		// Anthropic Models
+		for _, model := range anthropic.AvailableModels() {
+			desc, _ := anthropic.DescribeModel(model)
+			models = append(models, modelView{
+				Name:        model,
+				Selected:    model == conf.Chat.Model,
+				Description: strings.ReplaceAll(desc, "\n", " "),
+			})
+		}
+
+		// Print the models
+		for _, model := range models {
 			if c.Bool("json") {
-				if err := json.NewEncoder(c.App.Writer).Encode(mv); err != nil {
+				if err := json.NewEncoder(c.App.Writer).Encode(model); err != nil {
 					return err
 				}
 				continue
 			}
-			fmt.Fprintln(c.App.Writer, mv.String())
+			fmt.Fprintln(c.App.Writer, model.String())
 		}
 
 		_ = logger
@@ -55,8 +75,9 @@ var ChatModels = &cli.Command{
 }
 
 type modelView struct {
-	Name     string `json:"name"`
-	Selected bool   `json:"selected"`
+	Selected    bool   `json:"selected"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 func (m *modelView) String() string {
@@ -64,10 +85,4 @@ func (m *modelView) String() string {
 		return fmt.Sprintf("%s *", m.Name)
 	}
 	return m.Name
-}
-
-func availableModels() []string {
-	models := append([]string{}, openai.AvailableModels()...)
-	models = append(models, anthropic.AvailableModels()...)
-	return models
 }

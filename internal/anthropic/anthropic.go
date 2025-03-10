@@ -61,7 +61,7 @@ func AvailableModels() []string {
 	}
 }
 
-func describeModel(modelName string) (desc string, found bool) {
+func DescribeModel(modelName string) (desc string, found bool) {
 	m, ok := selectModel(modelName)
 	if !ok {
 		return "", false

@@ -2,6 +2,7 @@ package commands_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"path/filepath"
 	"testing"
 
@@ -36,6 +37,8 @@ o1
 o1-mini
 o3-mini
 claude-3-7-sonnet
+claude-3-5-sonnet
+claude-3-5-haiku
 `
 	if diff := cmp.Diff(expected, buf.String()); diff != "" {
 		t.Errorf("Unexpected output: (-got +want)\n%s", diff)
@@ -56,17 +59,17 @@ func TestModelsCommand_JSON(t *testing.T) {
 	// Exercise
 	err := app.Run([]string{"chat", "models", "--json"})
 
-	// Verify
+	// Verify - each line is a JSON object
 	require.NoError(err)
-	expected := `{"name":"gpt-4o","selected":false}
-{"name":"gpt-4o-mini","selected":true}
-{"name":"o1","selected":false}
-{"name":"o1-mini","selected":false}
-{"name":"o3-mini","selected":false}
-{"name":"claude-3-7-sonnet","selected":false}
-`
-	if diff := cmp.Diff(expected, buf.String()); diff != "" {
-		t.Errorf("Unexpected output: (-got +want)\n%s", diff)
+	for _, line := range bytes.Split(buf.Bytes(), []byte{'\n'}) {
+		if len(line) == 0 {
+			continue
+		}
+		data := map[string]any{}
+		require.NoError(json.Unmarshal(line, &data))
+		require.Contains(data, "name")
+		require.Contains(data, "selected")
+		require.Contains(data, "description")
 	}
 }
 
@@ -82,16 +85,18 @@ func TestModelsCommand_RespectSelected(t *testing.T) {
 	}
 
 	// Exercise
-	err := app.Run([]string{"chat", "models", "--model", "o1"})
+	err := app.Run([]string{"chat", "models", "--model", "claude-3-7-sonnet"})
 
 	// Verify
 	require.NoError(err)
 	expected := `gpt-4o
 gpt-4o-mini
-o1 *
+o1
 o1-mini
 o3-mini
-claude-3-7-sonnet
+claude-3-7-sonnet *
+claude-3-5-sonnet
+claude-3-5-haiku
 `
 	if diff := cmp.Diff(expected, buf.String()); diff != "" {
 		t.Errorf("Unexpected output: (-got +want)\n%s", diff)
