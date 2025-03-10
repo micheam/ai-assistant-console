@@ -12,33 +12,33 @@ import (
 	"micheam.com/aico/internal/logging"
 )
 
-type Claude3_7Sonnet struct {
+type Claude3_5Sonnet struct {
 	systemInstruction *assistant.TextContent
 	client            *anthropic.Client
 
 	opts []anthropicopt.RequestOption
 }
 
-var _ assistant.GenerativeModel = (*Claude3_7Sonnet)(nil)
+var _ assistant.GenerativeModel = (*Claude3_5Sonnet)(nil)
 
-func NewClaude3_7Sonnet(client *anthropic.Client) *Claude3_7Sonnet {
-	return &Claude3_7Sonnet{client: client}
+func NewClaude3_5Sonnet(client *anthropic.Client) *Claude3_5Sonnet {
+	return &Claude3_5Sonnet{client: client}
 }
 
-func (m *Claude3_7Sonnet) Name() string {
-	return anthropic.ModelClaude3_7SonnetLatest
+func (m *Claude3_5Sonnet) Name() string {
+	return anthropic.ModelClaude3_5SonnetLatest
 }
-func (m *Claude3_7Sonnet) Description() string {
-	return `Most highly intelligent model of Anthropics.
-Ideal for complex reasoning tasks, advanced problem solving, and strategic analysis.
-Extended thinking capabilities allow deeper analysis.`
+func (m *Claude3_5Sonnet) Description() string {
+	return `Claude 3.5 Sonnet combines high-caliber intelligence with improved processing speed,
+making it ideal for complex research, detailed analysis, and strategic planning.
+Its balanced performance is tailored for advanced problem-solving and rapid execution in demanding tasks.`
 }
 
-func (m *Claude3_7Sonnet) SetSystemInstruction(text *assistant.TextContent) {
+func (m *Claude3_5Sonnet) SetSystemInstruction(text *assistant.TextContent) {
 	m.systemInstruction = text
 }
 
-func (m *Claude3_7Sonnet) GenerateContent(
+func (m *Claude3_5Sonnet) GenerateContent(
 	ctx context.Context,
 	msgs ...*assistant.Message,
 ) (*assistant.GenerateContentResponse, error) {
@@ -47,7 +47,7 @@ func (m *Claude3_7Sonnet) GenerateContent(
 	// Request to Anthropics API
 	body, err := buildRequestBody(
 		logging.ContextWith(ctx, logger),
-		anthropic.ModelClaude3_7SonnetLatest,
+		anthropic.ModelClaude3_5SonnetLatest,
 		m.systemInstruction,
 		msgs)
 	if err != nil {
@@ -71,7 +71,7 @@ func (m *Claude3_7Sonnet) GenerateContent(
 	}, nil
 }
 
-func (m *Claude3_7Sonnet) GenerateContentStream(
+func (m *Claude3_5Sonnet) GenerateContentStream(
 	ctx context.Context,
 	msgs ...*assistant.Message,
 ) (iter.Seq[*assistant.GenerateContentResponse], error) {
@@ -80,7 +80,7 @@ func (m *Claude3_7Sonnet) GenerateContentStream(
 	// Request to Anthropics API
 	body, err := buildRequestBody(
 		logging.ContextWith(ctx, logger),
-		anthropic.ModelClaude3_7SonnetLatest,
+		anthropic.ModelClaude3_5SonnetLatest,
 		m.systemInstruction,
 		msgs)
 	if err != nil {
