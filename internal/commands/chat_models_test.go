@@ -35,6 +35,7 @@ gpt-4o-mini *
 o1
 o1-mini
 o3-mini
+claude-3-7-sonnet
 `
 	if diff := cmp.Diff(expected, buf.String()); diff != "" {
 		t.Errorf("Unexpected output: (-got +want)\n%s", diff)
@@ -62,6 +63,7 @@ func TestModelsCommand_JSON(t *testing.T) {
 {"name":"o1","selected":false}
 {"name":"o1-mini","selected":false}
 {"name":"o3-mini","selected":false}
+{"name":"claude-3-7-sonnet","selected":false}
 `
 	if diff := cmp.Diff(expected, buf.String()); diff != "" {
 		t.Errorf("Unexpected output: (-got +want)\n%s", diff)
@@ -89,6 +91,7 @@ gpt-4o-mini
 o1 *
 o1-mini
 o3-mini
+claude-3-7-sonnet
 `
 	if diff := cmp.Diff(expected, buf.String()); diff != "" {
 		t.Errorf("Unexpected output: (-got +want)\n%s", diff)

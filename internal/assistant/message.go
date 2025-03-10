@@ -10,11 +10,18 @@ import (
 type Message struct {
 	// Author is the author of the message.
 	// e.g: "assistant", "user"
-	Author string
+	Author MessageAuthor
 
 	// Contents holds the contents of the message.
 	Contents []MessageContent
 }
+
+type MessageAuthor string
+
+const (
+	MessageAuthorAssistant MessageAuthor = "assistant"
+	MessageAuthorUser      MessageAuthor = "user"
+)
 
 func (m *Message) toProto() (*assistantpb.Message, error) {
 	dest := &assistantpb.Message{}

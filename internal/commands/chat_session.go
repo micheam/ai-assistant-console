@@ -11,12 +11,14 @@ import (
 
 	"micheam.com/aico/internal/assistant"
 	"micheam.com/aico/internal/config"
+	"micheam.com/aico/internal/logging"
 )
 
 var ChatSession = &cli.Command{
 	Name:      "session",
 	Usage:     "Manage chat sessions",
 	ArgsUsage: "<subcommand>",
+	Flags:     []cli.Flag{flagDebug},
 	Before:    LoadConfig,
 	Subcommands: []*cli.Command{
 		{
@@ -43,6 +45,18 @@ var ChatSession = &cli.Command{
 
 func listChatSessions(c *cli.Context) error {
 	conf := config.MustFromContext(c.Context)
+
+	// Setup logger
+	logLevel := logging.LevelInfo
+	if c.Bool("debug") {
+		logLevel = logging.LevelDebug
+	}
+	logger, cleanup, err := setupLogger(conf.Logfile(), logLevel)
+	if err != nil {
+		return err
+	}
+	defer cleanup()
+
 	confLocationDir := filepath.Dir(conf.Location())
 	sessStoreDir, err := filepath.Abs(filepath.Join(confLocationDir, conf.Chat.Session.Directory))
 	if err != nil {
@@ -61,6 +75,8 @@ func listChatSessions(c *cli.Context) error {
 		id := strings.TrimSuffix(f.Name(), ".pb")
 		fmt.Fprintln(c.App.Writer, id)
 	}
+
+	_ = logger
 	return nil
 }
 
@@ -70,6 +86,17 @@ func showChatSession(c *cli.Context) error {
 	}
 
 	conf := config.MustFromContext(c.Context)
+	// Setup logger
+	logLevel := logging.LevelInfo
+	if c.Bool("debug") {
+		logLevel = logging.LevelDebug
+	}
+	logger, cleanup, err := setupLogger(conf.Logfile(), logLevel)
+	if err != nil {
+		return err
+	}
+	defer cleanup()
+
 	confLocationDir := filepath.Dir(conf.Location())
 	sessStoreDir, err := filepath.Abs(filepath.Join(confLocationDir, conf.Chat.Session.Directory))
 	if err != nil {
@@ -86,6 +113,8 @@ func showChatSession(c *cli.Context) error {
 		return fmt.Errorf("marshal chat session: %w", err)
 	}
 	fmt.Fprintln(c.App.Writer, string(b))
+
+	_ = logger
 	return nil
 }
 
@@ -95,6 +124,17 @@ func deleteChatSession(c *cli.Context) error {
 	}
 
 	conf := config.MustFromContext(c.Context)
+	// Setup logger
+	logLevel := logging.LevelInfo
+	if c.Bool("debug") {
+		logLevel = logging.LevelDebug
+	}
+	logger, cleanup, err := setupLogger(conf.Logfile(), logLevel)
+	if err != nil {
+		return err
+	}
+	defer cleanup()
+
 	confLocationDir := filepath.Dir(conf.Location())
 	sessStoreDir, err := filepath.Abs(filepath.Join(confLocationDir, conf.Chat.Session.Directory))
 	if err != nil {
@@ -105,5 +145,7 @@ func deleteChatSession(c *cli.Context) error {
 	if err := os.Remove(filepath.Join(sessStoreDir, sessID+".pb")); err != nil {
 		return fmt.Errorf("delete session: %s: %w", sessID, err)
 	}
+
+	_ = logger
 	return nil
 }

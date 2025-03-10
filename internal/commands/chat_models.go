@@ -6,7 +6,9 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"micheam.com/aico/internal/anthropic"
 	"micheam.com/aico/internal/config"
+	"micheam.com/aico/internal/logging"
 	"micheam.com/aico/internal/openai"
 )
 
@@ -14,14 +16,26 @@ var ChatModels = &cli.Command{
 	Name:  "models",
 	Usage: "Show the available models",
 	Flags: []cli.Flag{
+		flagDebug,
 		flagJSON,
 		flagModel,
 	},
 	Before: LoadConfig,
 	Action: func(c *cli.Context) error {
 		conf := config.MustFromContext(c.Context)
-		models := openai.AvailableModels()
-		for _, model := range models {
+
+		// Setup logger
+		logLevel := logging.LevelInfo
+		if c.Bool("debug") {
+			logLevel = logging.LevelDebug
+		}
+		logger, cleanup, err := setupLogger(conf.Logfile(), logLevel)
+		if err != nil {
+			return err
+		}
+		defer cleanup()
+
+		for _, model := range availableModels() {
 			mv := modelView{
 				Name:     model,
 				Selected: model == conf.Chat.Model,
@@ -34,6 +48,8 @@ var ChatModels = &cli.Command{
 			}
 			fmt.Fprintln(c.App.Writer, mv.String())
 		}
+
+		_ = logger
 		return nil
 	},
 }
@@ -48,4 +64,10 @@ func (m *modelView) String() string {
 		return fmt.Sprintf("%s *", m.Name)
 	}
 	return m.Name
+}
+
+func availableModels() []string {
+	models := append([]string{}, openai.AvailableModels()...)
+	models = append(models, anthropic.AvailableModels()...)
+	return models
 }

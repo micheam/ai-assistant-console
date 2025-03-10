@@ -164,12 +164,12 @@ func (c *ChatSession) fromProto(src *assistantv1.ChatSession) error {
 	}
 	c.History = make([]*Message, 0, len(src.History))
 	for _, msgPB := range src.History {
-		var author string
+		var author MessageAuthor
 		switch msgPB.Role {
 		case assistantv1.Message_ROLE_USER:
-			author = "user"
+			author = MessageAuthorUser
 		case assistantv1.Message_ROLE_ASSISTANT:
-			author = "assistant"
+			author = MessageAuthorAssistant
 		default:
 			return fmt.Errorf("unknown role: %v", msgPB.Role)
 		}

@@ -21,7 +21,9 @@ const (
 	LevelError = slog.LevelError
 )
 
-func New(out io.Writer, opts *Options) *slog.Logger {
+type Logger = slog.Logger
+
+func New(out io.Writer, opts *Options) *Logger {
 	if opts == nil {
 		opts = &Options{}
 	}
@@ -41,13 +43,13 @@ type contextKey int
 const contextKeyLogger contextKey = iota
 
 // ContextWith sets the logger in the context.
-func ContextWith(ctx context.Context, logger *slog.Logger) context.Context {
+func ContextWith(ctx context.Context, logger *Logger) context.Context {
 	return context.WithValue(ctx, contextKeyLogger, logger)
 }
 
 // LoggerFrom retrieves the logger from the context.
-func LoggerFrom(ctx context.Context) *slog.Logger {
-	if logger, ok := ctx.Value(contextKeyLogger).(*slog.Logger); ok {
+func LoggerFrom(ctx context.Context) *Logger {
+	if logger, ok := ctx.Value(contextKeyLogger).(*Logger); ok {
 		return logger
 	}
 	return New(io.Discard, nil)

@@ -9,6 +9,7 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"micheam.com/aico/internal/config"
+	"micheam.com/aico/internal/logging"
 )
 
 var Config = &cli.Command{
@@ -70,10 +71,27 @@ var configEdit = &cli.Command{
 			}
 		}
 		conf := config.MustFromContext(c.Context)
+
+		// Setup logger
+		logLevel := logging.LevelInfo
+		if c.Bool("debug") {
+			logLevel = logging.LevelDebug
+		}
+		logger, cleanup, err := setupLogger(conf.Logfile(), logLevel)
+		if err != nil {
+			return err
+		}
+		defer cleanup()
+
 		cmd := exec.Command(editor, conf.Location())
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
-		return cmd.Run()
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("edit configuration: %w", err)
+		}
+
+		logger.Debug("Configuration file edited")
+		return nil
 	},
 }

@@ -5,10 +5,12 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/urfave/cli/v2"
 
+	"micheam.com/aico/internal/anthropic"
 	"micheam.com/aico/internal/assistant"
 	"micheam.com/aico/internal/config"
 	"micheam.com/aico/internal/logging"
@@ -20,6 +22,7 @@ var ChatSend = &cli.Command{
 	Usage:     "Send a message to the AI assistant",
 	ArgsUsage: "<message>",
 	Flags: []cli.Flag{
+		flagDebug,
 		flagPersona,
 		flagModel,
 		flagChatSession,
@@ -40,8 +43,18 @@ var ChatSend = &cli.Command{
 			}
 		}
 
-		logger := logging.LoggerFrom(c.Context)
 		conf := config.MustFromContext(c.Context)
+
+		// Setup logger
+		logLevel := logging.LevelInfo
+		if c.Bool("debug") {
+			logLevel = logging.LevelDebug
+		}
+		logger, cleanup, err := setupLogger(conf.Logfile(), logLevel)
+		if err != nil {
+			return err
+		}
+		defer cleanup()
 
 		// Resolve session directory
 		confLocationDir := filepath.Dir(conf.Location())
@@ -51,7 +64,7 @@ var ChatSend = &cli.Command{
 		}
 
 		// Load GenerativeModel
-		m, err := setupGenerativeModel(*conf)
+		m, err := setupGenerativeModel(conf.Chat.Model)
 		if err != nil {
 			return fmt.Errorf("create model: %w", err)
 		}
@@ -106,16 +119,36 @@ var ChatSend = &cli.Command{
 	},
 }
 
-func setupGenerativeModel(conf config.Config) (assistant.GenerativeModel, error) {
-	openaiAPIKey, found := os.LookupEnv("OPENAI_API_KEY")
-	if !found {
-		return nil, fmt.Errorf("missing environment variable: OPENAI_API_KEY")
+func setupGenerativeModel(model string) (assistant.GenerativeModel, error) {
+
+	// OPEN_AI API
+	if slices.Contains(openai.AvailableModels(), model) {
+		openaiAPIKey, found := os.LookupEnv("OPENAI_API_KEY")
+		if !found {
+			return nil, fmt.Errorf("missing environment variable: OPENAI_API_KEY")
+		}
+		model, err := openai.NewGenerativeModel(model, openaiAPIKey)
+		if err != nil {
+			return nil, fmt.Errorf("OpenAI: %w", err)
+		}
+		return model, nil
 	}
-	model, err := openai.NewGenerativeModel(conf.Chat.Model, openaiAPIKey)
-	if err != nil {
-		return nil, fmt.Errorf("OpenAI: %w", err)
+
+	// ANTHROPIC API
+	if slices.Contains(anthropic.AvailableModels(), model) {
+		anthropicAPIKey, found := os.LookupEnv("ANTHROPIC_API_KEY")
+		if !found {
+			return nil, fmt.Errorf("missing environment variable: ANTHROPIC_API_KEY")
+		}
+		model, err := anthropic.NewGenerativeModel(model, anthropicAPIKey)
+		if err != nil {
+			return nil, fmt.Errorf("anthropic: %w", err)
+		}
+		return model, nil
 	}
-	return model, nil
+
+	// UNSUPPORTED...
+	return nil, fmt.Errorf("unfortunately, the model %s is not supported", model)
 }
 
 // resolvePersona resolves the persona to use for the chat
