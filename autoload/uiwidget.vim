@@ -1,12 +1,11 @@
 vim9script
 #==============================================================================
-# File: multi_select.vim
 # Description: A Vim9 script for a MultiSelect popup menu widget that allows 
 #              users to select multiple items from a list.
 # Author: Michito Maeda <michto.maeda@gmail.com>
 # License: MIT
 # Created: 2025-01-20
-# Last Updated: 2025-02-26T09:36:30+09:00
+# Last Updated: 2025-03-11T10:45:15+09:00
 # Version: 0.1.0
 # Dependencies: 
 #   - Vim patch 9.1.1119 or higher
