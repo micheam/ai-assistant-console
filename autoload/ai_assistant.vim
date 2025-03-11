@@ -1,6 +1,6 @@
 vim9script
 
-import autoload './uiwidget.vim' as uiwidget
+import './uiwidget.vim' as uiwidget
 
 if !has('patch-9.1.1119')
     echoerr "This plugin requires Vim patch 9.1.1119 or higher. Please update your Vim 🙇"
@@ -61,3 +61,61 @@ export def ShowModelSelector(): void
     endif
     ui.Render()
 enddef
+
+# ShowChatWindow shows a chat window.
+# If the chat window is already opened, it will focus on the window.
+# Chat window is a prompt-buffer with a chat prompt.
+# 
+# Example:
+#
+#  you> Hello, How are you today?
+#  I'm fine, thank you. How can I help you?
+#
+#  you> What is the weather in Tokyo?
+#  It's sunny today in Tokyo.
+#
+export def ShowChatWindow(): void
+    const model = Model()
+    const cmd = [ ChatCommand(), "send", "--model", model ]
+
+    if bufexists('AI Assistant')
+        execute "buffer 'AI Assistant'"
+    else
+        new 'AI Assistant'
+        set buftype=prompt
+        var buf = bufnr('')
+
+        b:ai_assistant_session = systemlist([ ChatCommand(), "session", "prepare" ]->join(' '))->join('')
+        prompt_setcallback(buf, HandleTextEntered)
+        prompt_setprompt(buf, "you> ")
+    endif
+
+    startinsert
+enddef
+
+def HandleTextEntered(text: string): void
+    if text == ''
+        return
+    endif
+
+    const model = Model()
+    const buf = bufnr('')
+
+    const cmd = [
+        ChatCommand(), "send",
+        "--model", model,
+        "--session", b:ai_assistant_session,
+        text,
+    ]
+
+    # TODO: use --stream
+    const response = systemlist(cmd->join(' '))
+
+    append(line('$') - 1, $"\n{model}:")
+    for line in response
+        append(line('$') - 1, line)
+    endfor
+enddef
+
+
+

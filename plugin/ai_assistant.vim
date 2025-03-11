@@ -14,3 +14,4 @@ vim9script
 import autoload '../autoload/ai_assistant.vim' as ai_assistant
 
 command! -nargs=0 AssistantModel ai_assistant.ShowModelSelector()
+command! -nargs=0 AssistantChat ai_assistant.ShowChatWindow()

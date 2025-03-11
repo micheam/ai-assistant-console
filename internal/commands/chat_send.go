@@ -110,7 +110,7 @@ var ChatSend = &cli.Command{
 				if err := sess.Save(sessStoreDir); err != nil {
 					return fmt.Errorf("save session: %w", err)
 				}
-				fmt.Fprintf(c.App.ErrWriter, "Session saved: %s\n", sess.ID)
+				logger.Debug("Session saved", "session-id", sess.ID)
 			}
 
 			// Print response
@@ -149,7 +149,7 @@ var ChatSend = &cli.Command{
 			if err := sess.Save(sessStoreDir); err != nil {
 				return fmt.Errorf("save session: %w", err)
 			}
-			fmt.Fprintf(c.App.ErrWriter, "Session saved: %s\n", sess.ID)
+			logger.Debug("Session saved", "session-id", sess.ID)
 		}
 		return nil
 	},
