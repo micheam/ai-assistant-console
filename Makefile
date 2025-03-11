@@ -3,7 +3,7 @@ SOURCE = $(shell find . -name '*.go')
 USER_BIN = $(shell echo $$HOME)/bin
 TEST_OPTS = -tags e2e
 
-chat : test ./cmd/chat/main.go $(SOURCE)
+bin/chat : test ./cmd/chat/main.go $(SOURCE)
 	@go build -o ./bin/chat ./cmd/chat
 
 test :
@@ -12,7 +12,7 @@ test :
 clean :
 	@rm -f ./bin/chat
 
-install : clean chat
+install : clean bin/chat
 	@cp ./bin/chat $(USER_BIN)/chat
 
 protogen: ./proto

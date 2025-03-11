@@ -27,6 +27,10 @@ var ChatSend = &cli.Command{
 		flagModel,
 		flagChatSession,
 		flagChatInstant,
+		&cli.BoolFlag{
+			Name:  "stream",
+			Usage: "Stream the conversation",
+		},
 	},
 	Before: LoadConfig,
 	Action: func(c *cli.Context) error {
@@ -94,27 +98,59 @@ var ChatSend = &cli.Command{
 		// Send message to assistant
 		ctx := logging.ContextWith(c.Context, logger)
 		message := strings.Join(msgs, " ")
-		resp, err := sess.SendMessage(ctx, assistant.NewTextContent(message))
+
+		if !c.Bool("stream") {
+			resp, err := sess.SendMessage(ctx, assistant.NewTextContent(message))
+			if err != nil {
+				return fmt.Errorf("send message: %w", err)
+			}
+
+			// Store session
+			if !c.Bool("instant") {
+				if err := sess.Save(sessStoreDir); err != nil {
+					return fmt.Errorf("save session: %w", err)
+				}
+				fmt.Fprintf(c.App.ErrWriter, "Session saved: %s\n", sess.ID)
+			}
+
+			// Print response
+			switch v := resp.Content.(type) {
+			case *assistant.TextContent:
+				fmt.Fprintln(c.App.Writer, v.Text)
+			default:
+				logger.Error("unexpected response type", "type", fmt.Sprintf("%T", v))
+			}
+			return nil
+		}
+
+		// Stream conversation
+		iter, err := sess.SendMessageStream(ctx, assistant.NewTextContent(message))
 		if err != nil {
 			return fmt.Errorf("send message: %w", err)
 		}
 
-		// Store session
+		var replyBuilder strings.Builder
+		for resp := range iter {
+			switch content := resp.Content.(type) {
+			case *assistant.TextContent:
+				fmt.Fprint(c.App.Writer, content.Text)
+				replyBuilder.WriteString(content.Text)
+			default:
+				logger.Error("unexpected response type", "type", fmt.Sprintf("%T", content))
+			}
+		}
+		completeReply := replyBuilder.String()
+		sess.AddHistory(&assistant.GenerateContentResponse{
+			Content: assistant.NewTextContent(completeReply),
+		})
+		fmt.Fprint(c.App.Writer, "\n\n")
+
 		if !c.Bool("instant") {
 			if err := sess.Save(sessStoreDir); err != nil {
 				return fmt.Errorf("save session: %w", err)
 			}
 			fmt.Fprintf(c.App.ErrWriter, "Session saved: %s\n", sess.ID)
 		}
-
-		// Print response
-		switch v := resp.Content.(type) {
-		case *assistant.TextContent:
-			fmt.Fprintln(c.App.Writer, v.Text)
-		default:
-			logger.Error("unexpected response type", "type", fmt.Sprintf("%T", v))
-		}
-
 		return nil
 	},
 }
