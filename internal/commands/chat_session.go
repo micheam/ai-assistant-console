@@ -40,6 +40,11 @@ var ChatSession = &cli.Command{
 			ArgsUsage: "<session-id>",
 			Action:    deleteChatSession,
 		},
+		{
+			Name:   "prepare",
+			Usage:  "Prepare an empty chat session",
+			Action: prepareChatSession,
+		},
 	},
 }
 
@@ -147,5 +152,45 @@ func deleteChatSession(c *cli.Context) error {
 	}
 
 	_ = logger
+	return nil
+}
+
+// prepareChatSession prepares empty chat session, and show the id
+func prepareChatSession(c *cli.Context) error {
+	conf := config.MustFromContext(c.Context)
+	// Setup logger
+	logLevel := logging.LevelInfo
+	if c.Bool("debug") {
+		logLevel = logging.LevelDebug
+	}
+	logger, cleanup, err := setupLogger(conf.Logfile(), logLevel)
+	if err != nil {
+		return err
+	}
+	defer cleanup()
+
+	confLocationDir := filepath.Dir(conf.Location())
+	sessStoreDir, err := filepath.Abs(filepath.Join(confLocationDir, conf.Chat.Session.Directory))
+	if err != nil {
+		return fmt.Errorf("resolve session directory: %w", err)
+	}
+
+	// Load GenerativeModel
+	m, err := setupGenerativeModel(conf.Chat.Model)
+	if err != nil {
+		return fmt.Errorf("create model: %w", err)
+	}
+
+	// Create ChatSession
+	sess, err := assistant.StartChat(m)
+	if err != nil {
+		return fmt.Errorf("create chat session: %w", err)
+	}
+	if err := sess.Save(sessStoreDir); err != nil {
+		return fmt.Errorf("save chat session: %w", err)
+	}
+	fmt.Fprintln(c.App.Writer, sess.ID)
+
+	logger.Debug("Chat session created", "session-id", sess.ID)
 	return nil
 }
