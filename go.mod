@@ -20,6 +20,9 @@ require (
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/urfave/cli/v3 v3.3.3 // indirect
+	github.com/yuin/goldmark v1.7.11 // indirect
+	github.com/yuin/goldmark-meta v1.1.0 // indirect
+	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
 
 require (
