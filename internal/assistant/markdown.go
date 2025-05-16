@@ -1,73 +1,167 @@
 package assistant
 
 import (
+	"fmt"
 	"io"
 	"strings"
+	"time"
 
-	_ "github.com/yuin/goldmark"
-	_ "github.com/yuin/goldmark-meta"
+	"github.com/yuin/goldmark"
+	meta "github.com/yuin/goldmark-meta"
 	"github.com/yuin/goldmark/ast"
-	_ "github.com/yuin/goldmark/parser"
+	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/text"
 )
 
 func LoadMarkdown(sess *ChatSession, r io.Reader) error {
+	// Read the entire file
+	source, err := io.ReadAll(r)
+	if err != nil {
+		return fmt.Errorf("read file: %w", err)
+	}
 
-	// 	return fmt.Errorf("read file: %w", err)
-	// }
+	// Create a new parser with meta extension for frontmatter
+	md := goldmark.New(
+		goldmark.WithExtensions(meta.Meta),
+	)
 
-	// md := goldmark.New(
-	// 	goldmark.WithExtensions(meta.Meta),
-	// )
-	// context := parser.NewContext()
-	// node := md.Parser().Parse(text.NewReader(source), parser.WithContext(context))
-	// metaData := meta.Get(context)
+	// Parse the markdown content
+	context := parser.NewContext()
+	reader := text.NewReader(source)
+	node := md.Parser().Parse(reader, parser.WithContext(context))
 
-	// // Frontmatter -----------------------------------------------------------------
-	// if title, ok := metaData["title"]; ok {
-	// 	sess.Title = title.(string)
-	// }
-	// if createdAt, ok := metaData["created_at"]; ok {
-	// 	strCreatedAt := createdAt.(string)
-	// 	sess.CreatedAt, err = time.Parse(time.RFC3339, strCreatedAt)
-	// 	if err != nil {
-	// 		return fmt.Errorf("parse created_at: %w", err)
-	// 	}
-	// }
+	// Get the frontmatter metadata
+	metaData := meta.Get(context)
 
-	// // Handle the body of the document ----------------------------------------------
-	// ast.Walk(node, func(currentNode ast.Node, entering bool) (ast.WalkStatus, error) {
-	// 	switch n := currentNode.(type) {
-	// 	case *ast.Heading:
-	// 		if n.Level == 2 {
-	// 			// H2 ヘッダーにより、セクションを分ける
-	// 			// 1. Sistem Instructions
-	// 			// 2. History（User, Assistant）
-	// 			header := extractText(n, source)
-	// 			fmt.Printf("%q\n", header)
-	// 			switch header {
-	// 			case "System Instructions":
-	// 				// システムインストラクションを取得
-	// 			case "History":
-	// 				// ヒストリーを取得
-	// 				// ユーザーとアシスタントのメッセージを取得
-	// 				for child := n.NextSibling(); child != nil; child = child.NextSibling() {
-	// 					if child.Kind() == ast.KindHeading {
-	// 						// 次のヘッダーに到達したら終了
-	// 						break
-	// 					}
-	// 					if child.Kind() == ast.KindBlockquote {
-	// 						fmt.Println(extractText(child, source))
-	// 					}
-	// 				}
-	// 			default:
-	// 				// その他のヘッダーは無視
-	// 				// 何もしない
-	// 			}
-	// 		}
-	// 	}
-	// 	return ast.WalkContinue, nil
-	// })
+	// Process the frontmatter
+	if title, ok := metaData["title"]; ok {
+		sess.Title = title.(string)
+	}
+
+	if createdAt, ok := metaData["created_at"]; ok {
+		strCreatedAt := createdAt.(string)
+		sess.CreatedAt, err = time.Parse(time.RFC3339, strCreatedAt)
+		if err != nil {
+			return fmt.Errorf("parse created_at: %w", err)
+		}
+	}
+
+	if sessionID, ok := metaData["session_id"]; ok {
+		sess.ID = sessionID.(string)
+	}
+
+	// Process the document content
+	var currentSection string
+	var historyNumber int
+	var currentAuthor MessageAuthor
+	var currentMessage *Message // Track current message
+	var currentContent strings.Builder // For accumulating text within a content block
+
+	err = ast.Walk(node, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+		if !entering {
+			return ast.WalkContinue, nil
+		}
+
+		switch v := n.(type) {
+		case *ast.Heading:
+			// Process headings to identify sections and messages
+			if v.Level == 2 {
+				// Level 2 headings define main sections (System Instructions, History)
+				header := extractText(v, source)
+				currentSection = header
+				historyNumber = 0
+				currentMessage = nil
+			} else if v.Level == 3 && currentSection == "History" {
+				// Level 3 headings in the History section define message authors
+				header := extractText(v, source)
+
+				// If we have a current message being processed, finalize any pending content
+				if currentMessage != nil && currentContent.Len() > 0 {
+					content := NewTextContent(strings.TrimSpace(currentContent.String()))
+					currentMessage.Contents = append(currentMessage.Contents, content)
+					currentContent.Reset()
+				}
+
+				historyNumber++
+
+				// Parse the message author from the heading
+				if strings.Contains(header, "User") {
+					currentAuthor = MessageAuthorUser
+				} else if strings.Contains(header, "Assistant") {
+					currentAuthor = MessageAuthorAssistant
+				}
+
+				// Create a new message
+				currentMessage = &Message{
+					Author:   currentAuthor,
+					Contents: []MessageContent{},
+				}
+				sess.History = append(sess.History, currentMessage)
+			}
+
+		case *ast.FencedCodeBlock:
+			// Process code blocks
+			if currentSection == "System Instructions" && entering {
+				// For system instructions, we extract the code block content
+				content := extractLinesText(v.Lines(), source)
+				sess.SystemInstruction = NewTextContent(content)
+			} else if currentSection == "History" && entering && currentMessage != nil {
+				// If we have accumulated text content, add it first
+				if currentContent.Len() > 0 {
+					content := NewTextContent(strings.TrimSpace(currentContent.String()))
+					currentMessage.Contents = append(currentMessage.Contents, content)
+					currentContent.Reset()
+				}
+
+				// For code blocks in messages, create a new content with proper formatting
+				content := extractLinesText(v.Lines(), source)
+				info := ""
+				if v.Info != nil {
+					info = string(v.Info.Value(source))
+				}
+
+				var codeBlock strings.Builder
+				if info != "" {
+					codeBlock.WriteString("```")
+					codeBlock.WriteString(info)
+					codeBlock.WriteString("\n")
+				} else {
+					codeBlock.WriteString("```\n")
+				}
+				codeBlock.WriteString(content)
+				codeBlock.WriteString("\n```\n")
+
+				// Add the code block as a separate content
+				codeContent := NewTextContent(codeBlock.String())
+				currentMessage.Contents = append(currentMessage.Contents, codeContent)
+			}
+
+		case *ast.Paragraph:
+			// Process paragraphs in the History section
+			if currentSection == "History" && entering && currentMessage != nil {
+				// We start a new content if needed
+				content := extractText(v, source)
+				
+				// Store in the current content builder
+				if currentContent.Len() > 0 {
+					currentContent.WriteString("\n")
+				}
+				currentContent.WriteString(content)
+			}
+		}
+
+		return ast.WalkContinue, nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("walk error: %w", err)
+	}
+
+	// Add any remaining content to the last message
+	if currentSection == "History" && currentMessage != nil && currentContent.Len() > 0 {
+		content := NewTextContent(strings.TrimSpace(currentContent.String()))
+		currentMessage.Contents = append(currentMessage.Contents, content)
+	}
 
 	return nil
 }

@@ -16,6 +16,13 @@ type Message struct {
 	Contents []MessageContent
 }
 
+func (m Message) GetContents() []MessageContent {
+	if m.Contents == nil {
+		return []MessageContent{}
+	}
+	return m.Contents
+}
+
 type MessageAuthor string
 
 const (

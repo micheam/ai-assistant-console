@@ -74,6 +74,13 @@ func (c *ChatSession) SetSystemInstruction(text *TextContent) {
 	c.SystemInstruction = text
 }
 
+func (c *ChatSession) GetSystemInstruction() *TextContent {
+	if c.SystemInstruction == nil {
+		return &TextContent{}
+	}
+	return c.SystemInstruction
+}
+
 // SendMessage sends a message to the chat session.
 func (c *ChatSession) SendMessage(
 	ctx context.Context,
