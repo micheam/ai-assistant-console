@@ -13,6 +13,9 @@ import (
 	"github.com/yuin/goldmark/text"
 )
 
+// LoadMarkdown parses a markdown file and loads its content into a ChatSession.
+// The markdown file should follow a specific format with frontmatter, system instructions,
+// and chat history sections.
 func LoadMarkdown(sess *ChatSession, r io.Reader) error {
 	// Read the entire file
 	source, err := io.ReadAll(r)
@@ -30,124 +33,71 @@ func LoadMarkdown(sess *ChatSession, r io.Reader) error {
 	reader := text.NewReader(source)
 	node := md.Parser().Parse(reader, parser.WithContext(context))
 
-	// Get the frontmatter metadata
-	metaData := meta.Get(context)
+	// Process the frontmatter metadata
+	if err := processFrontmatter(sess, meta.Get(context)); err != nil {
+		return err
+	}
 
-	// Process the frontmatter
+	// Process the document content (system instructions and chat history)
+	err = processDocument(sess, node, source)
+	if err != nil {
+		return fmt.Errorf("process document: %w", err)
+	}
+
+	return nil
+}
+
+// processFrontmatter extracts metadata from the frontmatter and sets it on the ChatSession.
+func processFrontmatter(sess *ChatSession, metaData map[string]any) error {
+	// Process title if present
 	if title, ok := metaData["title"]; ok {
 		sess.Title = title.(string)
 	}
 
+	// Process creation timestamp if present
 	if createdAt, ok := metaData["created_at"]; ok {
 		strCreatedAt := createdAt.(string)
-		sess.CreatedAt, err = time.Parse(time.RFC3339, strCreatedAt)
+		parsedTime, err := time.Parse(time.RFC3339, strCreatedAt)
 		if err != nil {
 			return fmt.Errorf("parse created_at: %w", err)
 		}
+		sess.CreatedAt = parsedTime
 	}
 
+	// Process session ID if present
 	if sessionID, ok := metaData["session_id"]; ok {
 		sess.ID = sessionID.(string)
 	}
 
-	// Process the document content
-	var currentSection string
-	var historyNumber int
-	var currentAuthor MessageAuthor
-	var currentMessage *Message // Track current message
-	var currentContent strings.Builder // For accumulating text within a content block
+	return nil
+}
 
-	err = ast.Walk(node, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+// processDocument walks the AST and processes the markdown document content.
+func processDocument(sess *ChatSession, node ast.Node, source []byte) error {
+	// State for tracking the document traversal
+	state := &processState{
+		source:         source,
+		currentSection: "",
+		historyNumber:  0,
+		currentAuthor:  "",
+		currentMessage: nil,
+		currentContent: strings.Builder{},
+		session:        sess,
+	}
+
+	// Walk the AST and process each node
+	err := ast.Walk(node, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if !entering {
 			return ast.WalkContinue, nil
 		}
 
 		switch v := n.(type) {
 		case *ast.Heading:
-			// Process headings to identify sections and messages
-			if v.Level == 2 {
-				// Level 2 headings define main sections (System Instructions, History)
-				header := extractText(v, source)
-				currentSection = header
-				historyNumber = 0
-				currentMessage = nil
-			} else if v.Level == 3 && currentSection == "History" {
-				// Level 3 headings in the History section define message authors
-				header := extractText(v, source)
-
-				// If we have a current message being processed, finalize any pending content
-				if currentMessage != nil && currentContent.Len() > 0 {
-					content := NewTextContent(strings.TrimSpace(currentContent.String()))
-					currentMessage.Contents = append(currentMessage.Contents, content)
-					currentContent.Reset()
-				}
-
-				historyNumber++
-
-				// Parse the message author from the heading
-				if strings.Contains(header, "User") {
-					currentAuthor = MessageAuthorUser
-				} else if strings.Contains(header, "Assistant") {
-					currentAuthor = MessageAuthorAssistant
-				}
-
-				// Create a new message
-				currentMessage = &Message{
-					Author:   currentAuthor,
-					Contents: []MessageContent{},
-				}
-				sess.History = append(sess.History, currentMessage)
-			}
-
+			return processHeading(state, v)
 		case *ast.FencedCodeBlock:
-			// Process code blocks
-			if currentSection == "System Instructions" && entering {
-				// For system instructions, we extract the code block content
-				content := extractLinesText(v.Lines(), source)
-				sess.SystemInstruction = NewTextContent(content)
-			} else if currentSection == "History" && entering && currentMessage != nil {
-				// If we have accumulated text content, add it first
-				if currentContent.Len() > 0 {
-					content := NewTextContent(strings.TrimSpace(currentContent.String()))
-					currentMessage.Contents = append(currentMessage.Contents, content)
-					currentContent.Reset()
-				}
-
-				// For code blocks in messages, create a new content with proper formatting
-				content := extractLinesText(v.Lines(), source)
-				info := ""
-				if v.Info != nil {
-					info = string(v.Info.Value(source))
-				}
-
-				var codeBlock strings.Builder
-				if info != "" {
-					codeBlock.WriteString("```")
-					codeBlock.WriteString(info)
-					codeBlock.WriteString("\n")
-				} else {
-					codeBlock.WriteString("```\n")
-				}
-				codeBlock.WriteString(content)
-				codeBlock.WriteString("\n```\n")
-
-				// Add the code block as a separate content
-				codeContent := NewTextContent(codeBlock.String())
-				currentMessage.Contents = append(currentMessage.Contents, codeContent)
-			}
-
+			return processFencedCodeBlock(state, v)
 		case *ast.Paragraph:
-			// Process paragraphs in the History section
-			if currentSection == "History" && entering && currentMessage != nil {
-				// We start a new content if needed
-				content := extractText(v, source)
-				
-				// Store in the current content builder
-				if currentContent.Len() > 0 {
-					currentContent.WriteString("\n")
-				}
-				currentContent.WriteString(content)
-			}
+			return processParagraph(state, v)
 		}
 
 		return ast.WalkContinue, nil
@@ -158,69 +108,127 @@ func LoadMarkdown(sess *ChatSession, r io.Reader) error {
 	}
 
 	// Add any remaining content to the last message
-	if currentSection == "History" && currentMessage != nil && currentContent.Len() > 0 {
-		content := NewTextContent(strings.TrimSpace(currentContent.String()))
-		currentMessage.Contents = append(currentMessage.Contents, content)
-	}
+	finalizeCurrentContent(state)
 
 	return nil
 }
 
-// extractText はノードからテキストを抽出する
-func extractText(node ast.Node, source []byte) string {
-	switch v := node.(type) {
-	case *ast.Text:
-		return string(v.Value(source))
+// processState tracks the state while traversing the AST.
+type processState struct {
+	source         []byte
+	currentSection string
+	historyNumber  int
+	currentAuthor  MessageAuthor
+	currentMessage *Message
+	currentContent strings.Builder
+	session        *ChatSession
+}
 
-	case *ast.String:
-		return string(v.Value)
+// processHeading handles heading nodes in the AST.
+func processHeading(state *processState, v *ast.Heading) (ast.WalkStatus, error) {
+	if v.Level == 2 {
+		// Level 2 headings define main sections (System Instructions, History)
+		header := extractTextFromChildren(v, state.source)
+		state.currentSection = header
+		state.historyNumber = 0
+		state.currentMessage = nil
+	} else if v.Level == 3 && state.currentSection == "History" {
+		// Level 3 headings in the History section define message authors
+		header := extractTextFromChildren(v, state.source)
 
-	case *ast.Heading:
-		// ヘッダーは子ノードからテキストを取得
-		return extractTextFromChildren(v, source)
+		// Finalize any pending content for the previous message
+		finalizeCurrentContent(state)
 
-	case *ast.Paragraph:
-		// Paragraphは Lines() を使用
-		if v.Lines() != nil {
-			return extractLinesText(v.Lines(), source)
+		state.historyNumber++
+
+		// Parse the message author from the heading
+		if strings.Contains(header, "User") {
+			state.currentAuthor = MessageAuthorUser
+		} else if strings.Contains(header, "Assistant") {
+			state.currentAuthor = MessageAuthorAssistant
 		}
-		return extractTextFromChildren(v, source)
 
-	case *ast.Link:
-		// リンクは子ノードのテキストが表示テキスト
-		return extractTextFromChildren(v, source)
+		// Create a new message
+		state.currentMessage = &Message{
+			Author:   state.currentAuthor,
+			Contents: []MessageContent{},
+		}
+		state.session.History = append(state.session.History, state.currentMessage)
+	}
 
-	case *ast.Image:
-		// 画像はaltテキストを使用
-		return extractTextFromChildren(v, source)
+	return ast.WalkContinue, nil
+}
 
-	case *ast.CodeSpan:
-		return extractLinesText(v.Lines(), source)
+// processFencedCodeBlock handles code block nodes in the AST.
+func processFencedCodeBlock(state *processState, v *ast.FencedCodeBlock) (ast.WalkStatus, error) {
+	if state.currentSection == "System Instructions" {
+		// For system instructions, we extract the code block content
+		content := extractLinesText(v.Lines(), state.source)
+		state.session.SystemInstruction = NewTextContent(content)
+	} else if state.currentSection == "History" && state.currentMessage != nil {
+		// Finalize any pending content before adding the code block
+		finalizeCurrentContent(state)
 
-	case *ast.CodeBlock:
-		return extractLinesText(v.Lines(), source)
+		// For code blocks in messages, create a new content with proper formatting
+		content := extractLinesText(v.Lines(), state.source)
+		info := ""
+		if v.Info != nil {
+			info = string(v.Info.Value(state.source))
+		}
 
-	case *ast.FencedCodeBlock:
-		return extractLinesText(v.Lines(), source)
+		// Format the code block with proper markdown syntax
+		var codeBlock strings.Builder
+		if info != "" {
+			codeBlock.WriteString("```")
+			codeBlock.WriteString(info)
+			codeBlock.WriteString("\n")
+		} else {
+			codeBlock.WriteString("```\n")
+		}
+		codeBlock.WriteString(content)
+		codeBlock.WriteString("\n```\n")
 
-	case *ast.Blockquote:
-		return extractTextFromChildren(v, source)
+		// Add the code block as a separate content
+		codeContent := NewTextContent(codeBlock.String())
+		state.currentMessage.Contents = append(state.currentMessage.Contents, codeContent)
+	}
 
-	case *ast.List:
-		return extractTextFromChildren(v, source)
+	return ast.WalkContinue, nil
+}
 
-	case *ast.ListItem:
-		return extractTextFromChildren(v, source)
+// processParagraph handles paragraph nodes in the AST.
+func processParagraph(state *processState, v *ast.Paragraph) (ast.WalkStatus, error) {
+	if state.currentSection == "History" && state.currentMessage != nil {
+		// Extract the text content from paragraph
+		content := ""
+		if v.Lines().Len() > 0 {
+			content = extractLinesText(v.Lines(), state.source)
+		} else {
+			content = extractTextFromChildren(v, state.source)
+		}
 
-	case *ast.Emphasis:
-		return extractTextFromChildren(v, source)
+		// Add to the current content builder with proper spacing
+		if state.currentContent.Len() > 0 {
+			state.currentContent.WriteString("\n")
+		}
+		state.currentContent.WriteString(content)
+	}
 
-	default:
-		// その他のノードは子ノードから再帰的に取得
-		return extractTextFromChildren(v, source)
+	return ast.WalkContinue, nil
+}
+
+// finalizeCurrentContent adds any accumulated content to the current message.
+func finalizeCurrentContent(state *processState) {
+	if state.currentSection == "History" &&
+		state.currentMessage != nil &&
+		state.currentContent.Len() > 0 {
+		content := NewTextContent(strings.TrimSpace(state.currentContent.String()))
+		state.currentMessage.Contents = append(state.currentMessage.Contents, content)
+		state.currentContent.Reset()
 	}
 }
 
+// extractTextFromChildren recursively extracts text from child nodes.
 func extractTextFromChildren(node ast.Node, source []byte) string {
 	var result strings.Builder
 
@@ -230,15 +238,20 @@ func extractTextFromChildren(node ast.Node, source []byte) string {
 				result.Write(textNode.Value(source))
 			}
 		} else {
-			text := extractText(child, source)
-			result.WriteString(text)
-		}
-
-		// ソフトラインブレイクの処理
-		if child.NextSibling() != nil {
-			segment := child.NextSibling()
-			if segment.Kind() == ast.KindText {
-				// TODO: 改行の処理など
+			// Handle different node types
+			switch v := child.(type) {
+			case *ast.Text:
+				result.WriteString(string(v.Value(source)))
+			case *ast.String:
+				result.WriteString(string(v.Value))
+			case *ast.CodeSpan, *ast.CodeBlock, *ast.FencedCodeBlock:
+				// These nodes have a Lines() method
+				if lines := v.Lines(); lines != nil {
+					result.WriteString(extractLinesText(lines, source))
+				}
+			default:
+				// Recursively extract text from child nodes
+				result.WriteString(extractTextFromChildren(v, source))
 			}
 		}
 	}
@@ -246,6 +259,7 @@ func extractTextFromChildren(node ast.Node, source []byte) string {
 	return result.String()
 }
 
+// extractLinesText extracts text from line segments.
 func extractLinesText(lines *text.Segments, source []byte) string {
 	if lines == nil || lines.Len() == 0 {
 		return ""
