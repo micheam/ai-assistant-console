@@ -11,6 +11,8 @@ import (
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/text"
+
+	"micheam.com/aico/internal/markdown"
 )
 
 // LoadMarkdown parses a markdown file and loads its content into a ChatSession.
@@ -128,13 +130,13 @@ type processState struct {
 func processHeading(state *processState, v *ast.Heading) (ast.WalkStatus, error) {
 	if v.Level == 2 {
 		// Level 2 headings define main sections (System Instructions, History)
-		header := extractTextFromChildren(v, state.source)
+		header := markdown.ExtractTextFromChildren(v, state.source)
 		state.currentSection = header
 		state.historyNumber = 0
 		state.currentMessage = nil
 	} else if v.Level == 3 && state.currentSection == "History" {
 		// Level 3 headings in the History section define message authors
-		header := extractTextFromChildren(v, state.source)
+		header := markdown.ExtractTextFromChildren(v, state.source)
 
 		// Finalize any pending content for the previous message
 		finalizeCurrentContent(state)
@@ -163,14 +165,14 @@ func processHeading(state *processState, v *ast.Heading) (ast.WalkStatus, error)
 func processFencedCodeBlock(state *processState, v *ast.FencedCodeBlock) (ast.WalkStatus, error) {
 	if state.currentSection == "System Instructions" {
 		// For system instructions, we extract the code block content
-		content := extractLinesText(v.Lines(), state.source)
+		content := markdown.ExtractLinesText(v.Lines(), state.source)
 		state.session.SystemInstruction = NewTextContent(content)
 	} else if state.currentSection == "History" && state.currentMessage != nil {
 		// Finalize any pending content before adding the code block
 		finalizeCurrentContent(state)
 
 		// For code blocks in messages, create a new content with proper formatting
-		content := extractLinesText(v.Lines(), state.source)
+		content := markdown.ExtractLinesText(v.Lines(), state.source)
 		info := ""
 		if v.Info != nil {
 			info = string(v.Info.Value(state.source))
@@ -202,9 +204,9 @@ func processParagraph(state *processState, v *ast.Paragraph) (ast.WalkStatus, er
 		// Extract the text content from paragraph
 		content := ""
 		if v.Lines().Len() > 0 {
-			content = extractLinesText(v.Lines(), state.source)
+			content = markdown.ExtractLinesText(v.Lines(), state.source)
 		} else {
-			content = extractTextFromChildren(v, state.source)
+			content = markdown.ExtractTextFromChildren(v, state.source)
 		}
 
 		// Add to the current content builder with proper spacing
@@ -226,50 +228,4 @@ func finalizeCurrentContent(state *processState) {
 		state.currentMessage.Contents = append(state.currentMessage.Contents, content)
 		state.currentContent.Reset()
 	}
-}
-
-// extractTextFromChildren recursively extracts text from child nodes.
-func extractTextFromChildren(node ast.Node, source []byte) string {
-	var result strings.Builder
-
-	for child := node.FirstChild(); child != nil; child = child.NextSibling() {
-		if child.Kind() == ast.KindText {
-			if textNode, ok := child.(*ast.Text); ok {
-				result.Write(textNode.Value(source))
-			}
-		} else {
-			// Handle different node types
-			switch v := child.(type) {
-			case *ast.Text:
-				result.WriteString(string(v.Value(source)))
-			case *ast.String:
-				result.WriteString(string(v.Value))
-			case *ast.CodeSpan, *ast.CodeBlock, *ast.FencedCodeBlock:
-				// These nodes have a Lines() method
-				if lines := v.Lines(); lines != nil {
-					result.WriteString(extractLinesText(lines, source))
-				}
-			default:
-				// Recursively extract text from child nodes
-				result.WriteString(extractTextFromChildren(v, source))
-			}
-		}
-	}
-
-	return result.String()
-}
-
-// extractLinesText extracts text from line segments.
-func extractLinesText(lines *text.Segments, source []byte) string {
-	if lines == nil || lines.Len() == 0 {
-		return ""
-	}
-
-	var result strings.Builder
-	for i := range lines.Len() {
-		segment := lines.At(i)
-		result.Write(segment.Value(source))
-	}
-
-	return strings.TrimSpace(result.String())
 }
