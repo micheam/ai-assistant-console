@@ -93,11 +93,16 @@ func processDocument(sess *ChatSession, node ast.Node, source []byte) error {
 			return ast.WalkContinue, nil
 		}
 
+		// TODO: ここでの処理は state.currentSection で振り分ける方が見通しが良い希ガス
+
 		switch v := n.(type) {
+
 		case *ast.Heading:
 			return processHeading(state, v)
+
 		case *ast.FencedCodeBlock:
 			return processFencedCodeBlock(state, v)
+
 		case *ast.Paragraph:
 			return processParagraph(state, v)
 		}
@@ -164,7 +169,6 @@ func processHeading(state *processState, v *ast.Heading) (ast.WalkStatus, error)
 // processFencedCodeBlock handles code block nodes in the AST.
 func processFencedCodeBlock(state *processState, v *ast.FencedCodeBlock) (ast.WalkStatus, error) {
 	if state.currentSection == "System Instructions" {
-		// For system instructions, we extract the code block content
 		content := markdown.ExtractLinesText(v.Lines(), state.source)
 		state.session.SystemInstruction = NewTextContent(content)
 	} else if state.currentSection == "History" && state.currentMessage != nil {
@@ -200,7 +204,22 @@ func processFencedCodeBlock(state *processState, v *ast.FencedCodeBlock) (ast.Wa
 
 // processParagraph handles paragraph nodes in the AST.
 func processParagraph(state *processState, v *ast.Paragraph) (ast.WalkStatus, error) {
-	if state.currentSection == "History" && state.currentMessage != nil {
+	if state.currentSection == "System Instructions" {
+		// Extract the text content from paragraph
+		content := ""
+		if v.Lines().Len() > 0 {
+			content = markdown.ExtractLinesText(v.Lines(), state.source)
+		} else {
+			content = markdown.ExtractTextFromChildren(v, state.source)
+		}
+		// Add to the system instruction content
+		if state.session.SystemInstruction == nil {
+			state.session.SystemInstruction = NewTextContent(content)
+		} else {
+			// Append to the existing system instruction
+			state.session.SystemInstruction.Text += "\n" + content
+		}
+	} else if state.currentSection == "History" && state.currentMessage != nil {
 		// Extract the text content from paragraph
 		content := ""
 		if v.Lines().Len() > 0 {

@@ -21,8 +21,12 @@ func TestLoad_SimpleChat(t *testing.T) {
 	require.NoError(err)
 
 	// Verify:
+
+	// metadata
 	require.Equal("Simple chat with code", sess.Title)
 	require.Equal("2025-03-04T10:00:00Z", sess.CreatedAt.Format("2006-01-02T15:04:05Z"))
+
+	// system instruction
 	require.Equal("You are a helpful programming assistant.\n"+
 		"Be concise and provide clear examples.",
 		sess.GetSystemInstruction().Text)

@@ -6,10 +6,8 @@ title: "Simple chat with code"
 
 ## System Instructions
 
-```
 You are a helpful programming assistant.
 Be concise and provide clear examples.
-```
 
 ## History
 
