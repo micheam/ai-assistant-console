@@ -23,6 +23,8 @@ message MessageContent {
     TextContent text = 1;
     // Image content represented by a URL.
     URLImageContent image = 2;
+    // Attachment content with name, syntax, and content.
+    AttachmentContent attachment = 3;
     // Future content types can be added here.
   }
 }
@@ -35,4 +37,14 @@ message TextContent {
 // URLImageContent holds the URL of an image.
 message URLImageContent {
   string url = 1;
+}
+
+// AttachmentContent represents an attachment with name, syntax highlighting, and content.
+message AttachmentContent {
+  // Name of the attachment.
+  string name = 1;
+  // Syntax highlighting information (e.g., "go", "python", etc.).
+  string syntax = 2;
+  // The actual content of the attachment.
+  bytes content = 3;
 }

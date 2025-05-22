@@ -3,6 +3,7 @@ package assistant
 import (
 	"fmt"
 	"io"
+	"regexp"
 	"strings"
 	"time"
 
@@ -85,6 +86,12 @@ func processDocument(sess *ChatSession, node ast.Node, source []byte) error {
 		currentMessage: nil,
 		currentContent: strings.Builder{},
 		session:        sess,
+
+		inAttachment:      false,
+		attachmentName:    "",
+		attachmentSyntax:  "",
+		attachmentContent: strings.Builder{},
+		contentOrder:      []MessageContent{},
 	}
 
 	// Walk the AST and process each node
@@ -105,6 +112,9 @@ func processDocument(sess *ChatSession, node ast.Node, source []byte) error {
 
 		case *ast.Paragraph:
 			return processParagraph(state, v)
+
+		case *ast.HTMLBlock:
+			return processHTMLBlock(state, v)
 		}
 
 		return ast.WalkContinue, nil
@@ -129,6 +139,14 @@ type processState struct {
 	currentMessage *Message
 	currentContent strings.Builder
 	session        *ChatSession
+
+	inAttachment      bool
+	attachmentName    string
+	attachmentSyntax  string
+	attachmentContent strings.Builder
+
+	// Track content order for proper sequencing
+	contentOrder []MessageContent
 }
 
 // processHeading handles heading nodes in the AST.
@@ -161,6 +179,9 @@ func processHeading(state *processState, v *ast.Heading) (ast.WalkStatus, error)
 			Contents: []MessageContent{},
 		}
 		state.session.History = append(state.session.History, state.currentMessage)
+
+		// Reset content order for the new message
+		state.contentOrder = []MessageContent{}
 	}
 
 	return ast.WalkContinue, nil
@@ -172,17 +193,27 @@ func processFencedCodeBlock(state *processState, v *ast.FencedCodeBlock) (ast.Wa
 		content := markdown.ExtractLinesText(v.Lines(), state.source)
 		state.session.SystemInstruction = NewTextContent(content)
 	} else if state.currentSection == "History" && state.currentMessage != nil {
-		// Finalize any pending content before adding the code block
-		finalizeCurrentContent(state)
-
-		// For code blocks in messages, create a new content with proper formatting
 		content := markdown.ExtractLinesText(v.Lines(), state.source)
 		info := ""
 		if v.Info != nil {
 			info = string(v.Info.Value(state.source))
 		}
 
-		// Format the code block with proper markdown syntax
+		if state.inAttachment {
+			// This is an attachment content, store it
+			state.attachmentSyntax = info
+			state.attachmentContent.WriteString(content)
+			return ast.WalkContinue, nil
+		}
+
+		// Add any accumulated text content first
+		if state.currentContent.Len() > 0 {
+			textContent := NewTextContent(strings.TrimSpace(state.currentContent.String()))
+			state.contentOrder = append(state.contentOrder, textContent)
+			state.currentContent.Reset()
+		}
+
+		// For code blocks in messages, create a new content with proper formatting
 		var codeBlock strings.Builder
 		if info != "" {
 			codeBlock.WriteString("```")
@@ -194,9 +225,9 @@ func processFencedCodeBlock(state *processState, v *ast.FencedCodeBlock) (ast.Wa
 		codeBlock.WriteString(content)
 		codeBlock.WriteString("\n```\n")
 
-		// Add the code block as a separate content
+		// Add the code block to the content order
 		codeContent := NewTextContent(codeBlock.String())
-		state.currentMessage.Contents = append(state.currentMessage.Contents, codeContent)
+		state.contentOrder = append(state.contentOrder, codeContent)
 	}
 
 	return ast.WalkContinue, nil
@@ -220,6 +251,11 @@ func processParagraph(state *processState, v *ast.Paragraph) (ast.WalkStatus, er
 			state.session.SystemInstruction.Text += "\n" + content
 		}
 	} else if state.currentSection == "History" && state.currentMessage != nil {
+		// Skip paragraphs inside attachments
+		if state.inAttachment {
+			return ast.WalkContinue, nil
+		}
+
 		// Extract the text content from paragraph
 		content := ""
 		if v.Lines().Len() > 0 {
@@ -233,18 +269,101 @@ func processParagraph(state *processState, v *ast.Paragraph) (ast.WalkStatus, er
 			state.currentContent.WriteString("\n")
 		}
 		state.currentContent.WriteString(content)
+
+		// Immediately add text content to maintain order
+		if state.currentContent.Len() > 0 {
+			textContent := NewTextContent(strings.TrimSpace(state.currentContent.String()))
+			state.contentOrder = append(state.contentOrder, textContent)
+			state.currentContent.Reset()
+		}
 	}
 
 	return ast.WalkContinue, nil
 }
 
+// Regular expressions for parsing artifact details
+var (
+	// Match <details> tag (with or without newlines/spaces)
+	detailsStartRegex = regexp.MustCompile(`(?s)<details>`)
+	// Match <summary>{name}</summary> tag (with or without newlines/spaces)
+	summaryRegex = regexp.MustCompile(`(?s)<summary>(.*?)</summary>`)
+	// Match </details> tag
+	detailsEndRegex = regexp.MustCompile(`</details>`)
+)
+
+// processHTMLBlock handles HTML block nodes in the AST, specifically for attachments.
+func processHTMLBlock(state *processState, v *ast.HTMLBlock) (ast.WalkStatus, error) {
+	if state.currentSection != "History" || state.currentMessage == nil {
+		return ast.WalkContinue, nil
+	}
+
+	content := markdown.ExtractLinesText(v.Lines(), state.source)
+
+	// If we're not in an attachment yet, check if this block starts an attachment
+	if !state.inAttachment {
+		if detailsStartRegex.MatchString(content) {
+			// We found the opening <details> tag
+			state.inAttachment = true
+
+			// Look for the summary tag which might be in the same HTML block
+			if matches := summaryRegex.FindStringSubmatch(content); len(matches) > 1 {
+				state.attachmentName = normalizeAttachmentName(matches[1])
+			}
+
+			state.attachmentContent.Reset()
+			return ast.WalkContinue, nil
+		}
+	} else {
+		// If we're already in an attachment, we might need to look for the summary tag
+		if state.attachmentName == "" {
+			if matches := summaryRegex.FindStringSubmatch(content); len(matches) > 1 {
+				state.attachmentName = normalizeAttachmentName(matches[1])
+				return ast.WalkContinue, nil
+			}
+		}
+
+		// Check if this is the end of an attachment
+		if detailsEndRegex.MatchString(content) {
+			// Create a new attachment content
+			attachment := NewAttachmentContent(
+				state.attachmentName,
+				state.attachmentSyntax,
+				strings.TrimSpace(state.attachmentContent.String()),
+			)
+
+			// Add the attachment to the content order
+			state.contentOrder = append(state.contentOrder, attachment)
+
+			// Reset attachment state
+			state.inAttachment = false
+			state.attachmentName = ""
+			state.attachmentSyntax = ""
+			state.attachmentContent.Reset()
+		}
+	}
+
+	return ast.WalkContinue, nil
+}
+
+func normalizeAttachmentName(s string) string {
+	s = strings.TrimSpace(s)
+	s = strings.TrimPrefix(s, "Attachment:")
+	return strings.TrimSpace(s)
+}
+
 // finalizeCurrentContent adds any accumulated content to the current message.
 func finalizeCurrentContent(state *processState) {
-	if state.currentSection == "History" &&
-		state.currentMessage != nil &&
-		state.currentContent.Len() > 0 {
-		content := NewTextContent(strings.TrimSpace(state.currentContent.String()))
-		state.currentMessage.Contents = append(state.currentMessage.Contents, content)
-		state.currentContent.Reset()
+	if state.currentSection == "History" && state.currentMessage != nil {
+		// Add any remaining accumulated text content (though it should already be processed)
+		if state.currentContent.Len() > 0 {
+			content := NewTextContent(strings.TrimSpace(state.currentContent.String()))
+			state.contentOrder = append(state.contentOrder, content)
+			state.currentContent.Reset()
+		}
+
+		// Add all content in the correct order
+		state.currentMessage.Contents = append(state.currentMessage.Contents, state.contentOrder...)
+		state.contentOrder = []MessageContent{}
 	}
 }
+

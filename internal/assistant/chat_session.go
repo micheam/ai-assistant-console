@@ -196,6 +196,14 @@ func (c *ChatSession) fromProto(src *assistantv1.ChatSession) error {
 				}
 				c := NewURLImageContent(*url_)
 				msg.Contents = append(msg.Contents, c)
+			case *assistantv1.MessageContent_Attachment:
+				attachment := contentPB.GetAttachment()
+				c := &AttachmentContent{
+					Name:    attachment.Name,
+					Syntax:  attachment.Syntax,
+					Content: attachment.Content,
+				}
+				msg.Contents = append(msg.Contents, c)
 			}
 		}
 		c.History = append(c.History, msg)

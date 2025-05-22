@@ -93,3 +93,51 @@ func TestLoad_SimpleChat(t *testing.T) {
 	require.Len(history4.GetContents(), 1)
 	require.Equal("You're welcome! If you have any more questions or need further assistance, feel free to ask.", history4.GetContents()[0].(*assistant.TextContent).Text)
 }
+
+func TestLoad_MessageWithArtifact(t *testing.T) {
+	// Setup:
+	require := require.New(t)
+	file, err := os.Open("testdata/attachment.md")
+	require.NoError(err)
+
+	// Exercise:
+	sess := &assistant.ChatSession{}
+	err = assistant.LoadMarkdown(sess, file)
+	require.NoError(err)
+
+	// Verify:
+
+	// User message:
+	//
+	// 	content[0]| Review the following code and provide feedback.
+	//
+	// 	content[1]| <details><summary>Artifact: test.go</summary>
+	//            |
+	// 	          | ```go
+	// 	          | package main
+	// 	          | import (
+	// 	          |     "fmt"
+	// 	          | )
+	//            |
+	// 	          | func main() {
+	// 	          |     fmt.Println("Hello, World!")
+	// 	          | }
+	// 	          | ```
+	//            |
+	// 	          | </details>
+	history1 := sess.History[0]
+	require.Equal(assistant.MessageAuthorUser, history1.Author)
+
+	require.Len(history1.GetContents(), 2)
+
+	require.Equal(
+		"Review the following code and provide feedback.",
+		history1.GetContents()[0].(*assistant.TextContent).Text,
+	)
+
+	attachment := history1.GetContents()[1].(*assistant.AttachmentContent)
+	require.Equal("test.go", attachment.Name)
+	require.Equal("go", attachment.Syntax)
+	require.Contains(string(attachment.Content), "package main")
+	require.Contains(string(attachment.Content), "fmt.Println(\"Hello, World!\")")
+}
