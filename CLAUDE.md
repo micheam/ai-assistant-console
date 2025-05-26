@@ -1,0 +1,1 @@
+- protobuf の定義を修正したら、 make protogen を実行するようにして
