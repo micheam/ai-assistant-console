@@ -179,6 +179,17 @@ func buildChatRequest(ctx context.Context, modelName string, systemInstruction *
 	for _, msg := range msgs {
 		for _, content := range msg.Contents {
 			switch v := content.(type) {
+			case *assistant.AttachmentContent:
+				content := []Content{&TextContent{
+					Text: v.ToText(),
+				}}
+				switch msg.Author {
+				case "user":
+					req.Messages = append(req.Messages, &UserMessage{Content: content})
+				case "assistant":
+					req.Messages = append(req.Messages, &AssistantMessage{Content: content})
+				}
+
 			case *assistant.TextContent:
 				switch msg.Author {
 				case "user":
@@ -190,6 +201,7 @@ func buildChatRequest(ctx context.Context, modelName string, systemInstruction *
 						Content: []Content{&TextContent{Text: v.Text}},
 					})
 				}
+
 			case *assistant.URLImageContent:
 				switch msg.Author {
 				case "user":
@@ -201,6 +213,7 @@ func buildChatRequest(ctx context.Context, modelName string, systemInstruction *
 						Content: []Content{&ImageContent{URL: v.URL}},
 					})
 				}
+
 			default:
 				// fmt.Printf("Unsupported message content type: %s\n", reflect.TypeOf(v))
 				logging.LoggerFrom(ctx).Warn(fmt.Sprintf("Unsupported message content type: %T", v))

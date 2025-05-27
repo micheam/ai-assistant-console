@@ -131,28 +131,3 @@ func (u *URLImageContent) isMessageContent() {}
 func NewURLImageContent(url url.URL) *URLImageContent {
 	return &URLImageContent{URL: url}
 }
-
-// AttachmentContent represents an attachment content in a message.
-type AttachmentContent struct {
-	Name    string `json:"name"`
-	Syntax  string `json:"syntax"`
-	Content []byte `json:"content"`
-}
-
-var _ MessageContent = (*AttachmentContent)(nil)
-
-func (*AttachmentContent) isMessageContent() {}
-
-// NewAttachmentContent creates a new attachment content.
-func NewAttachmentContent(name, syntax, content string) MessageContent {
-	return &AttachmentContent{
-		Name:    name,
-		Syntax:  syntax,
-		Content: []byte(content),
-	}
-}
-
-// String returns the string representation of the attachment content.
-func (c *AttachmentContent) String() string {
-	return fmt.Sprintf("<Attachment: %s>", c.Name)
-}

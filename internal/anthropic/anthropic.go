@@ -120,11 +120,15 @@ func messageParamFrom(ctx context.Context, src assistant.Message) (*anthropic.Me
 		if len(src.Contents) == 0 {
 			return nil, fmt.Errorf("empty assistant message")
 		}
-		textContent, ok := src.Contents[0].(*assistant.TextContent)
-		if !ok {
-			return nil, fmt.Errorf("unexpected assistant message content: %T", src.Contents[0])
+		var msg anthropic.MessageParam
+		switch v := src.GetContents()[0].(type) {
+		case *assistant.TextContent:
+			msg = anthropic.NewAssistantMessage(anthropic.NewTextBlock(v.Text))
+		case *assistant.AttachmentContent:
+			msg = anthropic.NewAssistantMessage(anthropic.NewTextBlock(v.ToText()))
+		default:
+			return nil, fmt.Errorf("unsupported assistant message content type: %T", v)
 		}
-		msg := anthropic.NewAssistantMessage(anthropic.NewTextBlock(textContent.Text))
 		return &msg, nil
 
 	case assistant.MessageAuthorUser:
@@ -133,6 +137,8 @@ func messageParamFrom(ctx context.Context, src assistant.Message) (*anthropic.Me
 			switch c := content.(type) {
 			case *assistant.TextContent:
 				contents = append(contents, anthropic.NewTextBlock(c.Text))
+			case *assistant.AttachmentContent:
+				contents = append(contents, anthropic.NewTextBlock(c.ToText()))
 			default:
 				logger.Warn("ignore unsupported content type", "type", fmt.Sprintf("%T", c))
 			}
