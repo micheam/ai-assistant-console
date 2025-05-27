@@ -146,9 +146,34 @@ func (r *Repl) Run(ctx context.Context) error {
 			sess.SetSystemInstruction(assistant.NewTextContent(systemText))
 
 			lines = append(lines, line)
-			query := r.buildQuery(lines)
+
+			var msgs []assistant.MessageContent
+			for _, line := range lines {
+				if line == "" {
+					continue // Skip empty lines
+				}
+
+				// Handle Attachment content
+				if strings.HasPrefix(line, "<Attachment: ") && strings.HasSuffix(line, ">") {
+					filepath := strings.TrimPrefix(line, "<Attachment:")
+					filepath = strings.TrimSuffix(filepath, ">")
+					filepath = strings.TrimSpace(filepath)
+					attachment := &assistant.AttachmentContent{}
+					if err := attachment.LoadFile(filepath); err != nil {
+						// NOTE: We don't return here, as we want to continue the REPL.
+						fmt.Fprintf(r.Err, theme.Error("[ERR] send message: %v\n"), err)
+						continue
+					}
+					msgs = append(msgs, attachment)
+					continue
+				}
+
+				// detault: handle as text content
+				msgs = append(msgs, assistant.NewTextContent(line))
+			}
+
 			ctxWithLogger := logging.ContextWith(ctx, logger)
-			iter, err := sess.SendMessageStream(ctxWithLogger, assistant.NewTextContent(query))
+			iter, err := sess.SendMessageStream(ctxWithLogger, msgs...)
 			if err != nil {
 				// NOTE: We don't return here, as we want to continue the REPL.
 				fmt.Fprintf(r.Err, theme.Error("[ERR] send message: %v\n"), err)
@@ -203,34 +228,46 @@ func (r *Repl) loadExternalFile(line string) ([]string, error) {
 		return nil, ErrAbort
 	}
 
-	// Read the file content
-	content, err := os.ReadFile(filePath)
-	if err != nil {
-		fmt.Fprintf(r.Err, theme.Error("[ERR] could not read file %s: %v\n"), filePath, err)
+	/*
+		// Read the file content
+		content, err := os.ReadFile(filePath)
+		if err != nil {
+			fmt.Fprintf(r.Err, theme.Error("[ERR] could not read file %s: %v\n"), filePath, err)
+			return nil, ErrAbort
+		}
+
+		// Split the file content into lines.
+		fileLines := strings.Split(string(content), "\n")
+		// Remove a trailing empty line if present.
+		if len(fileLines) > 0 && fileLines[len(fileLines)-1] == "" {
+			fileLines = fileLines[:len(fileLines)-1]
+		}
+
+		// sandwich with code block
+		//
+		// file: <file-path>
+		// ```<ext>
+		// ...
+		// <file-content>
+		// ...
+		// ```
+		//
+		fileLines = append([]string{
+			fmt.Sprintf("file: %s", filePath),
+			fmt.Sprintf("```%s", filepath.Ext(filePath)),
+		}, fileLines...)
+		fileLines = append(fileLines, "```")
+	*/
+
+	// Attachment として扱う '<Attachment: {file-path}>'
+	fileLines := []string{
+		fmt.Sprintf("<Attachment: %s>", filePath),
+	}
+	// Check if the file exists
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		fmt.Fprintf(r.Err, theme.Error("[ERR] file does not exist: %s\n"), filePath)
 		return nil, ErrAbort
 	}
-
-	// Split the file content into lines.
-	fileLines := strings.Split(string(content), "\n")
-	// Remove a trailing empty line if present.
-	if len(fileLines) > 0 && fileLines[len(fileLines)-1] == "" {
-		fileLines = fileLines[:len(fileLines)-1]
-	}
-
-	// sandwich with code block
-	//
-	// file: <file-path>
-	// ```<ext>
-	// ...
-	// <file-content>
-	// ...
-	// ```
-	//
-	fileLines = append([]string{
-		fmt.Sprintf("file: %s", filePath),
-		fmt.Sprintf("```%s", filepath.Ext(filePath)),
-	}, fileLines...)
-	fileLines = append(fileLines, "```")
 
 	return fileLines, nil
 }
@@ -264,11 +301,6 @@ func (r *Repl) printPrompt(ctx context.Context, lines []string) {
 	}
 }
 
-// buildQuery uses a strings.Builder to join all the lines into one query.
-func (r *Repl) buildQuery(lines []string) string {
-	return strings.Join(lines, "\n")
-}
-
 // resolvePersona returns the matching personality or the default one.
 func (r *Repl) resolvePersona() *config.Personality {
 	if p, ok := r.Config.Chat.GetPersona(r.PersonaName); ok {
@@ -287,8 +319,8 @@ func (r *Repl) editQuery(lines []string) ([]string, error) {
 	defer os.Remove(tmpFile.Name())
 
 	// Write current query into the temporary file.
-	initialQuery := r.buildQuery(lines)
-	if _, err := tmpFile.WriteString(initialQuery); err != nil {
+	originalLines := strings.Join(lines, "\n")
+	if _, err := tmpFile.WriteString(originalLines); err != nil {
 		tmpFile.Close()
 		return nil, fmt.Errorf("write to temp file: %w", err)
 	}
