@@ -1,14 +1,14 @@
-* Change output format of `chat session show` to markdown, to make it easier to use in `chat send --file` +Common
-* Append base system-instruction on chat send, so that we receive the markdown styled output +Common
+* Change output format of `chat session show` to markdown to make it easier to use in `chat send --file` +Common
+* Append base system instruction on chat send so that we receive markdown-styled output +Common
 * Cancel input on `Ctrl+C` +repl
-* Enable to attach image file to `chat send` +Chat +Send
-* Enable to attach image file to `chat repl` +Chat +Repl
+* Enable attaching image files to `chat send` +Chat +Send
+* Enable attaching image files to `chat repl` +Chat +Repl
 
-* Support PLaMoAPI +PlaMo
-* Support PerplexityAPI +Perplexity
-* Support GeminiAPI +Gemini
+* Support PlaMo API +PlaMo
+* Support Perplexity API +Perplexity
+* Support Gemini API +Gemini
 * Support [Image Generation](https://platform.openai.com/docs/guides/images?lang=curl) +OpenAI
-* Support [ImageGeneration](https://platform.openai.com/docs/guides/images?lang=curl#example-dall-e-3-generations) +OpenAI
-* Support [EditImage](https://platform.openai.com/docs/guides/images#edits-dall-e-2-only) +OpenAI
+* Support [Image Generation](https://platform.openai.com/docs/guides/images?lang=curl#example-dall-e-3-generations) +OpenAI
+* Support [Edit Image](https://platform.openai.com/docs/guides/images#edits-dall-e-2-only) +OpenAI
 * Support [Variations](https://platform.openai.com/docs/guides/images#variations-dall-e-2-only) +OpenAI
 * Add support for managing chat history +Common
