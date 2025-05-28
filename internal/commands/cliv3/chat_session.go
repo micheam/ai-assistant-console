@@ -82,7 +82,6 @@ func listChatSessions(ctx context.Context, cmd *cli.Command) error {
 		id := strings.TrimSuffix(f.Name(), ".pb")
 		fmt.Fprintln(cmd.Root().Writer, id)
 	}
-
 	_ = logger
 	return nil
 }
@@ -205,3 +204,4 @@ func prepareChatSession(ctx context.Context, cmd *cli.Command) error {
 	logger.Debug("Chat session created", "session-id", sess.ID)
 	return nil
 }
+

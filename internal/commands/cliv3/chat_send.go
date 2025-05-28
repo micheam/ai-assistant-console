@@ -32,8 +32,21 @@ var ChatSend = &cli.Command{
 			Name:  "stream",
 			Usage: "Stream the conversation",
 		},
+		&cli.StringFlag{
+			Name:  "file",
+			Usage: "Load chat session from a markdown file and continue the conversation",
+		},
+		&cli.StringFlag{
+			Name:  "prompt",
+			Usage: "Print this prompt before the assistant's response",
+		},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
+		// Handle --file flag to load session from markdown
+		if filename := cmd.String("file"); filename != "" {
+			return handleFileLoad(ctx, cmd, filename)
+		}
+
 		msgs := cmd.Args().Slice()
 		if len(msgs) == 0 {
 			// Try to read from stdin
@@ -115,6 +128,11 @@ var ChatSend = &cli.Command{
 				logger.Debug("Session saved", "session-id", sess.ID)
 			}
 
+			// Print prompt if specified
+			if prompt := cmd.String("prompt"); prompt != "" {
+				fmt.Fprintln(cmd.Root().Writer, prompt)
+			}
+
 			// Print response
 			switch v := resp.Content.(type) {
 			case *assistant.TextContent:
@@ -123,6 +141,11 @@ var ChatSend = &cli.Command{
 				logger.Error("unexpected response type", "type", fmt.Sprintf("%T", v))
 			}
 			return nil
+		}
+
+		// Print prompt if specified for streaming
+		if prompt := cmd.String("prompt"); prompt != "" {
+			fmt.Fprintln(cmd.Root().Writer, prompt)
 		}
 
 		// Stream conversation
@@ -196,4 +219,154 @@ func resolvePersona(conf *config.Config, personaName string) (*config.Personalit
 		return conf.Chat.GetPersona(personaName)
 	}
 	return conf.Chat.GetDefaultPersona(), true
+}
+
+// handleFileLoad loads a chat session from a markdown file and continues the conversation
+func handleFileLoad(ctx context.Context, cmd *cli.Command, filename string) error {
+	conf, err := LoadConfig(ctx, cmd)
+	if err != nil {
+		return fmt.Errorf("load config: %w", err)
+	}
+
+	// Setup logger
+	logLevel := logging.LevelInfo
+	if cmd.Bool("debug") {
+		logLevel = logging.LevelDebug
+	}
+	logger, cleanup, err := setupLogger(conf.Logfile(), logLevel)
+	if err != nil {
+		return err
+	}
+	defer cleanup()
+
+	// Load GenerativeModel
+	modelName := cmd.String("model")
+	if modelName == "" {
+		modelName = conf.Chat.Model
+	}
+	m, err := setupGenerativeModel(modelName)
+	if err != nil {
+		return fmt.Errorf("create model: %w", err)
+	}
+
+	file, err := os.Open(filename)
+	if err != nil {
+		return fmt.Errorf("open markdown file: %w", err)
+	}
+	defer file.Close()
+
+	// Load chat session from markdown file
+	sess := &assistant.ChatSession{}
+	if err := assistant.LoadMarkdown(sess, file); err != nil {
+		return fmt.Errorf("load chat session: %w", err)
+	}
+	sess.Model = m
+
+	// Resolve persona
+	//
+	// Note: input file may contain system instruction,
+	//       so we respect that unless a specific persona is provided.
+	if cmd.String("persona") != "" || (sess.SystemInstruction == nil && sess.SystemInstruction.Text == "") {
+		persona, found := resolvePersona(conf, cmd.String("persona"))
+		if !found {
+			return fmt.Errorf("persona not found: %s", cmd.String("persona"))
+		}
+		sess.SetSystemInstruction(
+			assistant.NewTextContent(strings.Join(persona.Messages, "\n")))
+	}
+
+	// Exit if the last message is not from the user
+	// (only store loaded session if not instant)
+	if lastMsg := sess.LastMessage(); lastMsg == nil || lastMsg.Author != assistant.MessageAuthorUser {
+		if !cmd.Bool("instant") { // Store session if not instant
+			confLocationDir := filepath.Dir(conf.Location())
+			sessStoreDir, err := filepath.Abs(path.Join(confLocationDir, conf.Chat.Session.Directory))
+			if err != nil {
+				return fmt.Errorf("resolve session directory: %w", err)
+			}
+			if err := sess.Save(sessStoreDir); err != nil {
+				return fmt.Errorf("save session: %w", err)
+			}
+			logger.Debug("Session saved", "session-id", sess.ID)
+		}
+		return nil
+	}
+
+	// Continue the conversation if the last message is from the user
+	ctx = logging.ContextWith(ctx, logger)
+
+	if !cmd.Bool("stream") {
+		var resp *assistant.GenerateContentResponse
+		if resp, err = sess.Continue(ctx); err != nil {
+			return fmt.Errorf("continue chat session: %w", err)
+		}
+
+		// Store session if not instant
+		if !cmd.Bool("instant") {
+			confLocationDir := filepath.Dir(conf.Location())
+			sessStoreDir, err := filepath.Abs(path.Join(confLocationDir, conf.Chat.Session.Directory))
+			if err != nil {
+				return fmt.Errorf("resolve session directory: %w", err)
+			}
+			if err := sess.Save(sessStoreDir); err != nil {
+				return fmt.Errorf("save session: %w", err)
+			}
+			logger.Debug("Session saved", "session-id", sess.ID)
+		}
+
+		// Print prompt if specified
+		if prompt := cmd.String("prompt"); prompt != "" {
+			fmt.Fprintln(cmd.Root().Writer, prompt)
+		}
+
+		// Print response
+		switch v := resp.Content.(type) {
+		case *assistant.TextContent:
+			fmt.Fprintln(cmd.Root().Writer, v.Text)
+		default:
+			return fmt.Errorf("unexpected response type: %T", v)
+		}
+		return nil
+	}
+
+	// Print prompt if specified for file stream
+	if prompt := cmd.String("prompt"); prompt != "" {
+		fmt.Fprintln(cmd.Root().Writer, prompt)
+	}
+
+	// Stream conversation
+	iter, err := sess.ContinueStream(ctx)
+	if err != nil {
+		return fmt.Errorf("continue chat session stream: %w", err)
+	}
+
+	var replyBuilder strings.Builder
+	for resp := range iter {
+		switch content := resp.Content.(type) {
+		case *assistant.TextContent:
+			fmt.Fprint(cmd.Root().Writer, content.Text)
+			replyBuilder.WriteString(content.Text)
+		default:
+			logger.Error("unexpected response type", "type", fmt.Sprintf("%T", content))
+		}
+	}
+	completeReply := replyBuilder.String()
+	sess.AddHistory(&assistant.GenerateContentResponse{
+		Content: assistant.NewTextContent(completeReply),
+	})
+	fmt.Fprint(cmd.Root().Writer, "\n\n")
+
+	if !cmd.Bool("instant") {
+		confLocationDir := filepath.Dir(conf.Location())
+		sessStoreDir, err := filepath.Abs(path.Join(confLocationDir, conf.Chat.Session.Directory))
+		if err != nil {
+			return fmt.Errorf("resolve session directory: %w", err)
+		}
+		if err := sess.Save(sessStoreDir); err != nil {
+			return fmt.Errorf("save session: %w", err)
+		}
+		logger.Debug("Session saved", "session-id", sess.ID)
+	}
+
+	return nil // OK
 }

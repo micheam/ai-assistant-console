@@ -28,6 +28,13 @@ type ChatSession struct {
 	CreatedAt         time.Time       `json:"created_at"`
 }
 
+func (c *ChatSession) LastMessage() *Message {
+	if len(c.History) == 0 {
+		return nil
+	}
+	return c.History[len(c.History)-1]
+}
+
 // StartChat starts a new chat session.
 func StartChat(m GenerativeModel) (*ChatSession, error) {
 	newid, err := newChatSessionID()
@@ -94,6 +101,50 @@ func (c *ChatSession) SendMessage(
 	}
 	c.AddHistory(resp)
 	return resp, nil
+}
+
+// Continue continues the chat session with the last message.
+func (c *ChatSession) Continue(ctx context.Context) (*GenerateContentResponse, error) {
+	if len(c.History) == 0 {
+		return nil, fmt.Errorf("no messages in history to continue")
+	}
+	lastMsg := c.LastMessage()
+	if lastMsg.Author != MessageAuthorUser {
+		return nil, fmt.Errorf("last message is not from user")
+	}
+	if c.Model == nil {
+		return nil, fmt.Errorf("model is not set")
+	}
+	c.Model.SetSystemInstruction(c.GetSystemInstruction())
+	resp, err := c.Model.GenerateContent(ctx, c.History...)
+	if err != nil {
+		return nil, fmt.Errorf("generate content: %w", err)
+	}
+	c.AddHistory(resp)
+	return resp, nil
+}
+
+// ContinueStream continues the chat session with streaming for the last message.
+func (c *ChatSession) ContinueStream(ctx context.Context) (
+	iter.Seq[*GenerateContentResponse],
+	error,
+) {
+	if len(c.History) == 0 {
+		return nil, fmt.Errorf("no messages in history to continue")
+	}
+	lastMsg := c.LastMessage()
+	if lastMsg.Author != MessageAuthorUser {
+		return nil, fmt.Errorf("last message is not from user")
+	}
+	if c.Model == nil {
+		return nil, fmt.Errorf("model is not set")
+	}
+	c.Model.SetSystemInstruction(c.GetSystemInstruction())
+	iter, err := c.Model.GenerateContentStream(ctx, c.History...)
+	if err != nil {
+		return nil, fmt.Errorf("generate content stream: %w", err)
+	}
+	return iter, nil
 }
 
 // SendMessageStream sends a message to the chat session.

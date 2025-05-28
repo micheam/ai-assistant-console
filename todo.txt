@@ -6,3 +6,5 @@
 (B) Support [EditImage](https://platform.openai.com/docs/guides/images#edits-dall-e-2-only) +OpenAI
 (B) Support [Variations](https://platform.openai.com/docs/guides/images#variations-dall-e-2-only) +OpenAI
 (C) Add support for managing chat history +Common
+(C) Change output format of `chat session show` to markdown, to make it easier to use in `chat continue` +Common
+(C) Add Base System Instruction +Common
