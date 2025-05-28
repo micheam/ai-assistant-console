@@ -1,16 +1,16 @@
 package commands
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"micheam.com/aico/internal/assistant"
-	"micheam.com/aico/internal/config"
 	"micheam.com/aico/internal/logging"
 )
 
@@ -19,8 +19,7 @@ var ChatSession = &cli.Command{
 	Usage:     "Manage chat sessions",
 	ArgsUsage: "<subcommand>",
 	Flags:     []cli.Flag{flagDebug},
-	Before:    LoadConfig,
-	Subcommands: []*cli.Command{
+	Commands: []*cli.Command{
 		{
 			Name:    "list",
 			Usage:   "List saved chat sessions",
@@ -48,12 +47,15 @@ var ChatSession = &cli.Command{
 	},
 }
 
-func listChatSessions(c *cli.Context) error {
-	conf := config.MustFromContext(c.Context)
+func listChatSessions(ctx context.Context, cmd *cli.Command) error {
+	conf, err := LoadConfig(ctx, cmd)
+	if err != nil {
+		return fmt.Errorf("load config: %w", err)
+	}
 
 	// Setup logger
 	logLevel := logging.LevelInfo
-	if c.Bool("debug") {
+	if cmd.Bool("debug") {
 		logLevel = logging.LevelDebug
 	}
 	logger, cleanup, err := setupLogger(conf.Logfile(), logLevel)
@@ -78,22 +80,24 @@ func listChatSessions(c *cli.Context) error {
 			continue // Skip if not a session file
 		}
 		id := strings.TrimSuffix(f.Name(), ".pb")
-		fmt.Fprintln(c.App.Writer, id)
+		fmt.Fprintln(cmd.Root().Writer, id)
 	}
-
 	_ = logger
 	return nil
 }
 
-func showChatSession(c *cli.Context) error {
-	if c.Args().Len() == 0 {
+func showChatSession(ctx context.Context, cmd *cli.Command) error {
+	if cmd.Args().Len() == 0 {
 		return fmt.Errorf("session-id is required")
 	}
+	conf, err := LoadConfig(ctx, cmd)
+	if err != nil {
+		return fmt.Errorf("load config: %w", err)
+	}
 
-	conf := config.MustFromContext(c.Context)
 	// Setup logger
 	logLevel := logging.LevelInfo
-	if c.Bool("debug") {
+	if cmd.Bool("debug") {
 		logLevel = logging.LevelDebug
 	}
 	logger, cleanup, err := setupLogger(conf.Logfile(), logLevel)
@@ -108,7 +112,7 @@ func showChatSession(c *cli.Context) error {
 		return fmt.Errorf("resolve session directory: %w", err)
 	}
 
-	sessID := c.Args().First()
+	sessID := cmd.Args().First()
 	sess, err := assistant.RestoreChat(sessStoreDir, sessID, nil)
 	if err != nil {
 		return fmt.Errorf("restore chat: %s: %w", sessID, err)
@@ -117,21 +121,24 @@ func showChatSession(c *cli.Context) error {
 	if err != nil {
 		return fmt.Errorf("marshal chat session: %w", err)
 	}
-	fmt.Fprintln(c.App.Writer, string(b))
+	fmt.Fprintln(cmd.Root().Writer, string(b))
 
 	_ = logger
 	return nil
 }
 
-func deleteChatSession(c *cli.Context) error {
-	if c.Args().Len() == 0 {
+func deleteChatSession(ctx context.Context, cmd *cli.Command) error {
+	if cmd.Args().Len() == 0 {
 		return fmt.Errorf("session-id is required")
 	}
 
-	conf := config.MustFromContext(c.Context)
+	conf, err := LoadConfig(ctx, cmd)
+	if err != nil {
+		return fmt.Errorf("load config: %w", err)
+	}
 	// Setup logger
 	logLevel := logging.LevelInfo
-	if c.Bool("debug") {
+	if cmd.Bool("debug") {
 		logLevel = logging.LevelDebug
 	}
 	logger, cleanup, err := setupLogger(conf.Logfile(), logLevel)
@@ -146,7 +153,7 @@ func deleteChatSession(c *cli.Context) error {
 		return fmt.Errorf("resolve session directory: %w", err)
 	}
 
-	sessID := c.Args().First()
+	sessID := cmd.Args().First()
 	if err := os.Remove(filepath.Join(sessStoreDir, sessID+".pb")); err != nil {
 		return fmt.Errorf("delete session: %s: %w", sessID, err)
 	}
@@ -156,11 +163,14 @@ func deleteChatSession(c *cli.Context) error {
 }
 
 // prepareChatSession prepares empty chat session, and show the id
-func prepareChatSession(c *cli.Context) error {
-	conf := config.MustFromContext(c.Context)
+func prepareChatSession(ctx context.Context, cmd *cli.Command) error {
+	conf, err := LoadConfig(ctx, cmd)
+	if err != nil {
+		return fmt.Errorf("load config: %w", err)
+	}
 	// Setup logger
 	logLevel := logging.LevelInfo
-	if c.Bool("debug") {
+	if cmd.Bool("debug") {
 		logLevel = logging.LevelDebug
 	}
 	logger, cleanup, err := setupLogger(conf.Logfile(), logLevel)
@@ -189,8 +199,9 @@ func prepareChatSession(c *cli.Context) error {
 	if err := sess.Save(sessStoreDir); err != nil {
 		return fmt.Errorf("save chat session: %w", err)
 	}
-	fmt.Fprintln(c.App.Writer, sess.ID)
+	fmt.Fprintln(cmd.Root().Writer, sess.ID)
 
 	logger.Debug("Chat session created", "session-id", sess.ID)
 	return nil
 }
+

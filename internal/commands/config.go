@@ -1,12 +1,13 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
 	"runtime"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"micheam.com/aico/internal/config"
 	"micheam.com/aico/internal/logging"
@@ -15,7 +16,7 @@ import (
 var Config = &cli.Command{
 	Name:  "config",
 	Usage: "Manage the configuration for the AI assistant",
-	Subcommands: []*cli.Command{
+	Commands: []*cli.Command{
 		configPath,
 		configInit,
 		configEdit,
@@ -25,9 +26,9 @@ var Config = &cli.Command{
 var configPath = &cli.Command{
 	Name:  "path",
 	Usage: "Show the path to the configuration file",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, cmd *cli.Command) error {
 		path := config.ConfigFilePath()
-		_, err := fmt.Fprintln(c.App.Writer, path)
+		_, err := fmt.Fprintln(cmd.Root().Writer, path)
 		return err
 	},
 }
@@ -38,31 +39,30 @@ var configInit = &cli.Command{
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:    "path",
-			Aliases: []string{"c"},
-			EnvVars: []string{config.EnvKeyConfigPath},
+			Aliases: []string{"cmd"},
+			Sources: cli.EnvVars(config.EnvKeyConfigPath),
 			Usage:   "The path to the configuration file",
 		},
 	},
-	Action: func(c *cli.Context) error {
-		if c.String("path") != "" {
+	Action: func(ctx context.Context, cmd *cli.Command) error {
+		if cmd.String("path") != "" {
 			// TODO: Make it configurable by other means than environment variables
-			os.Setenv(config.EnvKeyConfigPath, c.String("path"))
+			os.Setenv(config.EnvKeyConfigPath, cmd.String("path"))
 		}
 		conf, err := config.InitAndLoad()
 		if err != nil {
 			return err
 		}
-		fmt.Fprintln(c.App.Writer, "Configuration file initialized")
-		fmt.Fprintln(c.App.Writer, conf.Location())
+		fmt.Fprintln(cmd.Root().Writer, "Configuration file initialized")
+		fmt.Fprintln(cmd.Root().Writer, conf.Location())
 		return nil
 	},
 }
 
 var configEdit = &cli.Command{
-	Name:   "edit",
-	Usage:  "Edit the configuration file",
-	Before: LoadConfig,
-	Action: func(c *cli.Context) error {
+	Name:  "edit",
+	Usage: "Edit the configuration file",
+	Action: func(ctx context.Context, cmd *cli.Command) error {
 		editor := os.Getenv("EDITOR")
 		if editor == "" {
 			editor = "vim"
@@ -70,11 +70,14 @@ var configEdit = &cli.Command{
 				editor = "notepad.exe"
 			}
 		}
-		conf := config.MustFromContext(c.Context)
+		conf, err := LoadConfig(ctx, cmd)
+		if err != nil {
+			return fmt.Errorf("load config: %w", err)
+		}
 
 		// Setup logger
 		logLevel := logging.LevelInfo
-		if c.Bool("debug") {
+		if cmd.Bool("debug") {
 			logLevel = logging.LevelDebug
 		}
 		logger, cleanup, err := setupLogger(conf.Logfile(), logLevel)
@@ -83,11 +86,11 @@ var configEdit = &cli.Command{
 		}
 		defer cleanup()
 
-		cmd := exec.Command(editor, conf.Location())
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		if err := cmd.Run(); err != nil {
+		cmdExec := exec.Command(editor, conf.Location())
+		cmdExec.Stdin = os.Stdin
+		cmdExec.Stdout = os.Stdout
+		cmdExec.Stderr = os.Stderr
+		if err := cmdExec.Run(); err != nil {
 			return fmt.Errorf("edit configuration: %w", err)
 		}
 

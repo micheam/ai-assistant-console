@@ -2,13 +2,14 @@ package commands
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"io"
 	"log/slog"
 	"os"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"micheam.com/aico/internal/config"
 	"micheam.com/aico/internal/logging"
@@ -48,22 +49,29 @@ var flagPersona = &cli.StringFlag{
 	Value:   "default",
 }
 
+var (
+	ErrConfigFileNotFound = errors.New("config file not found")
+)
+
 // LoadConfig is a helper function to load the configuration and attach it to the context.
-func LoadConfig(c *cli.Context) error {
+//
+// errors:
+//
+// - [ErrConfigFileNotFound]: The config file was not found.
+func LoadConfig(_ context.Context, cmd *cli.Command) (*config.Config, error) {
 	conf, err := config.Load()
 	if errors.Is(err, config.ErrConfigFileNotFound) {
-		fmt.Fprintln(c.App.Writer, "Please run 'chat config init' to init the configuration file.")
+		return nil, ErrConfigFileNotFound
 	}
 	if err != nil {
-		return fmt.Errorf("load config: %w", err)
+		return nil, fmt.Errorf("load config: %w", err)
 	}
 
 	// Overwrite Model with command-line flag (`-m, --model`)
-	if model := c.String("model"); model != "" {
+	if model := cmd.String("model"); model != "" {
 		conf.Chat.Model = model
 	}
-	c.Context = config.WithConfig(c.Context, conf)
-	return nil
+	return conf, nil
 }
 
 // readLines reads lines from the given reader.

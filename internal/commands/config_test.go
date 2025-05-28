@@ -2,14 +2,15 @@ package commands_test
 
 import (
 	"bytes"
+	"context"
 	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"micheam.com/aico/internal/commands"
+	commands "micheam.com/aico/internal/commands"
 	"micheam.com/aico/internal/config"
 )
 
@@ -19,7 +20,7 @@ func TestConfigCommand_NoArguments(t *testing.T) {
 	_, require := assert.New(t), require.New(t)
 
 	var buf bytes.Buffer
-	app := &cli.App{
+	app := &cli.Command{
 		Writer: &buf,
 		Commands: []*cli.Command{
 			commands.Config,
@@ -27,7 +28,8 @@ func TestConfigCommand_NoArguments(t *testing.T) {
 	}
 
 	// Exercise
-	err := app.Run([]string{"chat", "config", "path"})
+	ctx := context.Background()
+	err := app.Run(ctx, []string{"chat", "config", "path"})
 
 	// Verify
 	require.NoError(err)
@@ -42,7 +44,7 @@ func TestConfigCommand_Initialize(t *testing.T) {
 	_, require := assert.New(t), require.New(t)
 
 	var buf bytes.Buffer
-	app := &cli.App{
+	app := &cli.Command{
 		Writer: &buf,
 		Commands: []*cli.Command{
 			commands.Config,
@@ -50,7 +52,8 @@ func TestConfigCommand_Initialize(t *testing.T) {
 	}
 
 	// Exercise
-	err := app.Run([]string{"chat", "config", "init"})
+	ctx := context.Background()
+	err := app.Run(ctx, []string{"chat", "config", "init"})
 
 	// Verify
 	require.NoError(err)
@@ -64,7 +67,7 @@ func TestConfigCommand_InitializeWithSpecifiedPath(t *testing.T) {
 	_, require := assert.New(t), require.New(t)
 
 	var buf bytes.Buffer
-	app := &cli.App{
+	app := &cli.Command{
 		Writer: &buf,
 		Commands: []*cli.Command{
 			commands.ConfigInit,
@@ -72,7 +75,8 @@ func TestConfigCommand_InitializeWithSpecifiedPath(t *testing.T) {
 	}
 
 	// Exercise
-	err := app.Run([]string{"config", "init", "-path", configPath})
+	ctx := context.Background()
+	err := app.Run(ctx, []string{"config", "init", "-path", configPath})
 
 	// Verify
 	require.NoError(err)

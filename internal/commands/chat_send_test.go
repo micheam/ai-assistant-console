@@ -2,14 +2,15 @@ package commands_test
 
 import (
 	"bytes"
+	"context"
 	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"micheam.com/aico/internal/commands"
+	commands "micheam.com/aico/internal/commands"
 	"micheam.com/aico/internal/config"
 )
 
@@ -19,13 +20,14 @@ func TestChatSendCommand(t *testing.T) {
 	_, require := assert.New(t), require.New(t)
 
 	var buf bytes.Buffer
-	app := &cli.App{
+	app := &cli.Command{
 		Writer:   &buf,
 		Commands: []*cli.Command{commands.ChatSend},
 	}
 
 	// Exercise
-	err := app.Run([]string{"chat", "send", "'Hello, How are you doing?'"})
+	ctx := context.Background()
+	err := app.Run(ctx, []string{"chat", "send", "'Hello, How are you doing?'"})
 
 	// Verify
 	require.NoError(err)
@@ -39,13 +41,14 @@ func TestChatSendCommand_WithNoArguments(t *testing.T) {
 	_, require := assert.New(t), require.New(t)
 
 	var buf bytes.Buffer
-	app := &cli.App{
+	app := &cli.Command{
 		Writer:   &buf,
 		Commands: []*cli.Command{commands.ChatSend},
 	}
 
 	// Exercise
-	err := app.Run([]string{"chat", "send"})
+	ctx := context.Background()
+	err := app.Run(ctx, []string{"chat", "send"})
 
 	// Verify
 	require.Error(err)
@@ -58,13 +61,14 @@ func TestChatSendCommand_WithModel(t *testing.T) {
 	_, require := assert.New(t), require.New(t)
 
 	var buf bytes.Buffer
-	app := &cli.App{
+	app := &cli.Command{
 		Writer:   &buf,
 		Commands: []*cli.Command{commands.ChatSend},
 	}
 
 	// Exercise
-	err := app.Run([]string{
+	ctx := context.Background()
+	err := app.Run(ctx, []string{
 		"chat", "send",
 		"--model=o3-mini",
 		"'Hello, How are you doing?'",
@@ -82,13 +86,14 @@ func TestChatSendCommand_WithPersona(t *testing.T) {
 	_, require := assert.New(t), require.New(t)
 
 	var buf bytes.Buffer
-	app := &cli.App{
+	app := &cli.Command{
 		Writer:   &buf,
 		Commands: []*cli.Command{commands.ChatSend},
 	}
 
 	// Exercise
-	err := app.Run([]string{
+	ctx := context.Background()
+	err := app.Run(ctx, []string{
 		"chat", "send",
 		"--persona=someotherpersona",
 		"'Hello, who are you?'",
@@ -106,13 +111,14 @@ func TestChatSendCommand_WithPersona_Unknown(t *testing.T) {
 	_, require := assert.New(t), require.New(t)
 
 	var buf bytes.Buffer
-	app := &cli.App{
+	app := &cli.Command{
 		Writer:   &buf,
 		Commands: []*cli.Command{commands.ChatSend},
 	}
 
 	// Exercise
-	err := app.Run([]string{
+	ctx := context.Background()
+	err := app.Run(ctx, []string{
 		"chat", "send",
 		"--persona=unknownpersona",
 		"'Hello, who are you?'",
@@ -129,13 +135,14 @@ func TestChatSendCommand_SessionCreation(t *testing.T) {
 	_, require := assert.New(t), require.New(t)
 
 	var buf bytes.Buffer
-	app := &cli.App{
+	app := &cli.Command{
 		Writer:   &buf,
 		Commands: []*cli.Command{commands.ChatSend},
 	}
 
 	// Exercise
-	err := app.Run([]string{
+	ctx := context.Background()
+	err := app.Run(ctx, []string{
 		"chat", "send", "'Hello, How are you doing?'",
 	})
 

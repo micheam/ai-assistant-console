@@ -1,37 +1,44 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"net/mail"
 	"os"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	assistantconsole "micheam.com/aico/internal"
-	"micheam.com/aico/internal/commands"
+	commands "micheam.com/aico/internal/commands"
 )
 
+var cmd = &cli.Command{
+	Name:    "aico",
+	Usage:   "AI Assistant Console",
+	Version: "v0.1.0",
+	Authors: []any{
+		mail.Address{Name: "Michito Maeda", Address: "michito.maeda@gmail.com"},
+	},
+	DefaultCommand: "help",
+	Commands: []*cli.Command{
+
+		commands.ChatModels,
+		commands.ChatRepl,
+		commands.ChatSend,
+		commands.ChatSession,
+
+		commands.Config,
+	},
+	Flags: []cli.Flag{
+		cli.GenerateShellCompletionFlag,
+	},
+	Suggest: true,
+}
+
 func main() {
-	err := app.Run(os.Args)
+	ctx := context.Background()
+	err := cmd.Run(ctx, os.Args)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-}
-
-var app = &cli.App{
-	Name:           "chat",
-	Usage:          "Chat with an AI assistant",
-	Version:        assistantconsole.Version,
-	DefaultCommand: "repl",
-	Commands: []*cli.Command{
-		commands.ChatRepl,
-		commands.ChatSend,
-		commands.ChatSession,
-		commands.ChatModels,
-		commands.Config,
-	},
-	Flags:                []cli.Flag{},
-	EnableBashCompletion: true,
-	Authors:              []*cli.Author{},
-	Suggest:              true,
 }

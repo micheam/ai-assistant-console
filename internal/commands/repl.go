@@ -1,11 +1,11 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"micheam.com/aico/internal/config"
 	"micheam.com/aico/internal/logging"
 	"micheam.com/aico/internal/repl"
 )
@@ -18,14 +18,15 @@ var ChatRepl = &cli.Command{
 		flagModel,
 		flagPersona,
 	},
-	Before: LoadConfig,
-	Action: func(c *cli.Context) error {
-		// Load configuration
-		conf := config.MustFromContext(c.Context)
+	Action: func(ctx context.Context, cmd *cli.Command) error {
+		conf, err := LoadConfig(ctx, cmd)
+		if err != nil {
+			return fmt.Errorf("load config: %w", err)
+		}
 
 		// Setup logger
 		logLevel := logging.LevelInfo
-		if c.Bool("debug") {
+		if cmd.Bool("debug") {
 			logLevel = logging.LevelDebug
 		}
 		logger, cleanup, err := setupLogger(conf.Logfile(), logLevel)
@@ -40,7 +41,8 @@ var ChatRepl = &cli.Command{
 			return fmt.Errorf("create model: %w", err)
 		}
 
-		ctx := logging.ContextWith(c.Context, logger.With("model", m.Name()))
-		return repl.Init(conf, c.String("persona"), m).Run(ctx)
+		ctx = logging.ContextWith(ctx, logger.With("model", m.Name()))
+		persona := cmd.String("persona")
+		return repl.Init(conf, persona, m).Run(ctx)
 	},
 }

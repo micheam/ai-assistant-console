@@ -2,6 +2,7 @@ package commands_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"path/filepath"
 	"testing"
@@ -9,9 +10,9 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"micheam.com/aico/internal/commands"
+	commands "micheam.com/aico/internal/commands"
 	"micheam.com/aico/internal/config"
 )
 
@@ -21,13 +22,13 @@ func TestModelsCommand_Plain(t *testing.T) {
 	_, require := assert.New(t), require.New(t)
 
 	var buf bytes.Buffer
-	app := &cli.App{
+	cmd := &cli.Command{
 		Writer:   &buf,
 		Commands: []*cli.Command{commands.ChatModels},
 	}
 
 	// Exercise
-	err := app.Run([]string{"chat", "models"})
+	err := cmd.Run(context.Background(), []string{"chat", "models"})
 
 	// Verify
 	require.NoError(err)
@@ -51,13 +52,14 @@ func TestModelsCommand_JSON(t *testing.T) {
 	_, require := assert.New(t), require.New(t)
 
 	var buf bytes.Buffer
-	app := &cli.App{
+	cmd := &cli.Command{
 		Writer:   &buf,
 		Commands: []*cli.Command{commands.ChatModels},
 	}
 
 	// Exercise
-	err := app.Run([]string{"chat", "models", "--json"})
+	ctx := context.Background()
+	err := cmd.Run(ctx, []string{"chat", "models", "--json"})
 
 	// Verify - each line is a JSON object
 	require.NoError(err)
@@ -79,13 +81,14 @@ func TestModelsCommand_RespectSelected(t *testing.T) {
 	_, require := assert.New(t), require.New(t)
 
 	var buf bytes.Buffer
-	app := &cli.App{
+	cmd := &cli.Command{
 		Writer:   &buf,
 		Commands: []*cli.Command{commands.ChatModels},
 	}
 
 	// Exercise
-	err := app.Run([]string{"chat", "models", "--model", "claude-3-7-sonnet"})
+	ctx := context.Background()
+	err := cmd.Run(ctx, []string{"chat", "models", "--model", "claude-3-7-sonnet"})
 
 	// Verify
 	require.NoError(err)

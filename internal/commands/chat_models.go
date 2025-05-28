@@ -1,14 +1,14 @@
 package commands
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"micheam.com/aico/internal/anthropic"
-	"micheam.com/aico/internal/config"
 	"micheam.com/aico/internal/logging"
 	"micheam.com/aico/internal/openai"
 )
@@ -21,13 +21,15 @@ var ChatModels = &cli.Command{
 		flagJSON,
 		flagModel,
 	},
-	Before: LoadConfig,
-	Action: func(c *cli.Context) error {
-		conf := config.MustFromContext(c.Context)
+	Action: func(ctx context.Context, cmd *cli.Command) error {
+		conf, err := LoadConfig(ctx, cmd)
+		if err != nil {
+			return fmt.Errorf("load config: %w", err)
+		}
 
 		// Setup logger
 		logLevel := logging.LevelInfo
-		if c.Bool("debug") {
+		if cmd.Bool("debug") {
 			logLevel = logging.LevelDebug
 		}
 		logger, cleanup, err := setupLogger(conf.Logfile(), logLevel)
@@ -60,13 +62,13 @@ var ChatModels = &cli.Command{
 
 		// Print the models
 		for _, model := range models {
-			if c.Bool("json") {
-				if err := json.NewEncoder(c.App.Writer).Encode(model); err != nil {
+			if cmd.Bool("json") {
+				if err := json.NewEncoder(cmd.Root().Writer).Encode(model); err != nil {
 					return err
 				}
 				continue
 			}
-			fmt.Fprintln(c.App.Writer, model.String())
+			fmt.Fprintln(cmd.Root().Writer, model.String())
 		}
 
 		_ = logger
