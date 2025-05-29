@@ -14,7 +14,7 @@ import (
 var version = "dev" // set by ldflags during build
 
 var cmd = &cli.Command{
-	Name:    "aico",
+	Name:    "chat",
 	Usage:   "AI Assistant Console",
 	Version: version,
 	Authors: []any{
