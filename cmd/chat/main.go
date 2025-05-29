@@ -11,10 +11,12 @@ import (
 	commands "micheam.com/aico/internal/commands"
 )
 
+var version = "dev" // set by ldflags during build
+
 var cmd = &cli.Command{
 	Name:    "aico",
 	Usage:   "AI Assistant Console",
-	Version: "v0.1.0",
+	Version: version,
 	Authors: []any{
 		mail.Address{Name: "Michito Maeda", Address: "michito.maeda@gmail.com"},
 	},

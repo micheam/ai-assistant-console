@@ -1,10 +1,12 @@
-.PHONY : clean test install
 SOURCE = $(shell find . -name '*.go')
 USER_BIN = $(shell echo $$HOME)/bin
 TEST_OPTS = -tags e2e
 
-bin/chat : test ./cmd/chat/main.go $(SOURCE)
-	@go build -o ./bin/chat ./cmd/chat
+.PHONY: test clean install protogen
+.DEFAULT_GOAL := bin/chat
+
+bin/chat : ./cmd/chat/main.go $(SOURCE)
+	@go build -ldflags "-X main.version=$(shell git describe --tags --always --dirty)" -o ./bin/chat ./cmd/chat
 
 test :
 	@go test $(TEST_OPTS) ./...
