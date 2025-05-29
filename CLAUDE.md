@@ -1,1 +1,1 @@
-- protobuf の定義を修正したら、 make protogen を実行するようにして
+- After modifying the protobuf definition, make sure to run make protogen

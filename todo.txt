@@ -1,9 +1,7 @@
-* Change output format of `chat session show` to markdown to make it easier to use in `chat send --file` +Common
 * Append base system instruction on chat send so that we receive markdown-styled output +Common
 * Cancel input on `Ctrl+C` +repl
 * Enable attaching image files to `chat send` +Chat +Send
 * Enable attaching image files to `chat repl` +Chat +Repl
-
 * Support PlaMo API +PlaMo
 * Support Perplexity API +Perplexity
 * Support Gemini API +Gemini

@@ -267,6 +267,73 @@ func (c *ChatSession) AddHistory(resp *GenerateContentResponse) {
 	c.History = append(c.History, NewAssistantMessage(resp.Content))
 }
 
+// ToMarkdown converts the chat session to markdown format compatible with LoadMarkdown.
+func (c *ChatSession) ToMarkdown() (string, error) {
+	var sb strings.Builder
+	
+	// Write frontmatter
+	sb.WriteString("---\n")
+	sb.WriteString(fmt.Sprintf("session_id: %s\n", c.ID))
+	sb.WriteString(fmt.Sprintf("created_at: %s\n", c.CreatedAt.Format(time.RFC3339)))
+	if c.Title != "" {
+		sb.WriteString(fmt.Sprintf("title: \"%s\"\n", c.Title))
+	}
+	sb.WriteString("---\n\n")
+	
+	// Write system instructions
+	sb.WriteString("## System Instructions\n\n")
+	if c.SystemInstruction != nil && c.SystemInstruction.Text != "" {
+		sb.WriteString(c.SystemInstruction.Text)
+		if !strings.HasSuffix(c.SystemInstruction.Text, "\n") {
+			sb.WriteString("\n")
+		}
+		sb.WriteString("\n")
+	}
+	
+	// Write chat history
+	sb.WriteString("## History\n\n")
+	
+	for i, msg := range c.History {
+		// Write message header with bold formatting
+		authorName := "**Assistant**"
+		if msg.Author == MessageAuthorUser {
+			authorName = "**User**"
+		}
+		sb.WriteString(fmt.Sprintf("### %d. %s\n", i+1, authorName))
+		
+		// Write message contents
+		for _, content := range msg.Contents {
+			switch c := content.(type) {
+			case *TextContent:
+				sb.WriteString(c.Text)
+				if !strings.HasSuffix(c.Text, "\n") {
+					sb.WriteString("\n")
+				}
+				sb.WriteString("\n")
+			case *AttachmentContent:
+				sb.WriteString("<details>\n\n")
+				sb.WriteString(fmt.Sprintf("<summary>Attachment: %s</summary>\n\n", c.Name))
+				sb.WriteString("```")
+				if c.Syntax != "" {
+					sb.WriteString(c.Syntax)
+				}
+				sb.WriteString("\n")
+				sb.Write(c.Content)
+				if !strings.HasSuffix(string(c.Content), "\n") {
+					sb.WriteString("\n")
+				}
+				sb.WriteString("```\n\n")
+				sb.WriteString("</details>\n\n")
+			default:
+				// For other content types, convert to string representation
+				sb.WriteString(fmt.Sprintf("%v\n\n", content))
+			}
+		}
+	}
+	
+	return sb.String(), nil
+}
+
 // newChatSessionID generates a new chat session ID.
 func newChatSessionID() (string, error) {
 	rawID, err := uuid.NewV7()

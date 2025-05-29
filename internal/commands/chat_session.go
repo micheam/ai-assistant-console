@@ -2,7 +2,6 @@ package commands
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -117,11 +116,12 @@ func showChatSession(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return fmt.Errorf("restore chat: %s: %w", sessID, err)
 	}
-	b, err := json.Marshal(sess)
+	
+	markdown, err := sess.ToMarkdown()
 	if err != nil {
-		return fmt.Errorf("marshal chat session: %w", err)
+		return fmt.Errorf("convert to markdown: %w", err)
 	}
-	fmt.Fprintln(cmd.Root().Writer, string(b))
+	fmt.Fprintln(cmd.Root().Writer, markdown)
 
 	_ = logger
 	return nil
