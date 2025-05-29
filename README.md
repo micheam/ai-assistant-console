@@ -7,11 +7,23 @@
 
 ![screenshot](screenshot.png)
 
-AICO is an AI-powered text generation tool using OpenAI's GPT-4 and other supported models.
+AICO is an AI-powered console application that supports multiple AI providers including OpenAI's GPT models and Anthropic's Claude models. It provides both interactive REPL and batch processing modes, along with advanced features like chat session management and Vim plugin integration.
 
 ## Install
 
-Since pre-built binaries are not provided, you will need to install Go to build and run AICO.
+### Option 1: Download Pre-built Binaries (macOS/Linux only)
+
+Pre-built binaries are available for macOS and Linux from the [GitHub Releases page](https://github.com/micheam/ai-assistant-console/releases). 
+
+> **Note**: Windows binaries are not provided as we don't have a Windows testing environment. Windows users should build from source.
+
+1. Go to the [releases page](https://github.com/micheam/ai-assistant-console/releases)
+2. Download the appropriate binary for your platform
+3. Extract and place the binary in your PATH
+
+### Option 2: Build from Source
+
+To build from source, you'll need to install Go.
 Make sure you have _Go version 1.20 or higher_ installed on your system. 
 You can check the installed version by running `go version`.
 
@@ -27,8 +39,7 @@ Once you have Go installed, follow these steps to install AICO:
    ```bash
    cd ai-assistant-console
    ```
-3. Use the `go.mod` file to manage dependencies. You don't need to do anything manually since Go will handle this for you.
-4. Build the executable binary by running `make`:
+3. Build the executable binary by running `make`:
    ```bash
    make
    ```
@@ -36,93 +47,89 @@ Once you have Go installed, follow these steps to install AICO:
 
 Now, you can use commands as described in the [Usage](#usage) section.
 
-## OpenAI API Key
+## API Keys Setup
 
-Currently, AICO requires an OpenAI API key to use the GPT-4 API.
+AICO supports multiple AI providers. You'll need to set up API keys for the providers you want to use:
+
+### OpenAI API Key
+
+To use OpenAI models (GPT-4, GPT-4o, etc.), you need an OpenAI API key.
 You can get an API key from [the OpenAI API Keys page].
 
-Once you have an API key, you can set it in the `OPENAI_API_KEY` environment variable:
-
 ```bash
-export OPENAI_API_KEY=<your API key>
+export OPENAI_API_KEY=<your OpenAI API key>
 ```
 
-## Usage of the `chat` Command
+### Anthropic API Key
 
-After building the binary, you can run `chat` to start chatting with AI.
+To use Anthropic Claude models, you need an Anthropic API key.
+You can get an API key from [Anthropic Console](https://console.anthropic.com/).
+
+```bash
+export ANTHROPIC_API_KEY=<your Anthropic API key>
+```
+
+## Usage
+
+After installation, you can use the `chat` command to interact with AI assistants.
 
 ```
 NAME:
-   chat - Chat with AI
+   chat - AI Assistant Console
 
 USAGE:
-   chat [global options] command [command options] [arguments...]
-
-VERSION:
-   0.0.11
-
+   chat [global options] [command [command options]]
 
 COMMANDS:
-   config   Show config file path
-   tui      Chat with AI in TUI
-   send     Send message to AI
+   models   Show the available models
+   repl     Start a chat session in a REPL
+   send     Send a message to the AI assistant
+   session  Manage chat sessions
+   config   Manage the configuration for the AI assistant
    help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --debug                    Enable debug mode (default: false) [$AICO_DEBUG]
-   --model value, -m value    GPT model to use (default: "gpt-4")
-   --persona value, -p value  Persona to use (default: "default")
-   --help, -h                 show help
-   --version, -v              print the version
+   --help, -h     show help
+   --version, -v  print the version
 ```
 
-### TUI Mode
+### REPL Mode (Interactive Chat)
 
-To chat with AI in TUI mode, use the `tui` subcommand:
+To start an interactive chat session, use the `repl` subcommand:
 
 ```bash
-$ ./bin/chat tui
+$ chat repl
 ```
 
-In TUI mode, you can send message with ';; (double semicolon)' line.
+In REPL mode, you can have interactive conversations with AI assistants.
+
+### Available Models
+
+To see all available models, use the `models` command:
 
 ```bash
-$ ./bin/chat tui
-Conversation with gpt-4-1106-preview
-------------------------------
-> Translate into English:
-> 
-> こんにちは、世界。
-> ;;
-
-Hello, world.
-```
-
-You can input Image URL to get the description of the image.
-(with `chatgpt-4o-latest` model)
-
-```bash
-$ chat --model=chatgpt-4o-latest tui
-Conversation with chatgpt-4o-latest
-------------------------------
-> What is in this image?
-> 
-> <https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg>
-> ;;
-
-This image shows a serene natural landscape with a wooden boardwalk path extending through a lush green
- field. The sky is bright and blue with scattered clouds, creating a peaceful and vibrant outdoor scene.
- Trees and bushes are visible in the background, adding to the natural beauty of the setting.
+$ chat models
 ```
 
 ### Batch Mode
 
-To send a message to AI, use the `send` subcommand:
+To send a single message to AI, use the `send` subcommand:
 
 ```bash
-$ ./bin/chat send "Translate into English: こんにちは、世界。"
+$ chat send "Translate into English: こんにちは、世界。"
 Hello, world.
 ```
+
+### Session Management
+
+AICO now supports chat session management. You can:
+
+- List sessions: `chat session list`
+- Show a session: `chat session show <session-id>`
+- Delete a session: `chat session delete <session-id>`
+- Prepare an empty session: `chat session prepare`
+
+Sessions can be exported in multiple formats including markdown, JSON, and plain text.
 
 ## Usage as a Vim Plugin
 
@@ -131,7 +138,8 @@ Please see the [Vim plugin documentation](README.vim.md) for more information.
 
 ## Environment Variables
 
-- `AICO_DEBUG`: Sets the debug mode of AICO. Default is `false`.
+- `OPENAI_API_KEY`: Your OpenAI API key for accessing GPT models
+- `ANTHROPIC_API_KEY`: Your Anthropic API key for accessing Claude models
 
 ## Development
 
