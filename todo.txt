@@ -1,3 +1,4 @@
+* Migrate gopkg.in/yaml into goccy/go-yaml +Common
 * Append base system instruction on chat send so that we receive markdown-styled output +Common
 * Cancel input on `Ctrl+C` +repl
 * Enable attaching image files to `chat send` +Chat +Send
