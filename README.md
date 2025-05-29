@@ -3,6 +3,7 @@
 
 # AICO - AI Assistant Console
 [![Go](https://github.com/micheam/ai-assistant-console/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/micheam/ai-assistant-console/actions/workflows/go.yml)
+[![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/micheam/ai-assistant-console?include_prereleases)](https://github.com/micheam/ai-assistant-console/releases)
 
 ![screenshot](screenshot.png)
 
