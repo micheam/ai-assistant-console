@@ -55,6 +55,8 @@ import (
 // AvailableModels returns a list of available models
 func AvailableModels() []string {
 	return []string{
+		"claude-opus-4",
+		"claude-sonnet-4",
 		"claude-3-7-sonnet",
 		"claude-3-5-haiku",
 	}
@@ -72,6 +74,10 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 	switch modelName {
 	default:
 		return nil, false
+	case "claude-opus-4":
+		return &ClaudeOpus4{}, true
+	case "claude-sonnet-4":
+		return &ClaudeSonnet4{}, true
 	case "claude-3-7-sonnet":
 		return &Claude3_7Sonnet{}, true
 	case "claude-3-5-haiku":
@@ -83,6 +89,10 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, error) {
 	client := anthropic.NewClient(option.WithAPIKey(apiKey))
 	switch modelName {
+	case "claude-opus-4":
+		return NewClaudeOpus4(client), nil
+	case "claude-sonnet-4":
+		return NewClaudeSonnet4(client), nil
 	case "claude-3-7-sonnet":
 		return NewClaude3_7Sonnet(client), nil
 	case "claude-3-5-haiku":
