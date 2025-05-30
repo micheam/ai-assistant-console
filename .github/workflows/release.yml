@@ -26,6 +26,15 @@ jobs:
       id: tag
       run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
+    - name: Prepare release body
+      id: release_body
+      run: |
+        sudo apt-get update && sudo apt-get install -y jq
+        release_body=$(./script/prepare_release_body.sh)
+        echo "body<<EOF" >> $GITHUB_OUTPUT
+        echo "$release_body" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
     - name: Build binaries
       run: |
         # Build for multiple platforms
@@ -42,6 +51,6 @@ jobs:
           aico-linux-arm64
           aico-darwin-amd64
           aico-darwin-arm64
-        generate_release_notes: true
+        body: ${{ steps.release_body.outputs.body }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
