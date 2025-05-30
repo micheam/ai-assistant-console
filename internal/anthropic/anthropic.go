@@ -56,7 +56,6 @@ import (
 func AvailableModels() []string {
 	return []string{
 		"claude-3-7-sonnet",
-		"claude-3-5-sonnet",
 		"claude-3-5-haiku",
 	}
 }
@@ -75,8 +74,6 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 		return nil, false
 	case "claude-3-7-sonnet":
 		return &Claude3_7Sonnet{}, true
-	case "claude-3-5-sonnet":
-		return &Claude3_5Sonnet{}, true
 	case "claude-3-5-haiku":
 		return &Claude3_5Haiku{}, true
 	}
@@ -88,8 +85,6 @@ func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, er
 	switch modelName {
 	case "claude-3-7-sonnet":
 		return NewClaude3_7Sonnet(client), nil
-	case "claude-3-5-sonnet":
-		return NewClaude3_5Sonnet(client), nil
 	case "claude-3-5-haiku":
 		return NewClaude3_5Haiku(client), nil
 	}

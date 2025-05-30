@@ -38,7 +38,6 @@ o1
 o1-mini
 o3-mini
 claude-3-7-sonnet
-claude-3-5-sonnet
 claude-3-5-haiku
 `
 	if diff := cmp.Diff(expected, buf.String()); diff != "" {
@@ -98,7 +97,6 @@ o1
 o1-mini
 o3-mini
 claude-3-7-sonnet *
-claude-3-5-sonnet
 claude-3-5-haiku
 `
 	if diff := cmp.Diff(expected, buf.String()); diff != "" {
