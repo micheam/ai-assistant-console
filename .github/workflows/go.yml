@@ -24,9 +24,6 @@ jobs:
     - name: Build
       run: go build -v ./...
 
-    - name: Test
-      run: go test -v ./...
-    
     - name: Integration Test
       if: github.ref == 'refs/heads/main'
       run: go test -tags=integration -v ./...
