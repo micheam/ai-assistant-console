@@ -141,3 +141,87 @@ func TestLoad_MessageWithArtifact(t *testing.T) {
 	require.Contains(string(attachment.Content), "package main")
 	require.Contains(string(attachment.Content), "fmt.Println(\"Hello, World!\")")
 }
+
+func TestMatchesAssistant(t *testing.T) {
+	require := require.New(t)
+
+	// Test various Assistant header formats
+	testCases := []struct {
+		header   string
+		expected bool
+	}{
+		{"Assistant", true},
+		{"**Assistant**", true},
+		{"1. Assistant", true},
+		{"2. **Assistant**", true},
+		{"User", false},
+		{"**User**", false},
+		{"Random text", false},
+		{"assistant", true}, // case insensitive
+		{"ASSISTANT", true}, // case insensitive
+		{"*assistant*", true},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.header, func(t *testing.T) {
+			result := assistant.MatchesAssistant(tc.header)
+			require.Equal(tc.expected, result, "header: %s", tc.header)
+		})
+	}
+}
+
+func TestMatchesUser(t *testing.T) {
+	require := require.New(t)
+
+	// Test various User header formats
+	testCases := []struct {
+		header   string
+		expected bool
+	}{
+		{"User", true},
+		{"**User**", true},
+		{"1. User", true},
+		{"2. **User**", true},
+		{"Assistant", false},
+		{"**Assistant**", false},
+		{"Random text", false},
+		{"user", true}, // case insensitive
+		{"USER", true}, // case insensitive
+		{"*user*", true},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.header, func(t *testing.T) {
+			result := assistant.MatchesUser(tc.header)
+			require.Equal(tc.expected, result, "header: %s", tc.header)
+		})
+	}
+}
+
+func TestLoad_MessageHeaderVariations(t *testing.T) {
+	// Setup:
+	require := require.New(t)
+	file, err := os.Open("testdata/assistant_headers_test.md")
+	require.NoError(err)
+	defer file.Close()
+
+	// Exercise:
+	sess := &assistant.ChatSession{}
+	err = assistant.LoadMarkdown(sess, file)
+	require.NoError(err)
+
+	// Verify:
+	require.Len(sess.History, 4)
+
+	// Check that both User and Assistant headers with various formatting are properly recognized
+	require.Equal(assistant.MessageAuthorUser, sess.History[0].Author)       // User
+	require.Equal(assistant.MessageAuthorAssistant, sess.History[1].Author) // **Assistant**
+	require.Equal(assistant.MessageAuthorUser, sess.History[2].Author)       // **User**
+	require.Equal(assistant.MessageAuthorAssistant, sess.History[3].Author) // Assistant
+
+	// Verify content
+	require.Equal("Test message from user.", sess.History[0].GetContents()[0].(*assistant.TextContent).Text)
+	require.Equal("Response from assistant with bold formatting.", sess.History[1].GetContents()[0].(*assistant.TextContent).Text)
+	require.Equal("Another user message with bold formatting.", sess.History[2].GetContents()[0].(*assistant.TextContent).Text)
+	require.Equal("Response from assistant without formatting.", sess.History[3].GetContents()[0].(*assistant.TextContent).Text)
+}

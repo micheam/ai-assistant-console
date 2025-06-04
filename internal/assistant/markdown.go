@@ -167,9 +167,9 @@ func processHeading(state *processState, v *ast.Heading) (ast.WalkStatus, error)
 		state.historyNumber++
 
 		// Parse the message author from the heading
-		if strings.Contains(header, "User") {
+		if matchesUser(header) {
 			state.currentAuthor = MessageAuthorUser
-		} else if strings.Contains(header, "Assistant") {
+		} else if matchesAssistant(header) {
 			state.currentAuthor = MessageAuthorAssistant
 		}
 
@@ -281,7 +281,7 @@ func processParagraph(state *processState, v *ast.Paragraph) (ast.WalkStatus, er
 	return ast.WalkContinue, nil
 }
 
-// Regular expressions for parsing artifact details
+// Regular expressions for parsing artifact details and message headers
 var (
 	// Match <details> tag (with or without newlines/spaces)
 	detailsStartRegex = regexp.MustCompile(`(?s)<details>`)
@@ -289,6 +289,10 @@ var (
 	summaryRegex = regexp.MustCompile(`(?s)<summary>(.*?)</summary>`)
 	// Match </details> tag
 	detailsEndRegex = regexp.MustCompile(`</details>`)
+	// Match Assistant headers with optional markdown formatting
+	assistantHeaderRegex = regexp.MustCompile(`(?i)\**(assistant)\**`)
+	// Match User headers with optional markdown formatting
+	userHeaderRegex = regexp.MustCompile(`(?i)\**(user)\**`)
 )
 
 // processHTMLBlock handles HTML block nodes in the AST, specifically for attachments.
@@ -349,6 +353,28 @@ func normalizeAttachmentName(s string) string {
 	s = strings.TrimSpace(s)
 	s = strings.TrimPrefix(s, "Attachment:")
 	return strings.TrimSpace(s)
+}
+
+// MatchesAssistant checks if the header text matches an Assistant message heading.
+// It supports various formats like "Assistant", "**Assistant**", etc.
+func MatchesAssistant(header string) bool {
+	return assistantHeaderRegex.MatchString(header)
+}
+
+// MatchesUser checks if the header text matches a User message heading.
+// It supports various formats like "User", "**User**", etc.
+func MatchesUser(header string) bool {
+	return userHeaderRegex.MatchString(header)
+}
+
+// matchesAssistant is a wrapper for backward compatibility
+func matchesAssistant(header string) bool {
+	return MatchesAssistant(header)
+}
+
+// matchesUser is a wrapper for backward compatibility
+func matchesUser(header string) bool {
+	return MatchesUser(header)
 }
 
 // finalizeCurrentContent adds any accumulated content to the current message.
