@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"micheam.com/aico/internal/assistant"
-	openai "micheam.com/aico/internal/openai"
+	openai "micheam.com/aico/internal/providers/openai"
 )
 
 func ExampleGPT4O_GenerateContent() {
