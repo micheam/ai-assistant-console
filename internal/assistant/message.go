@@ -1,10 +1,7 @@
 package assistant
 
 import (
-	"fmt"
 	"net/url"
-
-	assistantpb "micheam.com/aico/internal/pb/assistant/v1"
 )
 
 type Message struct {
@@ -29,51 +26,6 @@ const (
 	MessageAuthorAssistant MessageAuthor = "assistant"
 	MessageAuthorUser      MessageAuthor = "user"
 )
-
-func (m *Message) toProto() (*assistantpb.Message, error) {
-	dest := &assistantpb.Message{}
-	switch m.Author {
-	case "assistant":
-		dest.Role = assistantpb.Message_ROLE_ASSISTANT
-	case "user":
-		dest.Role = assistantpb.Message_ROLE_USER
-	default:
-		return nil, fmt.Errorf("unsupported message author: %q", m.Author)
-	}
-	for _, c := range m.Contents {
-		switch c := c.(type) {
-		case *TextContent:
-			dest.Contents = append(dest.Contents, &assistantpb.MessageContent{
-				Content: &assistantpb.MessageContent_Text{
-					Text: &assistantpb.TextContent{
-						Text: c.Text,
-					},
-				},
-			})
-		case *URLImageContent:
-			dest.Contents = append(dest.Contents, &assistantpb.MessageContent{
-				Content: &assistantpb.MessageContent_Image{
-					Image: &assistantpb.URLImageContent{
-						Url: c.URL.String(),
-					},
-				},
-			})
-		case *AttachmentContent:
-			dest.Contents = append(dest.Contents, &assistantpb.MessageContent{
-				Content: &assistantpb.MessageContent_Attachment{
-					Attachment: &assistantpb.AttachmentContent{
-						Name:    c.Name,
-						Syntax:  c.Syntax,
-						Content: c.Content,
-					},
-				},
-			})
-		default:
-			return nil, fmt.Errorf("unsupported message content type: %T", c)
-		}
-	}
-	return dest, nil
-}
 
 type MessageContent interface {
 	isMessageContent()
