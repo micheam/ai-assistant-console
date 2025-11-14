@@ -23,7 +23,7 @@ func TestConfigCommand_NoArguments(t *testing.T) {
 	app := &cli.Command{
 		Writer: &buf,
 		Commands: []*cli.Command{
-			commands.Config,
+			commands.CmdConfig,
 		},
 	}
 
@@ -47,7 +47,7 @@ func TestConfigCommand_Initialize(t *testing.T) {
 	app := &cli.Command{
 		Writer: &buf,
 		Commands: []*cli.Command{
-			commands.Config,
+			commands.CmdConfig,
 		},
 	}
 

@@ -15,39 +15,36 @@ import (
 	"micheam.com/aico/internal/logging"
 )
 
-var flagDebug = &cli.BoolFlag{
-	Name:  "debug",
-	Usage: "Enable debug logging",
-}
-
-var flagModel = &cli.StringFlag{
-	Name:    "model",
-	Aliases: []string{"m"},
-	Usage:   "The model to use",
-}
-
-var flagJSON = &cli.BoolFlag{
-	Name:  "json",
-	Usage: "Output the models in JSON format",
-}
-
-var flagChatSession = &cli.StringFlag{
-	Name:    "session",
-	Aliases: []string{"s"},
-	Usage:   "The chat session ID",
-}
-
-var flagChatInstant = &cli.BoolFlag{
-	Name:  "instant",
-	Usage: "Instantly send the message without storing it in the chat session",
-}
-
-var flagPersona = &cli.StringFlag{
-	Name:    "persona",
-	Aliases: []string{"p"},
-	Usage:   "The persona to use",
-	Value:   "default",
-}
+var (
+	flagDebug = &cli.BoolFlag{
+		Name:  "debug",
+		Usage: "Enable debug logging",
+	}
+	flagModel = &cli.StringFlag{
+		Name:    "model",
+		Aliases: []string{"m"},
+		Usage:   "The model to use",
+	}
+	flagJSON = &cli.BoolFlag{
+		Name:  "json",
+		Usage: "Output the models in JSON format",
+	}
+	flagChatSession = &cli.StringFlag{
+		Name:    "session",
+		Aliases: []string{"s"},
+		Usage:   "The chat session ID",
+	}
+	flagChatInstant = &cli.BoolFlag{
+		Name:  "instant",
+		Usage: "Instantly send the message without storing it in the chat session",
+	}
+	flagPersona = &cli.StringFlag{
+		Name:    "persona",
+		Aliases: []string{"p"},
+		Usage:   "The persona to use",
+		Value:   "default",
+	}
+)
 
 var (
 	ErrConfigFileNotFound = errors.New("config file not found")

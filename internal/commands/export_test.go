@@ -7,8 +7,6 @@ import (
 	"micheam.com/aico/internal/config"
 )
 
-var ConfigInit = configInit
-
 func PrepareConfig(t *testing.T) *config.Config {
 	t.Helper()
 	configPath := filepath.Join(t.TempDir(), "config.yaml")
