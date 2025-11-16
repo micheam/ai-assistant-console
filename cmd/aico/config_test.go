@@ -1,4 +1,4 @@
-package commands_test
+package main
 
 import (
 	"bytes"
@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v3"
 
-	commands "micheam.com/aico/internal/commands"
 	"micheam.com/aico/internal/config"
 )
 
@@ -21,10 +20,8 @@ func TestConfigCommand_NoArguments(t *testing.T) {
 
 	var buf bytes.Buffer
 	app := &cli.Command{
-		Writer: &buf,
-		Commands: []*cli.Command{
-			commands.CmdConfig,
-		},
+		Writer:   &buf,
+		Commands: []*cli.Command{CmdConfig},
 	}
 
 	// Exercise
@@ -45,10 +42,8 @@ func TestConfigCommand_Initialize(t *testing.T) {
 
 	var buf bytes.Buffer
 	app := &cli.Command{
-		Writer: &buf,
-		Commands: []*cli.Command{
-			commands.CmdConfig,
-		},
+		Writer:   &buf,
+		Commands: []*cli.Command{CmdConfig},
 	}
 
 	// Exercise
@@ -68,10 +63,8 @@ func TestConfigCommand_InitializeWithSpecifiedPath(t *testing.T) {
 
 	var buf bytes.Buffer
 	app := &cli.Command{
-		Writer: &buf,
-		Commands: []*cli.Command{
-			commands.ConfigInit,
-		},
+		Writer:   &buf,
+		Commands: []*cli.Command{CmdConfig},
 	}
 
 	// Exercise

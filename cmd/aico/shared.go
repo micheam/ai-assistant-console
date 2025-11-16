@@ -1,4 +1,4 @@
-package commands
+package main
 
 import (
 	"bufio"
@@ -13,41 +13,6 @@ import (
 
 	"micheam.com/aico/internal/config"
 	"micheam.com/aico/internal/logging"
-)
-
-var (
-	flagDebug = &cli.BoolFlag{
-		Name:  "debug",
-		Usage: "Enable debug logging",
-	}
-	flagModel = &cli.StringFlag{
-		Name:    "model",
-		Aliases: []string{"m"},
-		Usage:   "The model to use",
-	}
-	flagJSON = &cli.BoolFlag{
-		Name:  "json",
-		Usage: "Output the models in JSON format",
-	}
-	flagChatSession = &cli.StringFlag{
-		Name:    "session",
-		Aliases: []string{"s"},
-		Usage:   "The chat session ID",
-	}
-	flagChatInstant = &cli.BoolFlag{
-		Name:  "instant",
-		Usage: "Instantly send the message without storing it in the chat session",
-	}
-	flagPersona = &cli.StringFlag{
-		Name:    "persona",
-		Aliases: []string{"p"},
-		Usage:   "The persona to use",
-		Value:   "default",
-	}
-)
-
-var (
-	ErrConfigFileNotFound = errors.New("config file not found")
 )
 
 // LoadConfig is a helper function to load the configuration and attach it to the context.
