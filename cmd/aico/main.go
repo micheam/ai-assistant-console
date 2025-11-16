@@ -9,6 +9,8 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
+var version = "devel"
+
 func main() {
 	if err := run(os.Args); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -18,8 +20,10 @@ func main() {
 
 func run(args []string) error {
 	app := &cli.Command{
-		Name:  "aico",
-		Usage: "AI Assistant Console",
+		Name:                  "aico",
+		Usage:                 "AI Assistant Console",
+		Version:               version,
+		EnableShellCompletion: true,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "model",
@@ -49,15 +53,6 @@ func run(args []string) error {
 			return runGenerate(ctx, cmd, args.Slice())
 		},
 		Commands: []*cli.Command{
-			{
-				Name:    "version",
-				Aliases: []string{"v"},
-				Usage:   "show version information",
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					fmt.Println("aico version 0.1.0")
-					return nil
-				},
-			},
 			CmdEnv,
 			CmdConfig,
 			CmdModels,

@@ -8,6 +8,14 @@ USER_BIN = $(shell echo $$HOME)/bin
 TEST_OPTS = -tags e2e
 .DEFAULT_GOAL := help
 
+# Get version from git tags
+VERSION = $(shell git describe --tags --always --dirty)
+LDFLAGS = -ldflags "-X main.version=$(VERSION)"
+
+################################################################################ 
+# Targets
+################################################################################ 
+
 .PHONY: help clean install test build
 
 help: ## Describe make targets
@@ -17,10 +25,7 @@ help: ## Describe make targets
 build: $(TARGET) ## Build the aico binary with version info
 
 $(TARGET): $(SOURCE)
-	go build -ldflags \
-		"-X main.version=$(shell git describe --tags --always --dirty)" \
-		-o $(BIN_DIR)/aico \
-		$(ENTRY_POINT)
+	go build $(LDFLAGS) -o $(BIN_DIR)/aico $(ENTRY_POINT)
 
 clean: ## Clean up build artifacts
 	rm -f $(BIN_DIR)/*
