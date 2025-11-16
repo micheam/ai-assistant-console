@@ -25,25 +25,13 @@ func run(args []string) error {
 		Version:               version,
 		EnableShellCompletion: true,
 		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:    "model",
-				Aliases: []string{"m"},
-				Usage:   "model name to use",
-				Sources: cli.EnvVars("AI_MODEL"),
-			},
-			&cli.StringFlag{
-				Name:    "context-file",
-				Aliases: []string{"c"},
-				Usage:   "context file path",
-			},
-			&cli.StringFlag{
-				Name:  "system",
-				Usage: "system prompt",
-			},
-			&cli.BoolFlag{
-				Name:  "no-stream",
-				Usage: "disable streaming output",
-			},
+			flagContextFile,
+			flagDebug,
+			flagJSON,
+			flagModel,
+			flagNoStream,
+			flagPersona,
+			flagSystemPrompt,
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			args := cmd.Args()
@@ -63,34 +51,37 @@ func run(args []string) error {
 
 // Common flags
 var (
+	flagContextFile = &cli.StringFlag{
+		Name:    "context-file",
+		Aliases: []string{"c"},
+		Usage:   "context file path"}
+
 	flagDebug = &cli.BoolFlag{
 		Name:  "debug",
-		Usage: "Enable debug logging",
-	}
+		Usage: "Enable debug logging"}
+
+	flagJSON = &cli.BoolFlag{
+		Name:  "json",
+		Usage: "Output the models in JSON format"}
+
 	flagModel = &cli.StringFlag{
 		Name:    "model",
 		Aliases: []string{"m"},
-		Usage:   "The model to use",
-	}
-	flagJSON = &cli.BoolFlag{
-		Name:  "json",
-		Usage: "Output the models in JSON format",
-	}
-	flagChatSession = &cli.StringFlag{
-		Name:    "session",
-		Aliases: []string{"s"},
-		Usage:   "The chat session ID",
-	}
-	flagChatInstant = &cli.BoolFlag{
-		Name:  "instant",
-		Usage: "Instantly send the message without storing it in the chat session",
-	}
+		Usage:   "The model to use"}
+
+	flagNoStream = &cli.BoolFlag{
+		Name:  "no-stream",
+		Usage: "disable streaming output"}
+
 	flagPersona = &cli.StringFlag{
 		Name:    "persona",
 		Aliases: []string{"p"},
 		Usage:   "The persona to use",
-		Value:   "default",
-	}
+		Value:   "default"}
+
+	flagSystemPrompt = &cli.StringFlag{
+		Name:  "system",
+		Usage: "system prompt"}
 )
 
 // Common errors
