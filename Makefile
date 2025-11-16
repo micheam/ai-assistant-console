@@ -1,22 +1,34 @@
+BIN_NAME = aico
+ENTRY_POINT = ./cmd/aico
+TARGET = bin/$(BIN_NAME)
 SOURCE = $(shell find . -name '*.go')
+INSTALL_PATH ?= /usr/local/bin
+BIN_DIR = ./bin
 USER_BIN = $(shell echo $$HOME)/bin
 TEST_OPTS = -tags e2e
+.DEFAULT_GOAL := help
 
-.PHONY: test clean install protogen
-.DEFAULT_GOAL := bin/chat
+.PHONY: help clean install test build
 
-bin/chat: ./cmd/chat/main.go $(SOURCE)
-	@go build -ldflags "-X main.version=$(shell git describe --tags --always --dirty)" -o ./bin/chat ./cmd/chat
+help: ## Describe make targets
+	@grep -E '^[a-zA-Z0-9/_-]+\s?:.*?## .*$$' $(MAKEFILE_LIST) \
+		| awk 'BEGIN {FS = ":.*?## "}; {printf "%-30s %s\n", $$1, $$2}'
 
-test:
-	@go test $(TEST_OPTS) ./...
+build: $(TARGET) ## Build the aico binary with version info
 
-clean:
-	@rm -f ./bin/chat
+$(TARGET): $(SOURCE)
+	go build -ldflags \
+		"-X main.version=$(shell git describe --tags --always --dirty)" \
+		-o $(BIN_DIR)/aico \
+		$(ENTRY_POINT)
 
-install: bin/chat
-	@cp ./bin/chat $(USER_BIN)/chat
-	@echo "Installed chat to $(USER_BIN)/chat"
+clean: ## Clean up build artifacts
+	rm -f $(BIN_DIR)/*
 
-protogen: ./proto
-	@buf generate --clean
+install: $(TARGET) ## Install the binary to INSTALL_PATH (default: /usr/local/bin)
+	install -m 755 $(TARGET) $(INSTALL_PATH)/$(BIN_NAME)
+
+test: ## Run tests with specified options
+	go vet ./...
+	go test $(TEST_OPTS) ./...
+
