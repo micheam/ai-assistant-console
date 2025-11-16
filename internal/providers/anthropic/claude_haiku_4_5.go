@@ -12,35 +12,35 @@ import (
 	"micheam.com/aico/internal/logging"
 )
 
-type Claude3_5Haiku struct {
+type ClaudeHaiku4_5 struct {
 	systemInstruction *assistant.TextContent
 	client            *anthropic.Client
 
 	opts []anthropicopt.RequestOption
 }
 
-var _ assistant.GenerativeModel = (*Claude3_5Haiku)(nil)
+var _ assistant.GenerativeModel = (*ClaudeHaiku4_5)(nil)
 
-func NewClaude3_5Haiku(client *anthropic.Client) *Claude3_5Haiku {
-	return &Claude3_5Haiku{client: client}
+func NewClaudeHaiku4_5(client *anthropic.Client) *ClaudeHaiku4_5 {
+	return &ClaudeHaiku4_5{client: client}
 }
 
-func (m *Claude3_5Haiku) Name() string {
-	return anthropic.ModelClaude3_5HaikuLatest
+func (m *ClaudeHaiku4_5) Name() string {
+	return "claude-haiku-4-5"
 }
-func (m *Claude3_5Haiku) Description() string {
-	return `Claude 3.5 Haiku is engineered for speed and cost-efficiency,
-delivering near-instant responses ideal for real-time applications.
-It excels in rapid code generation, dynamic chatbot interactions, and
-data extraction tasks, providing a balanced solution where quick
-turnaround is essential.`
+func (m *ClaudeHaiku4_5) Description() string {
+	return `Claude Haiku 4.5 is the fastest model with near-frontier performance.
+Engineered for lightning-fast speed at the most economical price point.
+Best for real-time applications, high-volume intelligent processing,
+cost-sensitive deployments needing strong reasoning, and sub-agent tasks.
+Supports 200K context window.`
 }
 
-func (m *Claude3_5Haiku) SetSystemInstruction(text *assistant.TextContent) {
+func (m *ClaudeHaiku4_5) SetSystemInstruction(text *assistant.TextContent) {
 	m.systemInstruction = text
 }
 
-func (m *Claude3_5Haiku) GenerateContent(
+func (m *ClaudeHaiku4_5) GenerateContent(
 	ctx context.Context,
 	msgs ...*assistant.Message,
 ) (*assistant.GenerateContentResponse, error) {
@@ -49,7 +49,7 @@ func (m *Claude3_5Haiku) GenerateContent(
 	// Request to Anthropics API
 	body, err := buildRequestBody(
 		logging.ContextWith(ctx, logger),
-		anthropic.ModelClaude3_5HaikuLatest,
+		anthropic.Model(m.Name()),
 		m.systemInstruction,
 		msgs)
 	if err != nil {
@@ -73,7 +73,7 @@ func (m *Claude3_5Haiku) GenerateContent(
 	}, nil
 }
 
-func (m *Claude3_5Haiku) GenerateContentStream(
+func (m *ClaudeHaiku4_5) GenerateContentStream(
 	ctx context.Context,
 	msgs ...*assistant.Message,
 ) (iter.Seq[*assistant.GenerateContentResponse], error) {
@@ -82,7 +82,7 @@ func (m *Claude3_5Haiku) GenerateContentStream(
 	// Request to Anthropics API
 	body, err := buildRequestBody(
 		logging.ContextWith(ctx, logger),
-		anthropic.ModelClaude3_5HaikuLatest,
+		anthropic.Model(m.Name()),
 		m.systemInstruction,
 		msgs)
 	if err != nil {

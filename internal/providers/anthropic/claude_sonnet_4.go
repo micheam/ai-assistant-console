@@ -26,13 +26,13 @@ func NewClaudeSonnet4(client *anthropic.Client) *ClaudeSonnet4 {
 }
 
 func (m *ClaudeSonnet4) Name() string {
-	return "claude-sonnet-4-20250514"
+	return "claude-sonnet-4-5"
 }
 func (m *ClaudeSonnet4) Description() string {
-	return `Claude Sonnet 4 offers an excellent balance of intelligence and speed.
-Designed for sophisticated reasoning tasks while maintaining responsive performance.
-Ideal for complex coding, research, analysis, and strategic planning where both 
-quality and efficiency are important.`
+	return `Claude Sonnet 4.5 is the latest generation model with highest intelligence.
+Best for complex agents and coding with superior tool orchestration for long-running
+autonomous tasks. Ideal for autonomous coding agents, complex financial analysis,
+multi-hour research tasks, and multi-agent frameworks. Supports 200K context window.`
 }
 
 func (m *ClaudeSonnet4) SetSystemInstruction(text *assistant.TextContent) {

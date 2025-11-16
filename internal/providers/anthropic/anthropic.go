@@ -12,53 +12,37 @@ import (
 )
 
 // Anthropic available models and their descriptions.
-// 2025-03-10 16:00 JST
+// Updated: 2025-01-16
 //
-// Claude 3.7 Sonnet:
+// Claude Sonnet 4.5:
 //
-//     * Most intelligent model with extended thinking capabilities
-//     * Ideal for complex reasoning, advanced problem-solving, and strategic analysis
-//     * Shows thinking process before delivering answers 1
+//     * Latest generation model with highest intelligence across most tasks
+//     * Best for complex agents and coding with superior tool orchestration
+//     * Ideal for autonomous coding agents, complex financial analysis, multi-hour research tasks
+//     * Pricing: $3/MTok input, $15/MTok output
 //
-// Claude 3.5 Family:
-// Sonnet:
+// Claude Opus 4.1:
 //
-//     * Most intelligent model combining top performance with improved speed
-//     * Best for advanced research/analysis, complex problem-solving, and strategic planning 2
+//     * Exceptional model for specialized complex tasks
+//     * Best for highly complex codebase refactoring, nuanced creative writing
+//     * Specialized scientific analysis requiring deep reasoning
+//     * Pricing: $15/MTok input, $75/MTok output
 //
-// Haiku:
+// Claude Haiku 4.5:
 //
-//     * Fastest and most cost-effective model
-//     * Excels at code generation, real-time chatbots, data extraction and labeling , 3
+//     * Fastest model with near-frontier performance
+//     * Most economical price point with lightning-fast speed
+//     * Best for real-time applications, high-volume intelligent processing, sub-agent tasks
+//     * Pricing: $1/MTok input, $5/MTok output
 //
-// Claude 3 Family:
-//
-// Opus:
-//
-//     * Best performance on complex tasks like math and coding
-//     * Great for task automation, R&D, strategic analysis 4
-//
-// Sonnet:
-//
-//     * Balances intelligence and speed
-//     * Ideal for data processing, sales forecasting, code generation
-//
-// Haiku:
-//
-//     * Near-instant responsiveness
-//     * Perfect for live support chat, translations, content moderation
-//
-// Each model offers different context window sizes and pricing options to match specific use case needs.
-// For example, Claude 3.7 Sonnet has a 200k token context window and extended thinking capabilities 1,
-// while Claude 3.5 Haiku focuses on fast, cost-effective performance starting at $0.80 per million input tokens 3.
+// All models support 200K token context window, 64K max output, and extended thinking capabilities.
 
 // AvailableModels returns a list of available models
 func AvailableModels() []string {
 	return []string{
-		"claude-opus-4",
-		"claude-sonnet-4",
-		"claude-3-7-sonnet",
-		"claude-3-5-haiku",
+		"claude-sonnet-4-5",
+		"claude-opus-4-1",
+		"claude-haiku-4-5",
 	}
 }
 
@@ -74,14 +58,12 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 	switch modelName {
 	default:
 		return nil, false
-	case "claude-opus-4":
-		return &ClaudeOpus4{}, true
-	case "claude-sonnet-4":
+	case "claude-sonnet-4-5":
 		return &ClaudeSonnet4{}, true
-	case "claude-3-7-sonnet":
-		return &Claude3_7Sonnet{}, true
-	case "claude-3-5-haiku":
-		return &Claude3_5Haiku{}, true
+	case "claude-opus-4-1":
+		return &ClaudeOpus4{}, true
+	case "claude-haiku-4-5":
+		return &ClaudeHaiku4_5{}, true
 	}
 }
 
@@ -89,14 +71,12 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, error) {
 	client := anthropic.NewClient(option.WithAPIKey(apiKey))
 	switch modelName {
-	case "claude-opus-4":
-		return NewClaudeOpus4(client), nil
-	case "claude-sonnet-4":
+	case "claude-sonnet-4-5":
 		return NewClaudeSonnet4(client), nil
-	case "claude-3-7-sonnet":
-		return NewClaude3_7Sonnet(client), nil
-	case "claude-3-5-haiku":
-		return NewClaude3_5Haiku(client), nil
+	case "claude-opus-4-1":
+		return NewClaudeOpus4(client), nil
+	case "claude-haiku-4-5":
+		return NewClaudeHaiku4_5(client), nil
 	}
 	return nil, fmt.Errorf("unsupported model name: %s", modelName)
 }

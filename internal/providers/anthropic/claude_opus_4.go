@@ -26,12 +26,12 @@ func NewClaudeOpus4(client *anthropic.Client) *ClaudeOpus4 {
 }
 
 func (m *ClaudeOpus4) Name() string {
-	return "claude-opus-4-20250514"
+	return "claude-opus-4-1"
 }
 func (m *ClaudeOpus4) Description() string {
-	return `Claude Opus 4 is the most powerful and sophisticated model in the Claude 4 family.
-Designed for the most complex reasoning tasks, advanced problem-solving, and strategic analysis.
-Excels at mathematics, coding, research, and tasks requiring deep analytical thinking.`
+	return `Claude Opus 4.1 is designed for specialized complex tasks.
+Exceptional model for highly complex codebase refactoring, nuanced creative writing,
+and specialized scientific analysis. Supports 200K context window and 64K max output.`
 }
 
 func (m *ClaudeOpus4) SetSystemInstruction(text *assistant.TextContent) {
