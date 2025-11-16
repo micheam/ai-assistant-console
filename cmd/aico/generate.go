@@ -7,7 +7,11 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-func runGenerate(ctx context.Context, cmd *cli.Command, args []string) error {
+// -----------------------------------------------------------------------------
+// Actions
+// -----------------------------------------------------------------------------
+
+func runGenerate(_ context.Context, cmd *cli.Command, args []string) error {
 	prompt := args[0]
 	model := cmd.String("model")
 	contextFile := cmd.String("context-file")

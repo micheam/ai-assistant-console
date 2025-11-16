@@ -58,7 +58,7 @@ var CmdModels = &cli.Command{
 }
 
 // -----------------------------------------------------------------------------
-// Action: List Models
+// Actions
 // -----------------------------------------------------------------------------
 
 func runListModels(ctx context.Context, cmd *cli.Command) error {
@@ -105,10 +105,6 @@ func (m *listItemView) String() string {
 	}
 	return m.Name
 }
-
-// -----------------------------------------------------------------------------
-// Action: Show Model Info
-// -----------------------------------------------------------------------------
 
 func runShowModelInfo(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() < 1 {

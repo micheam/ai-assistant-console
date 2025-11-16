@@ -9,14 +9,16 @@ import (
 )
 
 var CmdEnv = &cli.Command{
-	Name:  "env",
-	Usage: "show environment information",
-	Action: func(ctx context.Context, cmd *cli.Command) error {
-		return showEnv(ctx)
-	},
+	Name:   "env",
+	Usage:  "show environment information",
+	Action: runShowEnv,
 }
 
-func showEnv(ctx context.Context) error {
+// -----------------------------------------------------------------------------
+// Actions
+// -----------------------------------------------------------------------------
+
+func runShowEnv(_ context.Context, cmd *cli.Command) error {
 	fmt.Println("Environment Information:")
 	fmt.Printf("  AI_MODEL: %s\n", os.Getenv("AI_MODEL"))
 	fmt.Printf("  ANTHROPIC_API_KEY: %s\n", maskAPIKey(os.Getenv("ANTHROPIC_API_KEY")))
