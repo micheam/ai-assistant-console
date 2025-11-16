@@ -9,15 +9,16 @@ import (
 )
 
 const endpoint = "https://api.openai.com/v1/chat/completions"
+const ProviderName = "openai"
 
 // AvailableModels returns a list of available models
-func AvailableModels() []string {
-	return []string{
-		"gpt-4o",
-		"gpt-4o-mini",
-		"o1",
-		"o1-mini",
-		"o3-mini",
+func AvailableModels() []assistant.ModelDescriptor {
+	return []assistant.ModelDescriptor{
+		&GPT4O{},
+		&GPT4OMini{},
+		&O1{},
+		&O1Mini{},
+		&O3Mini{},
 	}
 }
 

@@ -24,6 +24,10 @@ func NewO3Mini(apiKey string) *O3Mini {
 	}
 }
 
+func (m *O3Mini) Provider() string {
+	return ProviderName
+}
+
 func (m *O3Mini) Name() string {
 	return "o3-mini"
 }

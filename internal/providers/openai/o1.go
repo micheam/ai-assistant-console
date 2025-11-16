@@ -24,6 +24,10 @@ func NewO1(apiKey string) *O1 {
 	}
 }
 
+func (m *O1) Provider() string {
+	return ProviderName
+}
+
 func (m *O1) Name() string {
 	return "o1"
 }

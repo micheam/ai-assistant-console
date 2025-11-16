@@ -24,6 +24,10 @@ func NewO1Mini(apiKey string) *O1Mini {
 	}
 }
 
+func (m *O1Mini) Provider() string {
+	return ProviderName
+}
+
 func (m *O1Mini) Name() string {
 	return "o1-mini"
 }

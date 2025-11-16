@@ -24,6 +24,10 @@ func NewGPT4OMini(apiKey string) *GPT4OMini {
 	}
 }
 
+func (m *GPT4OMini) Provider() string {
+	return ProviderName
+}
+
 func (m *GPT4OMini) Name() string {
 	return "gpt-4o-mini"
 }

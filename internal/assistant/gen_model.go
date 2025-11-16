@@ -5,10 +5,15 @@ import (
 	"iter"
 )
 
-// GenerativeModel represents a generative model.
-type GenerativeModel interface {
+type ModelDescriptor interface {
 	Name() string
 	Description() string
+	Provider() string
+}
+
+// GenerativeModel represents a generative model.
+type GenerativeModel interface {
+	ModelDescriptor
 	SetSystemInstruction(*TextContent)
 	GenerateContent(context.Context, ...*Message) (*GenerateContentResponse, error)
 	GenerateContentStream(context.Context, ...*Message) (iter.Seq[*GenerateContentResponse], error)

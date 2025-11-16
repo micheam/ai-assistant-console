@@ -25,6 +25,10 @@ func NewClaudeSonnet4(client *anthropic.Client) *ClaudeSonnet4 {
 	return &ClaudeSonnet4{client: client}
 }
 
+func (m *ClaudeSonnet4) Provider() string {
+	return ProviderName
+}
+
 func (m *ClaudeSonnet4) Name() string {
 	return "claude-sonnet-4-5"
 }

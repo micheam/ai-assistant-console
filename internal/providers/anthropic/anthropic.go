@@ -11,8 +11,11 @@ import (
 	"micheam.com/aico/internal/logging"
 )
 
-// Anthropic available models and their descriptions.
-// Updated: 2025-01-16
+const ProviderName = "anthropic"
+
+// Anthropic available models and their descriptions from Anthropic Documentation:
+// * https://docs.claude.com/en/docs/about-claude/models/overview#latest-models-comparison
+// * https://docs.claude.com/en/docs/about-claude/models/choosing-a-model#model-selection-matrix
 //
 // Claude Sonnet 4.5:
 //
@@ -38,11 +41,11 @@ import (
 // All models support 200K token context window, 64K max output, and extended thinking capabilities.
 
 // AvailableModels returns a list of available models
-func AvailableModels() []string {
-	return []string{
-		"claude-sonnet-4-5",
-		"claude-opus-4-1",
-		"claude-haiku-4-5",
+func AvailableModels() []assistant.ModelDescriptor {
+	return []assistant.ModelDescriptor{
+		&ClaudeSonnet4{},
+		&ClaudeOpus4{},
+		&ClaudeHaiku4_5{},
 	}
 }
 

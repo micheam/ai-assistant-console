@@ -24,6 +24,10 @@ func NewGPT4O(apiKey string) *GPT4O {
 	}
 }
 
+func (m *GPT4O) Provider() string {
+	return ProviderName
+}
+
 func (m *GPT4O) Name() string {
 	return "gpt-4o"
 }
