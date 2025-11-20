@@ -27,7 +27,7 @@ func New(out io.Writer, opts *Options) *Logger {
 	if opts == nil {
 		opts = &Options{}
 	}
-	handler := slog.NewTextHandler(out, &slog.HandlerOptions{
+	handler := slog.NewJSONHandler(out, &slog.HandlerOptions{
 		AddSource: opts.AddSource,
 		Level:     opts.Level,
 	})

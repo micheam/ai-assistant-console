@@ -51,14 +51,15 @@ func readLines(r io.Reader) ([]string, error) {
 
 // setupLogger initializes and returns a logger based on configuration and log level.
 func setupLogger(filename string, level slog.Level) (*logging.Logger, func(), error) {
+	cleanup := func() {}
 	if filename == "" {
-		return nil, func() {}, fmt.Errorf("empty filename")
+		return nil, cleanup, fmt.Errorf("empty filename")
 	}
 	f, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		return nil, nil, fmt.Errorf("open logfile: %w", err)
 	}
 	opt := &logging.Options{Level: level}
-	cleanup := func() { f.Close() }
+	cleanup = func() { f.Close() }
 	return logging.New(f, opt), cleanup, nil
 }

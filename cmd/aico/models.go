@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/urfave/cli/v3"
 
 	"micheam.com/aico/internal/assistant"
 	"micheam.com/aico/internal/config"
+	"micheam.com/aico/internal/logging"
 	"micheam.com/aico/internal/providers/anthropic"
 	"micheam.com/aico/internal/providers/openai"
 )
@@ -141,4 +143,72 @@ type model struct {
 	Name        string
 	provider    string
 	Description string
+}
+
+// DefaultModel returns the default model descriptor.
+//
+// Important:
+//
+//	Currently, only **Anthropic models** are supported as default model.
+//	So, if an API key for Anthropic is not provided, it returns an error.
+func DefaultModel(ctx context.Context, cmd *cli.Command) (assistant.GenerativeModel, error) {
+	apikey := cmd.String(flagAPIKeyAnthropic.Name)
+	if apikey != "" {
+		return nil, errors.New(flagAPIKeyAnthropic.Name + " is required for default model, but not provided")
+	}
+	return anthropic.NewGenerativeModel(
+		anthropic.AvailableModels()[0].Name(),
+		apikey,
+	)
+}
+
+// detectModel attempts to detect the model from the app configuration and command flags.
+//
+// Following is the detection priority:
+// 1. If the --model flag is provided, use that model.
+// 2. Otherwise, use the model specified in the configuration file.
+// 3. If no model is specified in either place, return a default model.
+func detectModel(ctx context.Context, cmd *cli.Command) (assistant.GenerativeModel, error) {
+	logger := logging.LoggerFrom(ctx)
+	conf, err := config.Load()
+	if err != nil {
+		logger.Warn("failed to load config", "error", err)
+		return DefaultModel(ctx, cmd)
+	}
+
+	modelName := cmd.String(flagModel.Name)
+	if modelName == "" {
+		modelName = conf.Chat.Model
+	}
+	if modelName == "" {
+		return DefaultModel(ctx, cmd)
+	}
+
+	provider, found := detectProvierByModelName(modelName)
+	if !found {
+		logger.Warn("unable to detect provider for model, using default model", "model", modelName)
+		return DefaultModel(ctx, cmd)
+	}
+
+	switch provider {
+	case anthropic.ProviderName:
+		apikey := cmd.String(flagAPIKeyAnthropic.Name)
+		return anthropic.NewGenerativeModel(modelName, apikey)
+	case openai.ProviderName:
+		apikey := cmd.String(flagAPIKeyOpenAI.Name)
+		return openai.NewGenerativeModel(modelName, apikey)
+	default:
+		logger.Warn("unsupported provider for model, using default model", "provider", provider, "model", modelName)
+		return DefaultModel(ctx, cmd)
+	}
+}
+
+func detectProvierByModelName(modelName string) (string, bool) {
+	if _, found := anthropic.DescribeModel(modelName); found {
+		return anthropic.ProviderName, true
+	}
+	if _, found := openai.DescribeModel(modelName); found {
+		return openai.ProviderName, true
+	}
+	return "", false
 }

@@ -77,13 +77,8 @@ func (m *ClaudeHaiku4_5) GenerateContent(
 	}, nil
 }
 
-func (m *ClaudeHaiku4_5) GenerateContentStream(
-	ctx context.Context,
-	msgs ...*assistant.Message,
-) (iter.Seq[*assistant.GenerateContentResponse], error) {
+func (m *ClaudeHaiku4_5) GenerateContentStream(ctx context.Context, msgs ...*assistant.Message) (iter.Seq[*assistant.GenerateContentResponse], error) {
 	logger := logging.LoggerFrom(ctx).With("provider", "anthropic", "model", m.Name())
-
-	// Request to Anthropics API
 	body, err := buildRequestBody(
 		logging.ContextWith(ctx, logger),
 		anthropic.Model(m.Name()),
@@ -92,6 +87,8 @@ func (m *ClaudeHaiku4_5) GenerateContentStream(
 	if err != nil {
 		return nil, fmt.Errorf("anthropic request body: %w", err)
 	}
+
+	// Start streaming response from Anthropic API
 	stream := m.client.Messages.NewStreaming(ctx, *body, m.opts...)
 
 	// return converter iter

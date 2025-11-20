@@ -9,7 +9,10 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var version = "devel"
+const (
+	version = "devel"
+	appname = "aico"
+)
 
 func main() {
 	if err := run(os.Args); err != nil {
@@ -20,7 +23,7 @@ func main() {
 
 func run(args []string) error {
 	app := &cli.Command{
-		Name:                  "aico",
+		Name:                  appname,
 		Usage:                 "AI Assistant Console",
 		Version:               version,
 		EnableShellCompletion: true,
@@ -32,14 +35,11 @@ func run(args []string) error {
 			flagNoStream,
 			flagPersona,
 			flagSystemPrompt,
+
+			flagAPIKeyAnthropic,
+			flagAPIKeyOpenAI,
 		},
-		Action: func(ctx context.Context, cmd *cli.Command) error {
-			args := cmd.Args()
-			if args.Len() == 0 {
-				return cli.ShowAppHelp(cmd)
-			}
-			return runGenerate(ctx, cmd, args.Slice())
-		},
+		Action: runGenerate,
 		Commands: []*cli.Command{
 			CmdEnv,
 			CmdConfig,
@@ -82,6 +82,25 @@ var (
 	flagSystemPrompt = &cli.StringFlag{
 		Name:  "system",
 		Usage: "system prompt"}
+
+	//
+	// API Keys For Providers
+	//
+
+	flagAPIKeyOpenAI = &cli.StringFlag{
+		Name:  "openai-api-key",
+		Usage: "OpenAI API Key",
+		Sources: cli.NewValueSourceChain(
+			cli.EnvVar(envKeyWithPrefix(appname, "openai_api_key")),
+		),
+	}
+	flagAPIKeyAnthropic = &cli.StringFlag{
+		Name:  "anthropic-api-key",
+		Usage: "Anthropic API Key",
+		Sources: cli.NewValueSourceChain(
+			cli.EnvVar(envKeyWithPrefix(appname, "anthropic_api_key")),
+		),
+	}
 )
 
 // Common errors

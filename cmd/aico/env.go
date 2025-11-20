@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/urfave/cli/v3"
 )
@@ -36,4 +37,14 @@ func maskAPIKey(key string) string {
 		return "***"
 	}
 	return key[:4] + "..." + key[len(key)-4:]
+}
+
+// -----------------------------------------------------------------------------
+// Helper functions
+// -----------------------------------------------------------------------------
+
+func envKeyWithPrefix(prefix, key string) string {
+	prefix = strings.ToUpper(prefix)
+	key = strings.ToUpper(key)
+	return strings.Join([]string{prefix, key}, "_")
 }

@@ -74,3 +74,4 @@ tags
 bin/
 sess-*.pb
 aico.log
+.envrc
