@@ -41,20 +41,17 @@ func runGenerate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("failed to detect model: %w", err)
 	}
 
-	contents := []assistant.MessageContent{}
 	if source != "" {
 		sb := new(strings.Builder)
+		sb.WriteString("In the following <source> block is the context information for the prompt.\n\n")
 		sb.WriteString("<source>\n")
 		sb.WriteString(source)
 		sb.WriteString("\n</source>\n")
-		contents = append(contents, assistant.NewTextContent(sb.String()))
+		model.SetSystemInstruction(assistant.NewTextContent(sb.String()))
 	}
 
-	if prompt != "" {
-		contents = append(contents, assistant.NewTextContent(prompt))
-	}
-
-	iter, err := model.GenerateContentStream(ctx, assistant.NewUserMessage(contents...))
+	msg := assistant.NewUserMessage(assistant.NewTextContent(prompt))
+	iter, err := model.GenerateContentStream(ctx, msg)
 	if err != nil {
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
