@@ -3,8 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
+	"os"
 
 	"github.com/urfave/cli/v3"
+	"golang.org/x/term"
 
 	"micheam.com/aico/internal/assistant"
 	"micheam.com/aico/internal/logging"
@@ -26,13 +29,21 @@ func runGenerate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("prompt is required")
 	}
 
+	// Read source from stdin if available (piped input)
+	source, err := readSource(os.Stdin)
+	if err != nil {
+		return fmt.Errorf("failed to read source from stdin: %w", err)
+	}
+
 	ctx = logging.ContextWith(ctx, logger)
 	model, err := detectModel(ctx, cmd)
 	if err != nil {
 		return fmt.Errorf("failed to detect model: %w", err)
 	}
 
-	msg := assistant.NewUserMessage(assistant.NewTextContent(prompt))
+	// Build the message content
+	messageText := buildMessageText(prompt, source)
+	msg := assistant.NewUserMessage(assistant.NewTextContent(messageText))
 	iter, err := model.GenerateContentStream(ctx, msg)
 	if err != nil {
 		return fmt.Errorf("failed to generate content: %w", err)
@@ -49,4 +60,30 @@ func runGenerate(ctx context.Context, cmd *cli.Command) error {
 		}
 	}
 	return nil
+}
+
+// readSource reads content from stdin if it's piped (not a terminal).
+// Returns empty string if stdin is a terminal.
+func readSource(r io.Reader) (string, error) {
+	// Check if stdin is a terminal
+	if f, ok := r.(*os.File); ok {
+		if term.IsTerminal(int(f.Fd())) {
+			return "", nil
+		}
+	}
+
+	// Read all content from stdin
+	data, err := io.ReadAll(r)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
+// buildMessageText constructs the final message text combining prompt and source.
+func buildMessageText(prompt, source string) string {
+	if source == "" {
+		return prompt
+	}
+	return fmt.Sprintf("%s\n\n---\n<source>\n%s</source>", prompt, source)
 }
