@@ -6,8 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log/slog"
-	"os"
 
 	"github.com/urfave/cli/v3"
 
@@ -15,12 +13,12 @@ import (
 	"micheam.com/aico/internal/logging"
 )
 
-// LoadConfig is a helper function to load the configuration and attach it to the context.
+// loadConfig is a helper function to load the configuration and attach it to the context.
 //
 // errors:
 //
 // - [ErrConfigFileNotFound]: The config file was not found.
-func LoadConfig(_ context.Context, cmd *cli.Command) (*config.Config, error) {
+func loadConfig(ctx context.Context, cmd *cli.Command) (*config.Config, error) {
 	conf, err := config.Load()
 	if errors.Is(err, config.ErrConfigFileNotFound) {
 		return nil, ErrConfigFileNotFound
@@ -28,9 +26,7 @@ func LoadConfig(_ context.Context, cmd *cli.Command) (*config.Config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("load config: %w", err)
 	}
-
-	// Overwrite Model with command-line flag (`-m, --model`)
-	if model := cmd.String("model"); model != "" {
+	if model := cmd.String(flagModel.Name); model != "" {
 		conf.Chat.Model = model
 	}
 	return conf, nil
@@ -49,17 +45,21 @@ func readLines(r io.Reader) ([]string, error) {
 	return lines, nil
 }
 
-// setupLogger initializes and returns a logger based on configuration and log level.
-func setupLogger(filename string, level slog.Level) (*logging.Logger, func(), error) {
-	cleanup := func() {}
-	if filename == "" {
-		return nil, cleanup, fmt.Errorf("empty filename")
+// initializeLogger initializes a logger from command-line flags and returns it with a cleanup function.
+func initializeLogger(ctx context.Context, cmd *cli.Command) (*logging.Logger, func(), error) {
+	conf, err := loadConfig(ctx, cmd)
+	if err != nil {
+		return nil, nil, fmt.Errorf("load config: %w", err)
 	}
-	f, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	logLevel := logging.LevelInfo
+	if cmd.Bool("debug") {
+		logLevel = logging.LevelDebug
+	}
+	f, err := conf.OpenLogfile()
 	if err != nil {
 		return nil, nil, fmt.Errorf("open logfile: %w", err)
 	}
-	opt := &logging.Options{Level: level}
-	cleanup = func() { f.Close() }
-	return logging.New(f, opt), cleanup, nil
+	return logging.New(f, &logging.Options{Level: logLevel}),
+		func() { f.Close() },
+		nil
 }

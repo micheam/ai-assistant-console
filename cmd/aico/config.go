@@ -10,7 +10,6 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"micheam.com/aico/internal/config"
-	"micheam.com/aico/internal/logging"
 )
 
 var CmdConfig = &cli.Command{
@@ -53,7 +52,7 @@ func runShowConfigPath(ctx context.Context, cmd *cli.Command) error {
 	return err
 }
 
-func runInitConfig(_ context.Context, cmd *cli.Command) error {
+func runInitConfig(ctx context.Context, cmd *cli.Command) error {
 	if cmd.String("path") != "" {
 		// TODO: Make it configurable by other means than environment variables
 		os.Setenv(config.EnvKeyConfigPath, cmd.String("path"))
@@ -64,6 +63,14 @@ func runInitConfig(_ context.Context, cmd *cli.Command) error {
 	}
 	fmt.Fprintln(cmd.Root().Writer, "Configuration file initialized")
 	fmt.Fprintln(cmd.Root().Writer, conf.Location())
+
+	logger, cleanup, err := initializeLogger(ctx, cmd)
+	if err != nil {
+		return err
+	}
+	defer cleanup()
+	logger.Info("Configuration file initialized", "path", conf.Location())
+
 	return nil
 }
 
@@ -75,17 +82,13 @@ func runEditConfig(ctx context.Context, cmd *cli.Command) error {
 			editor = "notepad.exe"
 		}
 	}
-	conf, err := LoadConfig(ctx, cmd)
+	conf, err := loadConfig(ctx, cmd)
 	if err != nil {
 		return fmt.Errorf("load config: %w", err)
 	}
+	ctx = config.WithConfig(ctx, conf)
 
-	// Setup logger
-	logLevel := logging.LevelInfo
-	if cmd.Bool("debug") {
-		logLevel = logging.LevelDebug
-	}
-	logger, cleanup, err := setupLogger(conf.Logfile(), logLevel)
+	logger, cleanup, err := initializeLogger(ctx, cmd)
 	if err != nil {
 		return err
 	}

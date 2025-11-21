@@ -15,13 +15,9 @@ import (
 // -----------------------------------------------------------------------------
 
 func runGenerate(ctx context.Context, cmd *cli.Command) error {
-	logLevel := logging.LevelInfo
-	if cmd.Bool("debug") {
-		logLevel = logging.LevelDebug
-	}
-	logger, cleanup, err := setupLogger("aico.log", logLevel)
+	logger, cleanup, err := initializeLogger(ctx, cmd)
 	if err != nil {
-		return fmt.Errorf("setup logger: %w", err)
+		return err
 	}
 	defer cleanup()
 

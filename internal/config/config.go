@@ -94,7 +94,29 @@ func (c *Config) Logfile() string {
 	if c.logfile == "" {
 		return defaultLogfilePath()
 	}
-	return c.logfile
+	if filepath.IsAbs(c.logfile) {
+		return c.logfile
+	}
+	return filepath.Join(filepath.Dir(c.location), c.logfile)
+}
+
+// OpenLogfile opens the logfile for writing
+//
+// This will create the logfile if it does not exist.
+// It will also create the directory if it does not exist.
+//
+// Make sure to close the returned file when done.
+func (c *Config) OpenLogfile() (*os.File, error) {
+	logfilePath := c.Logfile()
+	// Ensure the directory exists
+	if err := os.MkdirAll(filepath.Dir(logfilePath), 0755); err != nil {
+		return nil, fmt.Errorf("mkdir all: %w", err)
+	}
+	f, err := os.OpenFile(logfilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		return nil, fmt.Errorf("open logfile: %w", err)
+	}
+	return f, nil
 }
 
 // load loads the configuration from the given path
