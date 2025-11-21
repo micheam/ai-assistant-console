@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/urfave/cli/v3"
 	"golang.org/x/term"
@@ -23,28 +24,37 @@ func runGenerate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 	defer cleanup()
+	ctx = logging.ContextWith(ctx, logger)
 
 	prompt := cmd.Args().First()
 	if prompt == "" {
 		return fmt.Errorf("prompt is required")
 	}
 
-	// Read source from stdin if available (piped input)
 	source, err := readSource(os.Stdin)
 	if err != nil {
 		return fmt.Errorf("failed to read source from stdin: %w", err)
 	}
 
-	ctx = logging.ContextWith(ctx, logger)
 	model, err := detectModel(ctx, cmd)
 	if err != nil {
 		return fmt.Errorf("failed to detect model: %w", err)
 	}
 
-	// Build the message content
-	messageText := buildMessageText(prompt, source)
-	msg := assistant.NewUserMessage(assistant.NewTextContent(messageText))
-	iter, err := model.GenerateContentStream(ctx, msg)
+	contents := []assistant.MessageContent{}
+	if source != "" {
+		sb := new(strings.Builder)
+		sb.WriteString("<source>\n")
+		sb.WriteString(source)
+		sb.WriteString("\n</source>\n")
+		contents = append(contents, assistant.NewTextContent(sb.String()))
+	}
+
+	if prompt != "" {
+		contents = append(contents, assistant.NewTextContent(prompt))
+	}
+
+	iter, err := model.GenerateContentStream(ctx, assistant.NewUserMessage(contents...))
 	if err != nil {
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
@@ -82,12 +92,4 @@ func readSource(r io.Reader) (string, error) {
 		return "", err
 	}
 	return string(data), nil
-}
-
-// buildMessageText constructs the final message text combining prompt and source.
-func buildMessageText(prompt, source string) string {
-	if source == "" {
-		return prompt
-	}
-	return fmt.Sprintf("%s\n\n---\n<source>\n%s</source>", prompt, source)
 }
