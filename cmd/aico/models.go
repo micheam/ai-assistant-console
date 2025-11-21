@@ -18,16 +18,6 @@ import (
 var CmdModels = &cli.Command{
 	Name:  "models",
 	Usage: "manage AI models",
-	Flags: []cli.Flag{
-		&cli.BoolFlag{
-			Name:  "debug",
-			Usage: "Enable debug logging",
-		},
-		&cli.BoolFlag{
-			Name:  "json",
-			Usage: "output in JSON format",
-		},
-	},
 
 	// default action: list models
 	Action: runListModels,
@@ -77,13 +67,11 @@ func runListModels(ctx context.Context, cmd *cli.Command) error {
 			Selected:    model.Name() == conf.Chat.Model,
 		})
 	}
-
-	if cmd.Bool("json") {
+	if cmd.Bool(flagJSON.Name) {
 		encoder := json.NewEncoder(cmd.Root().Writer)
 		encoder.SetIndent("", "  ")
 		return encoder.Encode(models)
 	}
-
 	for _, model := range models {
 		fmt.Fprintln(cmd.Root().Writer, model.String())
 	}

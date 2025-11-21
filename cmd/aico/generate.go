@@ -62,6 +62,10 @@ func runGenerate(ctx context.Context, cmd *cli.Command) error {
 	return nil
 }
 
+// -----------------------------------------------------------------------------
+// Helpers
+// -----------------------------------------------------------------------------
+
 // readSource reads content from stdin if it's piped (not a terminal).
 // Returns empty string if stdin is a terminal.
 func readSource(r io.Reader) (string, error) {
