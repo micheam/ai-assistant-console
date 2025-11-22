@@ -22,13 +22,7 @@ var CmdPersona = &cli.Command{
 			Name:    "list",
 			Aliases: []string{"ls"},
 			Usage:   "list available personas",
-			Flags: []cli.Flag{
-				&cli.BoolFlag{
-					Name:  "json",
-					Usage: "output in JSON format",
-				},
-			},
-			Action: runListPersonas,
+			Action:  runListPersonas,
 		},
 	},
 }
