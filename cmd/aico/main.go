@@ -44,6 +44,7 @@ func run(args []string) error {
 			CmdEnv,
 			CmdConfig,
 			CmdModels,
+			CmdPersona,
 		},
 	}
 	return app.Run(context.Background(), args)
