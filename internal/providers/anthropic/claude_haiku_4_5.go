@@ -15,7 +15,7 @@ import (
 const ModelNameClaudeHaiku4_5 = "claude-haiku-4-5"
 
 type ClaudeHaiku4_5 struct {
-	systemInstruction *assistant.TextContent
+	systemInstruction []*assistant.TextContent
 	client            *anthropic.Client
 
 	opts []anthropicopt.RequestOption
@@ -37,8 +37,8 @@ cost-sensitive deployments needing strong reasoning, and sub-agent tasks.
 Supports 200K context window.`
 }
 
-func (m *ClaudeHaiku4_5) SetSystemInstruction(text *assistant.TextContent) {
-	m.systemInstruction = text
+func (m *ClaudeHaiku4_5) SetSystemInstruction(contents ...*assistant.TextContent) {
+	m.systemInstruction = contents
 }
 
 func (m *ClaudeHaiku4_5) GenerateContent(

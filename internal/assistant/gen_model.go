@@ -14,7 +14,7 @@ type ModelDescriptor interface {
 // GenerativeModel represents a generative model.
 type GenerativeModel interface {
 	ModelDescriptor
-	SetSystemInstruction(*TextContent)
+	SetSystemInstruction(...*TextContent)
 	GenerateContent(context.Context, ...*Message) (*GenerateContentResponse, error)
 	GenerateContentStream(context.Context, ...*Message) (iter.Seq[*GenerateContentResponse], error)
 }

@@ -164,7 +164,7 @@ type ChatResponse struct {
 	Choices []Choice `json:"choices"`
 }
 
-func buildChatRequest(ctx context.Context, modelName string, systemInstruction *assistant.TextContent, msgs []*assistant.Message) (*ChatRequest, error) {
+func buildChatRequest(ctx context.Context, modelName string, systemInstruction []*assistant.TextContent, msgs []*assistant.Message) (*ChatRequest, error) {
 	if len(msgs) == 0 {
 		return nil, fmt.Errorf("no messages provided")
 	}
@@ -172,10 +172,10 @@ func buildChatRequest(ctx context.Context, modelName string, systemInstruction *
 		Model:    modelName,
 		Messages: make([]Message, 0, len(msgs)+1),
 	}
-	if systemInstruction != nil {
-		req.Messages = append(req.Messages, &SystemMessage{
-			Content: systemInstruction.Text,
-		})
+	if len(systemInstruction) > 0 {
+		for _, c := range systemInstruction {
+			req.Messages = append(req.Messages, &SystemMessage{Content: c.Text})
+		}
 	}
 	for _, msg := range msgs {
 		for _, content := range msg.Contents {

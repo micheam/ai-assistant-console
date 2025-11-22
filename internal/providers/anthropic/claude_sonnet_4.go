@@ -15,7 +15,7 @@ import (
 const ModelNameClaudeSonnet4 = "claude-sonnet-4-5"
 
 type ClaudeSonnet4_5 struct {
-	systemInstruction *assistant.TextContent
+	systemInstruction []*assistant.TextContent
 	client            *anthropic.Client
 
 	opts []anthropicopt.RequestOption
@@ -35,8 +35,8 @@ autonomous tasks. Ideal for autonomous coding agents, complex financial analysis
 multi-hour research tasks, and multi-agent frameworks. Supports 200K context window.`
 }
 
-func (m *ClaudeSonnet4_5) SetSystemInstruction(text *assistant.TextContent) {
-	m.systemInstruction = text
+func (m *ClaudeSonnet4_5) SetSystemInstruction(contents ...*assistant.TextContent) {
+	m.systemInstruction = contents
 }
 
 func (m *ClaudeSonnet4_5) GenerateContent(

@@ -50,8 +50,8 @@ type Config struct {
 	// If omitted, the default model for the application will be used.
 	Model string `toml:"model"`
 
-	// Persona is the persona to use for the chat
-	Persona map[string]Personality `toml:"persona"`
+	// PersonaMap is the persona to use for the chat
+	PersonaMap map[string]Personality `toml:"persona"`
 }
 
 // Location returns the location of the configuration file
@@ -227,7 +227,7 @@ func InitAndLoad() (*Config, error) {
 
 // GetDefaultPersona returns the default persona
 func (c *Config) GetDefaultPersona() *Personality {
-	if p, ok := c.Persona["default"]; ok {
+	if p, ok := c.PersonaMap["default"]; ok {
 		return &p
 	}
 	return DefaultConfig().GetDefaultPersona()
@@ -236,7 +236,7 @@ func (c *Config) GetDefaultPersona() *Personality {
 // GetPersona returns the persona with the given name
 // If the persona does not exist, this will return nil.
 func (c *Config) GetPersona(name string) (*Personality, bool) {
-	if p, ok := c.Persona[name]; ok {
+	if p, ok := c.PersonaMap[name]; ok {
 		return &p, true
 	}
 	return nil, false
@@ -248,7 +248,7 @@ func DefaultConfig() *Config {
 	return &Config{
 		logfile: defaultLogfilePath(),
 		Model:   DefaultModel,
-		Persona: map[string]Personality{
+		PersonaMap: map[string]Personality{
 			"default": {
 				Description: "Default",
 				Message: "You're aico, my personal AI assistant." +

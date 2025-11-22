@@ -12,7 +12,7 @@ import (
 )
 
 type GPT4O struct {
-	systemInstruction *assistant.TextContent
+	systemInstruction []*assistant.TextContent
 	client            *APIClient
 }
 
@@ -41,8 +41,8 @@ The knowledge cutoff date for GPT-4o models is October 2023.
 Reference: https://platform.openai.com/docs/models#gpt-4o`
 }
 
-func (m *GPT4O) SetSystemInstruction(text *assistant.TextContent) {
-	m.systemInstruction = text
+func (m *GPT4O) SetSystemInstruction(contents ...*assistant.TextContent) {
+	m.systemInstruction = contents
 }
 
 func (m *GPT4O) SetHttpClient(c *http.Client) {

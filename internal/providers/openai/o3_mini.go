@@ -12,7 +12,7 @@ import (
 )
 
 type O3Mini struct {
-	systemInstruction *assistant.TextContent
+	systemInstruction []*assistant.TextContent
 	client            *APIClient
 }
 
@@ -42,8 +42,8 @@ The knowledge cutoff date for o3-mini models is October 2023.
 Reference: https://platform.openai.com/docs/models#o3-mini`
 }
 
-func (m *O3Mini) SetSystemInstruction(text *assistant.TextContent) {
-	m.systemInstruction = text
+func (m *O3Mini) SetSystemInstruction(contents ...*assistant.TextContent) {
+	m.systemInstruction = contents
 }
 
 func (m *O3Mini) SetHttpClient(c *http.Client) {

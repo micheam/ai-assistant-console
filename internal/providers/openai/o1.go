@@ -12,7 +12,7 @@ import (
 )
 
 type O1 struct {
-	systemInstruction *assistant.TextContent
+	systemInstruction []*assistant.TextContent
 	client            *APIClient
 }
 
@@ -40,8 +40,8 @@ The knowledge cutoff date for o1 models is October 2023.
 Reference: https://platform.openai.com/docs/models#o1`
 }
 
-func (m *O1) SetSystemInstruction(text *assistant.TextContent) {
-	m.systemInstruction = text
+func (m *O1) SetSystemInstruction(contents ...*assistant.TextContent) {
+	m.systemInstruction = contents
 }
 
 func (m *O1) SetHttpClient(c *http.Client) {

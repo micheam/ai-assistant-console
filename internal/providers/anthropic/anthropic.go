@@ -84,7 +84,7 @@ func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, er
 	return nil, fmt.Errorf("unsupported model name: %s", modelName)
 }
 
-func buildRequestBody(ctx context.Context, model anthropic.Model, smsg *assistant.TextContent, msgs []*assistant.Message) (*anthropic.MessageNewParams, error) {
+func buildRequestBody(ctx context.Context, model anthropic.Model, systemInstruction []*assistant.TextContent, msgs []*assistant.Message) (*anthropic.MessageNewParams, error) {
 	messages, err := messageParams(ctx, msgs...)
 	if err != nil {
 		return nil, fmt.Errorf("build message params: %w", err)
@@ -93,7 +93,7 @@ func buildRequestBody(ctx context.Context, model anthropic.Model, smsg *assistan
 		MaxTokens: anthropic.F(int64(1_024)),
 		Model:     anthropic.F(model),
 		Messages:  anthropic.F(messages),
-		System:    anthropic.F(systemMessageParam(smsg)),
+		System:    anthropic.F(systemMessageParam(systemInstruction)),
 	}, nil
 }
 
@@ -148,11 +148,13 @@ func messageParams(ctx context.Context, msgs ...*assistant.Message) ([]anthropic
 	return messages, nil
 }
 
-func systemMessageParam(text *assistant.TextContent) []anthropic.TextBlockParam {
-	if text == nil {
+func systemMessageParam(conts []*assistant.TextContent) []anthropic.TextBlockParam {
+	if conts == nil {
 		return []anthropic.TextBlockParam{}
 	}
-	return []anthropic.TextBlockParam{
-		anthropic.NewTextBlock(text.Text),
+	param := make([]anthropic.TextBlockParam, 0, len(conts))
+	for _, conts := range conts {
+		param = append(param, anthropic.NewTextBlock(conts.Text))
 	}
+	return param
 }

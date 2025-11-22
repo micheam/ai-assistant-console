@@ -15,7 +15,7 @@ import (
 const ModelNameClaudeOpus4 = "claude-opus-4-1"
 
 type ClaudeOpus4 struct {
-	systemInstruction *assistant.TextContent
+	systemInstruction []*assistant.TextContent
 	client            *anthropic.Client
 
 	opts []anthropicopt.RequestOption
@@ -32,8 +32,8 @@ Exceptional model for highly complex codebase refactoring, nuanced creative writ
 and specialized scientific analysis. Supports 200K context window and 64K max output.`
 }
 
-func (m *ClaudeOpus4) SetSystemInstruction(text *assistant.TextContent) {
-	m.systemInstruction = text
+func (m *ClaudeOpus4) SetSystemInstruction(contents ...*assistant.TextContent) {
+	m.systemInstruction = contents
 }
 
 func (m *ClaudeOpus4) GenerateContent(

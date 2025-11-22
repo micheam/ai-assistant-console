@@ -12,6 +12,7 @@ import (
 	"golang.org/x/term"
 
 	"micheam.com/aico/internal/assistant"
+	"micheam.com/aico/internal/config"
 	"micheam.com/aico/internal/logging"
 )
 
@@ -43,15 +44,32 @@ func runGenerate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("failed to detect model: %w", err)
 	}
 
+	// Set Personalities as System Instructions
+	systemInstruction := make([]*assistant.TextContent, 0)
+	conf, err := config.Load()
+	if err != nil {
+		conf = config.DefaultConfig()
+	}
+	persona, ok := conf.PersonaMap[cmd.String(flagPersona.Name)]
+	if !ok {
+		return fmt.Errorf("persona %q not found", cmd.String(flagPersona.Name))
+	}
+	systemInstruction = append(systemInstruction, assistant.NewTextContent(persona.Message))
+	logger = logger.With(slog.String("persona", cmd.String(flagPersona.Name)))
+
+	// Append Source Context as System Instruction
 	if source != "" {
 		sb := new(strings.Builder)
 		sb.WriteString("In the following <source> block is the context information for the prompt.\n\n")
 		sb.WriteString("<source>\n")
 		sb.WriteString(source)
 		sb.WriteString("\n</source>\n")
-		model.SetSystemInstruction(assistant.NewTextContent(sb.String()))
+		// model.SetSystemInstruction(assistant.NewTextContent(sb.String()))
+		systemInstruction = append(systemInstruction, assistant.NewTextContent(sb.String()))
 	}
+	model.SetSystemInstruction(systemInstruction...)
 
+	// Generate Content
 	msg := assistant.NewUserMessage(assistant.NewTextContent(prompt))
 	logger.Debug("sending generate request")
 	iter, err := model.GenerateContentStream(ctx, msg)
