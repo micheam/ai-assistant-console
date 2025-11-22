@@ -15,7 +15,7 @@ import (
 
 func TestConfigCommand_NoArguments(t *testing.T) {
 	// Setup
-	t.Setenv(config.EnvKeyConfigPath, filepath.Join("testdata", "config.yaml"))
+	t.Setenv(config.EnvKeyConfigPath, filepath.Join("testdata", "config.toml"))
 	_, require := assert.New(t), require.New(t)
 
 	var buf bytes.Buffer
@@ -36,7 +36,7 @@ func TestConfigCommand_NoArguments(t *testing.T) {
 
 func TestConfigCommand_Initialize(t *testing.T) {
 	// Setup
-	configPath := filepath.Join(t.TempDir(), "config.yaml")
+	configPath := filepath.Join(t.TempDir(), "config.toml")
 	t.Setenv(config.EnvKeyConfigPath, configPath) // non-existent file
 	_, require := assert.New(t), require.New(t)
 

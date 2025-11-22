@@ -9,7 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"gopkg.in/yaml.v3"
+	"github.com/BurntSushi/toml"
 
 	"micheam.com/aico/internal/providers/anthropic"
 )
@@ -39,19 +39,19 @@ func MustFromContext(ctx context.Context) *Config {
 
 // Config is the configuration for the application
 type Config struct {
-	location string `yaml:"-"`
+	location string `toml:"-"`
 
 	// Logfile is the path to the logfile
-	logfile string `yaml:"logfile"`
+	logfile string `toml:"logfile"`
 
 	// Model is the model to use for the chat
 	//
 	// This can be one of [openai.chatAvailableModels].
 	// If omitted, the default model for the application will be used.
-	Model string `yaml:"model"`
+	Model string `toml:"model"`
 
 	// Persona is the persona to use for the chat
-	Persona map[string]Personality `yaml:"persona"`
+	Persona map[string]Personality `toml:"persona"`
 }
 
 // Location returns the location of the configuration file
@@ -62,10 +62,10 @@ func (c *Config) Location() string {
 // Personality is the personality to use for the chat
 type Personality struct {
 	// Description is the description of the personality
-	Description string `yaml:"description"`
+	Description string `toml:"description"`
 
 	// Messages is the list of messages to use for the personality
-	Messages []string `yaml:"messages"`
+	Messages []string `toml:"messages"`
 }
 
 // Session
@@ -76,13 +76,13 @@ type Session struct {
 	// Sessions will be stored in this directory with the pattern [SessionFilePattern].
 	//
 	// e.g: "/Users/micheam/.aico/sessions"
-	Directory string `yaml:"directory"`
+	Directory string `toml:"directory"`
 
 	// DirectoryRaw is the raw directory path before environment variable expansion
 	// This is used to store the raw directory path before expansion
 	//
 	// e.g: "$HOME/.aico/sessions"
-	DirectoryRaw string `yaml:"-"`
+	DirectoryRaw string `toml:"-"`
 }
 
 var ErrConfigFileNotFound = errors.New("config file not found")
@@ -139,8 +139,8 @@ func load(path string) (*Config, error) {
 
 func loadFromReader(r io.Reader) (*Config, error) {
 	var config Config
-	if err := yaml.NewDecoder(r).Decode(&config); err != nil {
-		return nil, fmt.Errorf("decode yaml: %w", err)
+	if _, err := toml.NewDecoder(r).Decode(&config); err != nil {
+		return nil, fmt.Errorf("decode toml: %w", err)
 	}
 	return &config, nil
 }
@@ -175,7 +175,7 @@ const (
 	ApplicationFQN = "com.micheam.aico"
 
 	// ConfigFileName is the name of the config file
-	ConfigFileName = "config.yaml"
+	ConfigFileName = "config.toml"
 
 	// LogFileName is the name of the log file
 	LogFileName = "aico.log"
@@ -210,11 +210,11 @@ func InitAndLoad() (*Config, error) {
 		}
 
 		// write default config
-		b, err := yaml.Marshal(conf)
-		if err != nil {
-			return nil, fmt.Errorf("marshal yaml: %w", err)
+		var buf bytes.Buffer
+		if err := toml.NewEncoder(&buf).Encode(conf); err != nil {
+			return nil, fmt.Errorf("encode toml: %w", err)
 		}
-		if err := os.WriteFile(ConfigFilePath(), b, 0644); err != nil {
+		if err := os.WriteFile(ConfigFilePath(), buf.Bytes(), 0644); err != nil {
 			return nil, fmt.Errorf("write file: %w", err)
 		}
 		conf.location = ConfigFilePath()

@@ -1,0 +1,11 @@
+logfile = "/Users/foo/Library/Application Support/com.micheam.aico/aico.log"
+model = "gpt-3.5-turbo"
+
+[persona.default]
+description = "Professional"
+messages = [
+    "Message1 for Professional",
+    "Message2 for Professional",
+    "Message3 for Professional",
+    "Message4 for Professional",
+]
