@@ -12,6 +12,8 @@ import (
 	"micheam.com/aico/internal/logging"
 )
 
+const ModelNameClaudeHaiku4_5 = "claude-haiku-4-5"
+
 type ClaudeHaiku4_5 struct {
 	systemInstruction *assistant.TextContent
 	client            *anthropic.Client
@@ -25,13 +27,8 @@ func NewClaudeHaiku4_5(client *anthropic.Client) *ClaudeHaiku4_5 {
 	return &ClaudeHaiku4_5{client: client}
 }
 
-func (m *ClaudeHaiku4_5) Provider() string {
-	return ProviderName
-}
-
-func (m *ClaudeHaiku4_5) Name() string {
-	return "claude-haiku-4-5"
-}
+func (m *ClaudeHaiku4_5) Provider() string { return ProviderName }
+func (m *ClaudeHaiku4_5) Name() string     { return ModelNameClaudeHaiku4_5 }
 func (m *ClaudeHaiku4_5) Description() string {
 	return `Claude Haiku 4.5 is the fastest model with near-frontier performance.
 Engineered for lightning-fast speed at the most economical price point.

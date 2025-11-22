@@ -22,16 +22,8 @@ var CmdConfig = &cli.Command{
 			Action: runShowConfigPath,
 		},
 		{
-			Name:  "init",
-			Usage: "Initialize the configuration file",
-			Flags: []cli.Flag{
-				&cli.StringFlag{
-					Name:    "path",
-					Aliases: []string{"cmd"},
-					Sources: cli.EnvVars(config.EnvKeyConfigPath),
-					Usage:   "The path to the configuration file",
-				},
-			},
+			Name:   "init",
+			Usage:  "Initialize the configuration file",
 			Action: runInitConfig,
 		},
 		{
@@ -53,10 +45,6 @@ func runShowConfigPath(ctx context.Context, cmd *cli.Command) error {
 }
 
 func runInitConfig(ctx context.Context, cmd *cli.Command) error {
-	if cmd.String("path") != "" {
-		// TODO: Make it configurable by other means than environment variables
-		os.Setenv(config.EnvKeyConfigPath, cmd.String("path"))
-	}
 	conf, err := config.InitAndLoad()
 	if err != nil {
 		return err

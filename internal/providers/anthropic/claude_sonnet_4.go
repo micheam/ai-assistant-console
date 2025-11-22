@@ -12,38 +12,34 @@ import (
 	"micheam.com/aico/internal/logging"
 )
 
-type ClaudeSonnet4 struct {
+const ModelNameClaudeSonnet4 = "claude-sonnet-4-5"
+
+type ClaudeSonnet4_5 struct {
 	systemInstruction *assistant.TextContent
 	client            *anthropic.Client
 
 	opts []anthropicopt.RequestOption
 }
 
-var _ assistant.GenerativeModel = (*ClaudeSonnet4)(nil)
+var _ assistant.GenerativeModel = (*ClaudeSonnet4_5)(nil)
 
-func NewClaudeSonnet4(client *anthropic.Client) *ClaudeSonnet4 {
-	return &ClaudeSonnet4{client: client}
+func NewClaudeSonnet4(client *anthropic.Client) *ClaudeSonnet4_5 {
+	return &ClaudeSonnet4_5{client: client}
 }
-
-func (m *ClaudeSonnet4) Provider() string {
-	return ProviderName
-}
-
-func (m *ClaudeSonnet4) Name() string {
-	return "claude-sonnet-4-5"
-}
-func (m *ClaudeSonnet4) Description() string {
+func (m *ClaudeSonnet4_5) Provider() string { return ProviderName }
+func (m *ClaudeSonnet4_5) Name() string     { return ModelNameClaudeSonnet4 }
+func (m *ClaudeSonnet4_5) Description() string {
 	return `Claude Sonnet 4.5 is the latest generation model with highest intelligence.
 Best for complex agents and coding with superior tool orchestration for long-running
 autonomous tasks. Ideal for autonomous coding agents, complex financial analysis,
 multi-hour research tasks, and multi-agent frameworks. Supports 200K context window.`
 }
 
-func (m *ClaudeSonnet4) SetSystemInstruction(text *assistant.TextContent) {
+func (m *ClaudeSonnet4_5) SetSystemInstruction(text *assistant.TextContent) {
 	m.systemInstruction = text
 }
 
-func (m *ClaudeSonnet4) GenerateContent(
+func (m *ClaudeSonnet4_5) GenerateContent(
 	ctx context.Context,
 	msgs ...*assistant.Message,
 ) (*assistant.GenerateContentResponse, error) {
@@ -76,7 +72,7 @@ func (m *ClaudeSonnet4) GenerateContent(
 	}, nil
 }
 
-func (m *ClaudeSonnet4) GenerateContentStream(
+func (m *ClaudeSonnet4_5) GenerateContentStream(
 	ctx context.Context,
 	msgs ...*assistant.Message,
 ) (iter.Seq[*assistant.GenerateContentResponse], error) {

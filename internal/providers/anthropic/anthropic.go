@@ -43,7 +43,7 @@ const ProviderName = "anthropic"
 // AvailableModels returns a list of available models
 func AvailableModels() []assistant.ModelDescriptor {
 	return []assistant.ModelDescriptor{
-		&ClaudeSonnet4{},
+		&ClaudeSonnet4_5{},
 		&ClaudeOpus4{},
 		&ClaudeHaiku4_5{},
 	}
@@ -62,7 +62,7 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 	default:
 		return nil, false
 	case "claude-sonnet-4-5":
-		return &ClaudeSonnet4{}, true
+		return &ClaudeSonnet4_5{}, true
 	case "claude-opus-4-1":
 		return &ClaudeOpus4{}, true
 	case "claude-haiku-4-5":

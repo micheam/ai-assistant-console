@@ -12,6 +12,8 @@ import (
 	"micheam.com/aico/internal/logging"
 )
 
+const ModelNameClaudeOpus4 = "claude-opus-4-1"
+
 type ClaudeOpus4 struct {
 	systemInstruction *assistant.TextContent
 	client            *anthropic.Client
@@ -21,17 +23,9 @@ type ClaudeOpus4 struct {
 
 var _ assistant.GenerativeModel = (*ClaudeOpus4)(nil)
 
-func NewClaudeOpus4(client *anthropic.Client) *ClaudeOpus4 {
-	return &ClaudeOpus4{client: client}
-}
-
-func (m *ClaudeOpus4) Provider() string {
-	return ProviderName
-}
-
-func (m *ClaudeOpus4) Name() string {
-	return "claude-opus-4-1"
-}
+func NewClaudeOpus4(client *anthropic.Client) *ClaudeOpus4 { return &ClaudeOpus4{client: client} }
+func (m *ClaudeOpus4) Provider() string                    { return ProviderName }
+func (m *ClaudeOpus4) Name() string                        { return ModelNameClaudeOpus4 }
 func (m *ClaudeOpus4) Description() string {
 	return `Claude Opus 4.1 is designed for specialized complex tasks.
 Exceptional model for highly complex codebase refactoring, nuanced creative writing,

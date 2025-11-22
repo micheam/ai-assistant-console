@@ -55,24 +55,3 @@ func TestConfigCommand_Initialize(t *testing.T) {
 	require.FileExists(configPath)
 	require.Contains(buf.String(), "Configuration file initialized\n")
 }
-
-func TestConfigCommand_InitializeWithSpecifiedPath(t *testing.T) {
-	// Setup
-	configPath := filepath.Join(t.TempDir(), "config2.yaml")
-	_, require := assert.New(t), require.New(t)
-
-	var buf bytes.Buffer
-	app := &cli.Command{
-		Writer:   &buf,
-		Commands: []*cli.Command{CmdConfig},
-	}
-
-	// Exercise
-	ctx := context.Background()
-	err := app.Run(ctx, []string{"config", "init", "-path", configPath})
-
-	// Verify
-	require.NoError(err)
-	require.FileExists(configPath)
-	require.Contains(buf.String(), "Configuration file initialized\n")
-}

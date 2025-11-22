@@ -64,7 +64,7 @@ func runListModels(ctx context.Context, cmd *cli.Command) error {
 			Name:        model.Name(),
 			Provider:    model.Provider(),
 			Description: model.Description(),
-			Selected:    model.Name() == conf.Chat.Model,
+			Selected:    model.Name() == conf.Model,
 		})
 	}
 	if cmd.Bool(flagJSON.Name) {
@@ -166,7 +166,7 @@ func detectModel(ctx context.Context, cmd *cli.Command) (assistant.GenerativeMod
 
 	modelName := cmd.String(flagModel.Name)
 	if modelName == "" {
-		modelName = conf.Chat.Model
+		modelName = conf.Model
 	}
 	if modelName == "" {
 		return DefaultModel(ctx, cmd)

@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 
 	"gopkg.in/yaml.v3"
+
+	"micheam.com/aico/internal/providers/anthropic"
 )
 
 type contextKey int
@@ -38,17 +40,10 @@ func MustFromContext(ctx context.Context) *Config {
 // Config is the configuration for the application
 type Config struct {
 	location string `yaml:"-"`
-	Chat     Chat   `yaml:"chat"`
-	logfile  string `yaml:"logfile"` // logfile is the path to the logfile
-}
 
-// Location returns the location of the configuration file
-func (c *Config) Location() string {
-	return c.location
-}
+	// Logfile is the path to the logfile
+	logfile string `yaml:"logfile"`
 
-// Chat is the configuration for the chat
-type Chat struct {
 	// Model is the model to use for the chat
 	//
 	// This can be one of [openai.chatAvailableModels].
@@ -57,9 +52,11 @@ type Chat struct {
 
 	// Persona is the persona to use for the chat
 	Persona map[string]Personality `yaml:"persona"`
+}
 
-	// Session is the configuration for the chat session
-	Session Session `yaml:"session"`
+// Location returns the location of the configuration file
+func (c *Config) Location() string {
+	return c.location
 }
 
 // Personality is the personality to use for the chat
@@ -145,10 +142,6 @@ func loadFromReader(r io.Reader) (*Config, error) {
 	if err := yaml.NewDecoder(r).Decode(&config); err != nil {
 		return nil, fmt.Errorf("decode yaml: %w", err)
 	}
-
-	// Resolve environment variables
-	config.Chat.Session.DirectoryRaw = config.Chat.Session.Directory
-	config.Chat.Session.Directory = os.ExpandEnv(config.Chat.Session.Directory)
 	return &config, nil
 }
 
@@ -160,13 +153,13 @@ func ConfigFilePath() string {
 		return os.Getenv(EnvKeyConfigPath)
 	}
 	if os.Getenv("XDG_CONFIG_HOME") != "" {
-		return filepath.Join(os.Getenv("XDG_CONFIG_HOME"), ApplicationName, ConfigFileName)
+		return filepath.Join(os.Getenv("XDG_CONFIG_HOME"), ApplicationFQN, ConfigFileName)
 	}
 	dir, err := os.UserConfigDir()
 	if err != nil {
 		return ""
 	}
-	return filepath.Join(dir, ApplicationName, ConfigFileName)
+	return filepath.Join(dir, ApplicationFQN, ConfigFileName)
 }
 
 func defaultLogfilePath() string {
@@ -175,11 +168,11 @@ func defaultLogfilePath() string {
 }
 
 const (
-	// DefaultModel is the default model to use for the chat
-	DefaultModel = "gpt-4o-mini"
+	// DefaultModel is the default model to use
+	DefaultModel = anthropic.ModelNameClaudeHaiku4_5
 
-	// ApplicationName is the name of the application
-	ApplicationName = "com.micheam.aico"
+	// ApplicationFQN is the fully qualified name of the application
+	ApplicationFQN = "com.micheam.aico"
 
 	// ConfigFileName is the name of the config file
 	ConfigFileName = "config.yaml"
@@ -233,41 +226,35 @@ func InitAndLoad() (*Config, error) {
 }
 
 // GetDefaultPersona returns the default persona
-func (c *Chat) GetDefaultPersona() *Personality {
+func (c *Config) GetDefaultPersona() *Personality {
 	if p, ok := c.Persona["default"]; ok {
 		return &p
 	}
-	return &defaultPersona
+	return DefaultConfig().GetDefaultPersona()
 }
 
 // GetPersona returns the persona with the given name
 // If the persona does not exist, this will return nil.
-func (c *Chat) GetPersona(name string) (*Personality, bool) {
+func (c *Config) GetPersona(name string) (*Personality, bool) {
 	if p, ok := c.Persona[name]; ok {
 		return &p, true
 	}
 	return nil, false
 }
 
-var defaultPersona Personality = Personality{
-	Description: "Default",
-	Messages: []string{
-		"You're aico, my personal AI assistant.",
-		"You're here to help me with my daily tasks.",
-	},
-}
-
+// DefaultConfig returns the default configuration
+// This is used when initializing the configuration for the first time.
 func DefaultConfig() *Config {
 	return &Config{
 		logfile: defaultLogfilePath(),
-		Chat: Chat{
-			Model: DefaultModel,
-			Persona: map[string]Personality{
-				"default": defaultPersona,
-			},
-			Session: Session{
-				Directory:    "./sessions",
-				DirectoryRaw: "./sessions",
+		Model:   DefaultModel,
+		Persona: map[string]Personality{
+			"default": Personality{
+				Description: "Default",
+				Messages: []string{
+					"You're aico, my personal AI assistant.",
+					"You're here to help me with my daily tasks.",
+				},
 			},
 		},
 	}

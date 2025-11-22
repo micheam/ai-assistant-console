@@ -27,7 +27,7 @@ func loadConfig(ctx context.Context, cmd *cli.Command) (*config.Config, error) {
 		return nil, fmt.Errorf("load config: %w", err)
 	}
 	if model := cmd.String(flagModel.Name); model != "" {
-		conf.Chat.Model = model
+		conf.Model = model
 	}
 	return conf, nil
 }
