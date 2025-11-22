@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -37,6 +38,7 @@ func runGenerate(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	model, err := detectModel(ctx, cmd)
+	logger = logger.With(slog.String("model", model.Name()))
 	if err != nil {
 		return fmt.Errorf("failed to detect model: %w", err)
 	}
@@ -51,6 +53,7 @@ func runGenerate(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	msg := assistant.NewUserMessage(assistant.NewTextContent(prompt))
+	logger.Debug("sending generate request")
 	iter, err := model.GenerateContentStream(ctx, msg)
 	if err != nil {
 		return fmt.Errorf("failed to generate content: %w", err)

@@ -52,7 +52,7 @@ func initializeLogger(ctx context.Context, cmd *cli.Command) (*logging.Logger, f
 		return nil, nil, fmt.Errorf("load config: %w", err)
 	}
 	logLevel := logging.LevelInfo
-	if cmd.Bool("debug") {
+	if cmd.Bool(flagDebug.Name) {
 		logLevel = logging.LevelDebug
 	}
 	f, err := conf.OpenLogfile()
