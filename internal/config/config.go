@@ -64,8 +64,8 @@ type Personality struct {
 	// Description is the description of the personality
 	Description string `toml:"description"`
 
-	// Messages is the list of messages to use for the personality
-	Messages []string `toml:"messages"`
+	// Message is the system message to use for the personality
+	Message string `toml:"message"`
 }
 
 // Session
@@ -249,12 +249,10 @@ func DefaultConfig() *Config {
 		logfile: defaultLogfilePath(),
 		Model:   DefaultModel,
 		Persona: map[string]Personality{
-			"default": Personality{
+			"default": {
 				Description: "Default",
-				Messages: []string{
-					"You're aico, my personal AI assistant.",
+				Message: "You're aico, my personal AI assistant." +
 					"You're here to help me with my daily tasks.",
-				},
 			},
 		},
 	}
