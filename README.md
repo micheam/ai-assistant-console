@@ -5,9 +5,7 @@
 [![Go](https://github.com/micheam/ai-assistant-console/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/micheam/ai-assistant-console/actions/workflows/go.yml)
 [![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/micheam/ai-assistant-console?include_prereleases)](https://github.com/micheam/ai-assistant-console/releases)
 
-![screenshot](screenshot.png)
-
-AICO is an AI-powered console application that supports multiple AI providers including OpenAI's GPT models and Anthropic's Claude models. It provides both interactive REPL and batch processing modes, along with advanced features like chat session management and Vim plugin integration.
+AICO is an AI-powered console application that supports multiple AI providers including OpenAI's GPT models and Anthropic's Claude models. It provides simple text generation with Vim plugin integration.
 
 ## Install
 
@@ -57,7 +55,7 @@ To use OpenAI models (GPT-4, GPT-4o, etc.), you need an OpenAI API key.
 You can get an API key from [the OpenAI API Keys page].
 
 ```bash
-export OPENAI_API_KEY=<your OpenAI API key>
+export AICO_OPENAI_API_KEY=<your OpenAI API key>
 ```
 
 ### Anthropic API Key
@@ -66,70 +64,72 @@ To use Anthropic Claude models, you need an Anthropic API key.
 You can get an API key from [Anthropic Console](https://console.anthropic.com/).
 
 ```bash
-export ANTHROPIC_API_KEY=<your Anthropic API key>
+export AICO_ANTHROPIC_API_KEY=<your Anthropic API key>
 ```
 
 ## Usage
 
-After installation, you can use the `chat` command to interact with AI assistants.
+After installation, you can use the `aico` command to generate text with AI.
 
 ```
 NAME:
-   chat - AI Assistant Console
+   aico - AI Assistant Console
 
 USAGE:
-   chat [global options] [command [command options]]
+   aico [global options] [command [command options]]
 
 COMMANDS:
-   models   Show the available models
-   repl     Start a chat session in a REPL
-   send     Send a message to the AI assistant
-   session  Manage chat sessions
+   env      show environment information
    config   Manage the configuration for the AI assistant
+   models   manage AI models
+   persona  manage personas
    help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --help, -h     show help
-   --version, -v  print the version
+   --debug                  Enable debug logging
+   --json                   Output in JSON format
+   --model, -m              The model to use
+   --no-stream              Disable streaming output
+   --persona, -p            The persona to use (default: "default")
+   --system                 System prompt
+   --source, -s             Source string or @file path
+   --context, -c            Context string or @file path
+   --help, -h               show help
+   --version, -v            print the version
 ```
 
-### REPL Mode (Interactive Chat)
+### Basic Text Generation
 
-To start an interactive chat session, use the `repl` subcommand:
+Generate text by providing a prompt:
 
 ```bash
-$ chat repl
+$ aico "Translate into English: こんにちは、世界。"
+Hello, world.
 ```
 
-In REPL mode, you can have interactive conversations with AI assistants.
+### Using Source and Context
+
+You can provide source content and additional context:
+
+```bash
+$ aico "Explain this code" --source=@main.go --context=@README.md --context="$(go list ./...)"
+```
 
 ### Available Models
 
 To see all available models, use the `models` command:
 
 ```bash
-$ chat models
+$ aico models
 ```
 
-### Batch Mode
+### Persona Management
 
-To send a single message to AI, use the `send` subcommand:
+Manage personas with the `persona` command:
 
 ```bash
-$ chat send "Translate into English: こんにちは、世界。"
-Hello, world.
+$ aico persona list
 ```
-
-### Session Management
-
-AICO now supports chat session management. You can:
-
-- List sessions: `chat session list`
-- Show a session: `chat session show <session-id>`
-- Delete a session: `chat session delete <session-id>`
-- Prepare an empty session: `chat session prepare`
-
-Sessions can be exported in multiple formats including markdown, JSON, and plain text.
 
 ## Usage as a Vim Plugin
 
@@ -138,8 +138,8 @@ Please see the [Vim plugin documentation](README.vim.md) for more information.
 
 ## Environment Variables
 
-- `OPENAI_API_KEY`: Your OpenAI API key for accessing GPT models
-- `ANTHROPIC_API_KEY`: Your Anthropic API key for accessing Claude models
+- `AICO_OPENAI_API_KEY`: Your OpenAI API key for accessing GPT models
+- `AICO_ANTHROPIC_API_KEY`: Your Anthropic API key for accessing Claude models
 
 ## Development
 

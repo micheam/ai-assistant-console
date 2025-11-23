@@ -44,13 +44,12 @@ type Config struct {
 	// Logfile is the path to the logfile
 	logfile string `toml:"logfile"`
 
-	// Model is the model to use for the chat
+	// Model is the model to use for text generation
 	//
-	// This can be one of [openai.chatAvailableModels].
 	// If omitted, the default model for the application will be used.
 	Model string `toml:"model"`
 
-	// PersonaMap is the persona to use for the chat
+	// PersonaMap is the persona to use for text generation
 	PersonaMap map[string]Personality `toml:"persona"`
 }
 
@@ -59,30 +58,13 @@ func (c *Config) Location() string {
 	return c.location
 }
 
-// Personality is the personality to use for the chat
+// Personality is the personality to use for text generation
 type Personality struct {
 	// Description is the description of the personality
 	Description string `toml:"description"`
 
 	// Message is the system message to use for the personality
 	Message string `toml:"message"`
-}
-
-// Session
-type Session struct {
-	// Directory is the directory to store the chat session files
-	// This can be a relative or absolute path.
-	// Environment variables can be used in the path.
-	// Sessions will be stored in this directory with the pattern [SessionFilePattern].
-	//
-	// e.g: "/Users/micheam/.aico/sessions"
-	Directory string `toml:"directory"`
-
-	// DirectoryRaw is the raw directory path before environment variable expansion
-	// This is used to store the raw directory path before expansion
-	//
-	// e.g: "$HOME/.aico/sessions"
-	DirectoryRaw string `toml:"-"`
 }
 
 var ErrConfigFileNotFound = errors.New("config file not found")
@@ -179,9 +161,6 @@ const (
 
 	// LogFileName is the name of the log file
 	LogFileName = "aico.log"
-
-	// SessionFilePattern is the pattern for the session file
-	SessionFilePattern = "{{.ID}}.pb"
 )
 
 // Load loads the configuration for the application

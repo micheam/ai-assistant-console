@@ -8,7 +8,6 @@ require (
 	github.com/fatih/color v1.15.0
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v3 v3.3.3
-	github.com/yuin/goldmark v1.7.11
 	golang.org/x/term v0.37.0
 )
 
