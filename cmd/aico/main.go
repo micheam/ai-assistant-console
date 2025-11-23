@@ -35,6 +35,7 @@ func run(args []string) error {
 			flagNoStream,
 			flagPersona,
 			flagSystemPrompt,
+			flagSource,
 			flagContext,
 
 			flagAPIKeyAnthropic,
@@ -53,6 +54,12 @@ func run(args []string) error {
 
 // Common flags
 var (
+	flagSource = &cli.StringFlag{
+		Name:    "source",
+		Aliases: []string{"s"},
+		Usage:   "source string or @file path - the primary subject of the prompt (e.g., --source @code.go)",
+	}
+
 	flagContext = &cli.StringSliceFlag{
 		Name:    "context",
 		Aliases: []string{"c"},

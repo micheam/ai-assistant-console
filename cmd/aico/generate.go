@@ -33,9 +33,14 @@ func runGenerate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("prompt is required")
 	}
 
-	source, err := readSource(os.Stdin)
+	// Source: --source flag or stdin (mutually exclusive)
+	srcFlag := cmd.String(flagSource.Name)
+	source, err := getSource(srcFlag, os.Stdin)
 	if err != nil {
-		return fmt.Errorf("failed to read source from stdin: %w", err)
+		return err
+	}
+	if srcFlag != "" {
+		logger = logger.With(slog.String("source", srcFlag))
 	}
 
 	model, err := detectModel(ctx, cmd)
@@ -60,10 +65,8 @@ func runGenerate(ctx context.Context, cmd *cli.Command) error {
 	// Source:
 	if source != "" {
 		sb := new(strings.Builder)
-		sb.WriteString("In the following <source> block is the context information for the prompt.\n\n")
-		sb.WriteString("<source>\n")
+		sb.WriteString("The <source> block contains the primary subject that the user's prompt refers to (e.g., 'this code', 'this file').\n\n")
 		sb.WriteString(source)
-		sb.WriteString("\n</source>\n")
 		systemInstruction = append(systemInstruction, assistant.NewTextContent(sb.String()))
 	}
 
@@ -84,6 +87,8 @@ func runGenerate(ctx context.Context, cmd *cli.Command) error {
 
 	// Wrap up system instructions:
 	model.SetSystemInstruction(systemInstruction...)
+
+	logger.Debug("prepared system instruction", "system_instruction", systemInstruction)
 
 	// Generate Content
 	msg := assistant.NewUserMessage(assistant.NewTextContent(prompt))
@@ -109,6 +114,57 @@ func runGenerate(ctx context.Context, cmd *cli.Command) error {
 // -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
+
+// getSource returns the source content from either --source flag or stdin.
+// It returns an error if both are specified.
+func getSource(srcFlag string, stdin io.Reader) (string, error) {
+	stdinContent, err := readSource(stdin)
+	if err != nil {
+		return "", fmt.Errorf("failed to read source from stdin: %w", err)
+	}
+
+	if srcFlag != "" && stdinContent != "" {
+		return "", fmt.Errorf("cannot specify both --source flag and stdin input")
+	}
+
+	if srcFlag != "" {
+		return resolveSource(srcFlag)
+	}
+
+	if stdinContent == "" {
+		return "", nil
+	}
+
+	sb := new(strings.Builder)
+	sb.WriteString("<source>\n")
+	sb.WriteString(stdinContent)
+	sb.WriteString("\n</source>")
+	return sb.String(), nil
+}
+
+// resolveSource resolves a source string.
+// If the string starts with '@', it reads from the file path after '@'.
+// Otherwise, it returns the string as-is wrapped in <source> tags.
+func resolveSource(src string) (string, error) {
+	if strings.HasPrefix(src, "@") {
+		filePath := strings.TrimPrefix(src, "@")
+		data, err := os.ReadFile(filePath)
+		if err != nil {
+			return "", fmt.Errorf("failed to read file %q: %w", filePath, err)
+		}
+		sb := new(strings.Builder)
+		fmt.Fprintf(sb, "<source file=%q>\n", filePath)
+		fmt.Fprint(sb, string(data))
+		fmt.Fprintln(sb, "\n</source>")
+		return sb.String(), nil
+	}
+	// Direct string source
+	sb := new(strings.Builder)
+	sb.WriteString("<source>\n")
+	sb.WriteString(src)
+	sb.WriteString("\n</source>")
+	return sb.String(), nil
+}
 
 // resolveContext resolves a context string.
 // If the string starts with '@', it reads from the file path after '@'.
