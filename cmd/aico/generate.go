@@ -44,7 +44,7 @@ func runGenerate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("failed to detect model: %w", err)
 	}
 
-	// Set Personalities as System Instructions
+	// Persona:
 	systemInstruction := make([]*assistant.TextContent, 0)
 	conf, err := config.Load()
 	if err != nil {
@@ -57,16 +57,32 @@ func runGenerate(ctx context.Context, cmd *cli.Command) error {
 	systemInstruction = append(systemInstruction, assistant.NewTextContent(persona.Message))
 	logger = logger.With(slog.String("persona", cmd.String(flagPersona.Name)))
 
-	// Append Source Context as System Instruction
+	// Source:
 	if source != "" {
 		sb := new(strings.Builder)
 		sb.WriteString("In the following <source> block is the context information for the prompt.\n\n")
 		sb.WriteString("<source>\n")
 		sb.WriteString(source)
 		sb.WriteString("\n</source>\n")
-		// model.SetSystemInstruction(assistant.NewTextContent(sb.String()))
 		systemInstruction = append(systemInstruction, assistant.NewTextContent(sb.String()))
 	}
+
+	// Context:
+	contexts := cmd.StringSlice(flagContext.Name)
+	logger = logger.With(slog.String("contexts", strings.Join(contexts, ",")))
+	if len(contexts) > 0 {
+		systemInstruction = append(systemInstruction,
+			assistant.NewTextContent("The following context is provided for the prompt."))
+	}
+	for _, ctx := range contexts {
+		content, err := resolveContext(ctx)
+		if err != nil {
+			return fmt.Errorf("failed to resolve context %q: %w", ctx, err)
+		}
+		systemInstruction = append(systemInstruction, assistant.NewTextContent(content))
+	}
+
+	// Wrap up system instructions:
 	model.SetSystemInstruction(systemInstruction...)
 
 	// Generate Content
@@ -93,6 +109,30 @@ func runGenerate(ctx context.Context, cmd *cli.Command) error {
 // -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
+
+// resolveContext resolves a context string.
+// If the string starts with '@', it reads from the file path after '@'.
+// Otherwise, it returns the string as-is.
+func resolveContext(ctx string) (string, error) {
+	if strings.HasPrefix(ctx, "@") {
+		filePath := strings.TrimPrefix(ctx, "@")
+		data, err := os.ReadFile(filePath)
+		if err != nil {
+			return "", fmt.Errorf("failed to read file %q: %w", filePath, err)
+		}
+		sb := new(strings.Builder)
+		fmt.Fprintf(sb, "<context file=%q>\n", filePath)
+		fmt.Fprint(sb, string(data))
+		fmt.Fprintln(sb, "\n</context>")
+		return sb.String(), nil
+	}
+	// Direct string context
+	sb := new(strings.Builder)
+	sb.WriteString("<context>\n")
+	sb.WriteString(ctx)
+	sb.WriteString("\n</context>")
+	return sb.String(), nil
+}
 
 // readSource reads content from stdin if it's piped (not a terminal).
 // Returns empty string if stdin is a terminal.

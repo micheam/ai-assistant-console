@@ -28,13 +28,14 @@ func run(args []string) error {
 		Version:               version,
 		EnableShellCompletion: true,
 		Flags: []cli.Flag{
-			flagContextFile,
 			flagDebug,
 			flagJSON,
 			flagModel,
+
 			flagNoStream,
 			flagPersona,
 			flagSystemPrompt,
+			flagContext,
 
 			flagAPIKeyAnthropic,
 			flagAPIKeyOpenAI,
@@ -52,37 +53,44 @@ func run(args []string) error {
 
 // Common flags
 var (
-	flagContextFile = &cli.StringFlag{
-		Name:    "context-file",
+	flagContext = &cli.StringSliceFlag{
+		Name:    "context",
 		Aliases: []string{"c"},
-		Usage:   "context file path"}
+		Usage:   "context string or @file path (e.g., --context 'text' or --context @file.txt)",
+	}
 
 	flagDebug = &cli.BoolFlag{
 		Name:  "debug",
-		Usage: "Enable debug logging"}
+		Usage: "Enable debug logging",
+	}
 
 	flagJSON = &cli.BoolFlag{
 		Name:  "json",
-		Usage: "Output the models in JSON format"}
+		Usage: "Output the models in JSON format",
+	}
 
 	flagModel = &cli.StringFlag{
 		Name:    "model",
 		Aliases: []string{"m"},
-		Usage:   "The model to use"}
+		Usage:   "The model to use",
+	}
 
 	flagNoStream = &cli.BoolFlag{
 		Name:  "no-stream",
-		Usage: "disable streaming output"}
+		Usage: "disable streaming output",
+	}
 
 	flagPersona = &cli.StringFlag{
 		Name:    "persona",
 		Aliases: []string{"p"},
 		Usage:   "The persona to use",
-		Value:   "default"}
+		Value:   "default",
+	}
 
 	flagSystemPrompt = &cli.StringFlag{
 		Name:  "system",
-		Usage: "system prompt"}
+		Usage: "system prompt",
+	}
 
 	//
 	// API Keys For Providers
