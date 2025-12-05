@@ -12,31 +12,32 @@ import (
 	"micheam.com/aico/internal/logging"
 )
 
-const ModelNameClaudeOpus4 = "claude-opus-4-1"
+const ModelNameClaudeOpus4_5 = "claude-opus-4-5"
 
-type ClaudeOpus4 struct {
+type ClaudeOpus4_5 struct {
 	systemInstruction []*assistant.TextContent
 	client            *anthropic.Client
 
 	opts []anthropicopt.RequestOption
 }
 
-var _ assistant.GenerativeModel = (*ClaudeOpus4)(nil)
+var _ assistant.GenerativeModel = (*ClaudeOpus4_5)(nil)
 
-func NewClaudeOpus4(client *anthropic.Client) *ClaudeOpus4 { return &ClaudeOpus4{client: client} }
-func (m *ClaudeOpus4) Provider() string                    { return ProviderName }
-func (m *ClaudeOpus4) Name() string                        { return ModelNameClaudeOpus4 }
-func (m *ClaudeOpus4) Description() string {
-	return `Claude Opus 4.1 is designed for specialized complex tasks.
-Exceptional model for highly complex codebase refactoring, nuanced creative writing,
-and specialized scientific analysis. Supports 200K context window and 64K max output.`
+func NewClaudeOpus4_5(client *anthropic.Client) *ClaudeOpus4_5 { return &ClaudeOpus4_5{client: client} }
+func (m *ClaudeOpus4_5) Provider() string                      { return ProviderName }
+func (m *ClaudeOpus4_5) Name() string                          { return ModelNameClaudeOpus4_5 }
+func (m *ClaudeOpus4_5) Description() string {
+	return `Claude Opus 4.5 is the most intelligent model for the world's hardest problems.
+State-of-the-art on real-world software engineering tasks, scoring higher than human candidates.
+Enhanced vision, reasoning, and mathematics skills. Best for long-horizon autonomous tasks,
+tool calling, and multi-agent coordination. Supports 200K context window and 64K max output.`
 }
 
-func (m *ClaudeOpus4) SetSystemInstruction(contents ...*assistant.TextContent) {
+func (m *ClaudeOpus4_5) SetSystemInstruction(contents ...*assistant.TextContent) {
 	m.systemInstruction = contents
 }
 
-func (m *ClaudeOpus4) GenerateContent(
+func (m *ClaudeOpus4_5) GenerateContent(
 	ctx context.Context,
 	msgs ...*assistant.Message,
 ) (*assistant.GenerateContentResponse, error) {
@@ -69,7 +70,7 @@ func (m *ClaudeOpus4) GenerateContent(
 	}, nil
 }
 
-func (m *ClaudeOpus4) GenerateContentStream(
+func (m *ClaudeOpus4_5) GenerateContentStream(
 	ctx context.Context,
 	msgs ...*assistant.Message,
 ) (iter.Seq[*assistant.GenerateContentResponse], error) {

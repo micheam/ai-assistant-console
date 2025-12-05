@@ -24,12 +24,13 @@ const ProviderName = "anthropic"
 //     * Ideal for autonomous coding agents, complex financial analysis, multi-hour research tasks
 //     * Pricing: $3/MTok input, $15/MTok output
 //
-// Claude Opus 4.1:
+// Claude Opus 4.5:
 //
-//     * Exceptional model for specialized complex tasks
-//     * Best for highly complex codebase refactoring, nuanced creative writing
-//     * Specialized scientific analysis requiring deep reasoning
-//     * Pricing: $15/MTok input, $75/MTok output
+//     * State-of-the-art model for the world's hardest problems
+//     * Best for real-world software engineering, long-horizon autonomous tasks
+//     * Enhanced vision, reasoning, and mathematics skills
+//     * Superior tool calling and multi-agent coordination
+//     * Pricing: $5/MTok input, $25/MTok output
 //
 // Claude Haiku 4.5:
 //
@@ -44,7 +45,7 @@ const ProviderName = "anthropic"
 func AvailableModels() []assistant.ModelDescriptor {
 	return []assistant.ModelDescriptor{
 		&ClaudeSonnet4_5{},
-		&ClaudeOpus4{},
+		&ClaudeOpus4_5{},
 		&ClaudeHaiku4_5{},
 	}
 }
@@ -63,8 +64,8 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 		return nil, false
 	case "claude-sonnet-4-5":
 		return &ClaudeSonnet4_5{}, true
-	case "claude-opus-4-1":
-		return &ClaudeOpus4{}, true
+	case "claude-opus-4-5":
+		return &ClaudeOpus4_5{}, true
 	case "claude-haiku-4-5":
 		return &ClaudeHaiku4_5{}, true
 	}
@@ -76,8 +77,8 @@ func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, er
 	switch modelName {
 	case "claude-sonnet-4-5":
 		return NewClaudeSonnet4(client), nil
-	case "claude-opus-4-1":
-		return NewClaudeOpus4(client), nil
+	case "claude-opus-4-5":
+		return NewClaudeOpus4_5(client), nil
 	case "claude-haiku-4-5":
 		return NewClaudeHaiku4_5(client), nil
 	}
