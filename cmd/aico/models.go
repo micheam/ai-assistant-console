@@ -44,6 +44,12 @@ var CmdModels = &cli.Command{
 					Usage: "output in JSON format",
 				},
 			},
+			ShellComplete: func(ctx context.Context, cmd *cli.Command) {
+				// すべての利用可能なモデル名を補完候補として出力
+				for _, model := range allAvailableModels() {
+					fmt.Fprintln(cmd.Root().Writer, model.Name())
+				}
+			},
 			Action: runShowModelInfo,
 		},
 	},
