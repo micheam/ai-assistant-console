@@ -145,6 +145,9 @@ def ExecuteAssistant(prompt: string, input_text: string): void
     # Build command
     const cmd = [ChatCommand(), '--model=' .. Model(), prompt]
 
+    # Save current window to return to it later
+    const original_winid = win_getid()
+
     # Create a new scratch buffer for output
     new
     setlocal buftype=nofile
@@ -159,6 +162,9 @@ def ExecuteAssistant(prompt: string, input_text: string): void
 
     # Show initial message
     setline(1, '# Waiting for response...')
+
+    # Return to original window
+    win_gotoid(original_winid)
     redraw
 
     var is_first_output = true
