@@ -63,3 +63,73 @@ export def ShowModelSelector(): void
     endif
     ui.Render()
 enddef
+
+# RunAssistant runs the ai-assistant with the given prompt.
+#
+# This function takes the content of the current buffer as input
+# and displays the AI response in a new scratch buffer.
+#
+# Usage:
+#   :Assistant 'explain this code'
+#   :Assistant 'summarize the following'
+export def RunAssistant(prompt: string): void
+    if prompt->empty()
+        echoerr "Prompt is required"
+        return
+    endif
+
+    # Get current buffer content
+    const bufcontent = getline(1, '$')
+    const input_text = bufcontent->join("\n")
+
+    # Build command
+    const cmd = [ChatCommand(), '--model=' .. Model(), prompt]
+
+    # Create a new scratch buffer for output
+    new
+    setlocal buftype=nofile
+    setlocal bufhidden=wipe
+    setlocal noswapfile
+    setlocal filetype=markdown
+    const bufname = 'Assistant(' .. localtime() .. '): ' .. prompt[: 30]
+    execute 'file ' .. fnameescape(bufname)
+
+    const output_bufnr = bufnr()
+    const output_winid = win_getid()
+
+    # Show initial message
+    setline(1, '# Waiting for response...')
+    redraw
+
+    var output_lines: list<string> = []
+
+    # Start async job
+    const job = job_start(cmd, {
+        in_io: 'pipe',
+        out_io: 'pipe',
+        err_io: 'pipe',
+        out_cb: (ch, msg) => {
+            output_lines->add(msg)
+        },
+        err_cb: (ch, msg) => {
+            output_lines->add('[ERROR] ' .. msg)
+        },
+        exit_cb: (job, status) => {
+            # Update buffer with output
+            if bufexists(output_bufnr) && win_id2win(output_winid) != 0
+                deletebufline(output_bufnr, 1, '$')
+                if output_lines->len() > 0
+                    setbufline(output_bufnr, 1, output_lines)
+                else
+                    setbufline(output_bufnr, 1, '(No response)')
+                endif
+                win_execute(output_winid, 'cursor(1, 1)')
+            endif
+        }
+    })
+
+    # Send input to the job
+    const channel = job_getchannel(job)
+    ch_sendraw(channel, input_text)
+    ch_close_in(channel)
+enddef
