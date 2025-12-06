@@ -225,7 +225,6 @@ def OpenPromptBuffer(input_text: string): void
     # Add placeholder text
     setline(1, ['# Enter your prompt here', '# :w to submit, :q to cancel', ''])
     cursor(3, 1)
-    startinsert
 enddef
 
 # SubmitPrompt is called when user writes the prompt buffer.
