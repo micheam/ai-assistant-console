@@ -7,50 +7,52 @@ if !has('patch-9.1.1119')
     finish
 endif
 
+const default_model = 'claude-opus-4-5'
+const default_chat_command = 'aico'
+
 # Option: g:ai_assistant_model
 export def Model(): string
     if exists('g:ai_assistant_model')
         return g:ai_assistant_model
     endif
-    return 'claude-3-5-sonnet'
+    return default_model
 enddef
 
 export def SetModel(model_name: string): void
     g:ai_assistant_model = model_name
 enddef
 
-# Option: g:ai_assistant_chat_command
+# Option: g:ai_assistant_bin
 #
 # The command to run the ai-assistant.
-# Default: "chat"
-# Example: "~/bin/chat"
+# Default: "aico"
+# Example: "/path/to/bin/aico"
 export def ChatCommand(): string
-    if exists('g:ai_assistant_chat_command')
-        return g:ai_assistant_chat_command
+    if exists('g:ai_assistant_bin')
+        return g:ai_assistant_bin
     endif
-    return "chat"
+    return default_chat_command
 enddef
 
 export def SetChatCommand(command: string): void
-    g:ai_assistant_chat_command = command
+    g:ai_assistant_bin = command
 enddef
 
 # ShowModelSelector shows a popup menu to select a ai-assistant model.
+#
+# TODO: Show Description of the model.
+#       May be mappping to 'K' or something.
 export def ShowModelSelector(): void
     const cmd = [ ChatCommand(), "models", "--json" ]
-
-    var models: list<dict<any>> = []
-    for line in systemlist(cmd->join(' '))
-        const model = json_decode(line)
-        models->add(model)
-    endfor
-
-    # TODO: Show Description of the model.
-    #       May be mappping to 'K' or something.
+    const models = json_decode(system(cmd->join(' ')))
+    if len(models) == 0
+        echom "No models available."
+        return
+    endif
 
     const model_names = models->mapnew((_, model) => model["name"])
-    const ui = uiwidget.Select.new(model_names, (selected_index: number) => {
-        const selectedModel = models[selected_index]
+    const ui = uiwidget.Select.new(model_names, (selected: number) => {
+        const selectedModel = models[selected]
         SetModel(selectedModel["name"])
         echom "Selected model: " .. selectedModel["name"]
         return true

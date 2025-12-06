@@ -8,7 +8,7 @@ vim9script
 # and handle asynchronous jobs.
 #
 # Maintainer:  Michito Maeda <michito.maeda@gmail.com>
-# Last Change: 2022-10-10
+# Last Change: 2025-12-06
 #
 #===============================================================================
 import autoload '../autoload/ai_assistant.vim' as ai_assistant
