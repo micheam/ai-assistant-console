@@ -11,6 +11,7 @@ const default_model = 'claude-opus-4-5'
 const default_chat_command = 'aico'
 const default_split_position = 'below'  # 'above', 'below', 'left', 'right'
 const default_split_size = 15  # lines for horizontal, columns for vertical
+const default_persona = ''  # empty string means "not used"
 
 # Option: g:ai_assistant_model
 export def Model(): string
@@ -73,6 +74,22 @@ export def SetSplitSize(size: number): void
     g:ai_assistant_split_size = size
 enddef
 
+# Option: g:ai_assistant_persona
+#
+# The persona to use for text generation.
+# Empty string means persona is not used.
+# Default: '' (not used)
+export def Persona(): string
+    if exists('g:ai_assistant_persona')
+        return g:ai_assistant_persona
+    endif
+    return default_persona
+enddef
+
+export def SetPersona(persona_name: string): void
+    g:ai_assistant_persona = persona_name
+enddef
+
 # OpenSplitBuffer opens a new buffer with configured position and size.
 def OpenSplitBuffer(): void
     const pos = SplitPosition()
@@ -117,6 +134,43 @@ export def ShowModelSelector(): void
     const currentModelIndex = indexof(models, (_, model) => model["name"] == Model())
     if currentModelIndex != -1
         ui.SetSelectedIndex(currentModelIndex)
+    endif
+    ui.Render()
+enddef
+
+# ShowPersonaSelector shows a popup menu to select a ai-assistant persona.
+export def ShowPersonaSelector(): void
+    const cmd = [ ChatCommand(), "--json", "persona", "list" ]
+    const personas = json_decode(system(cmd->join(' ')))
+    if len(personas) == 0
+        echom "No personas available."
+        return
+    endif
+
+    const persona_names = personas->mapnew((_, p) => p["name"])
+    # Add "None (not used)" option at the beginning
+    const display_names = ["(None - not used)"] + persona_names
+    const ui = uiwidget.Select.new(display_names, (selected: number) => {
+        if selected == 0
+            # "None" selected - clear persona
+            SetPersona('')
+            echom "Persona disabled"
+        else
+            const selectedPersona = personas[selected - 1]
+            SetPersona(selectedPersona["name"])
+            echom "Selected persona: " .. selectedPersona["name"]
+        endif
+        return true
+    })
+    # Set initial selection based on current persona
+    const currentPersona = Persona()
+    if currentPersona->empty()
+        ui.SetSelectedIndex(0)  # "None" option
+    else
+        const currentIndex = indexof(personas, (_, p) => p["name"] == currentPersona)
+        if currentIndex != -1
+            ui.SetSelectedIndex(currentIndex + 1)  # +1 for "None" offset
+        endif
     endif
     ui.Render()
 enddef
@@ -200,7 +254,13 @@ enddef
 # ExecuteAssistant runs the ai-assistant command and displays results.
 def ExecuteAssistant(prompt: string, input_text: string): void
     # Build command
-    const cmd = [ChatCommand(), '--model=' .. Model(), prompt]
+    var cmd = [ChatCommand(), '--model=' .. Model()]
+    # Add persona if specified
+    const persona = Persona()
+    if !persona->empty()
+        cmd->add('--persona=' .. persona)
+    endif
+    cmd->add(prompt)
 
     # Save current window to return to it later
     const original_winid = win_getid()
