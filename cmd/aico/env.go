@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/urfave/cli/v3"
+
+	"micheam.com/aico/internal/config"
 )
 
 var CmdEnv = &cli.Command{
@@ -19,13 +21,20 @@ var CmdEnv = &cli.Command{
 // Actions
 // -----------------------------------------------------------------------------
 
-func runShowEnv(_ context.Context, cmd *cli.Command) error {
-	fmt.Println("Environment Information:")
-	fmt.Printf("  AI_MODEL: %s\n", os.Getenv("AI_MODEL"))
-	fmt.Printf("  ANTHROPIC_API_KEY: %s\n", maskAPIKey(os.Getenv("ANTHROPIC_API_KEY")))
-	fmt.Printf("  OPENAI_API_KEY: %s\n", maskAPIKey(os.Getenv("OPENAI_API_KEY")))
-	fmt.Printf("  CEREBRAS_API_KEY: %s\n", maskAPIKey(os.Getenv("CEREBRAS_API_KEY")))
-	fmt.Printf("  Config file: %s\n", "~/.config/aico/config.toml")
+func runShowEnv(ctx context.Context, cmd *cli.Command) error {
+	var model string
+	if conf, err := config.Load(); err != nil {
+		model = "Not-loaded"
+	} else {
+		model = conf.Model
+	}
+
+	fmt.Printf("Default Model: %s\n", model)
+	fmt.Printf("Config file: %s\n", config.ConfigFilePath())
+
+	fmt.Printf("ANTHROPIC_API_KEY: %s\n", maskAPIKey(os.Getenv("ANTHROPIC_API_KEY")))
+	fmt.Printf("OPENAI_API_KEY: %s\n", maskAPIKey(os.Getenv("OPENAI_API_KEY")))
+	fmt.Printf("CEREBRAS_API_KEY: %s\n", maskAPIKey(os.Getenv("CEREBRAS_API_KEY")))
 	return nil
 }
 
