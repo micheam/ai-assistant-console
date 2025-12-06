@@ -64,24 +64,84 @@ export def ShowModelSelector(): void
     ui.Render()
 enddef
 
+# Script-local state for prompt buffer
+var pending_input_text: string = ''
+
 # RunAssistant runs the ai-assistant with the given prompt.
 #
 # This function takes the content of the current buffer as input
 # and displays the AI response in a new scratch buffer.
 #
 # Usage:
+#   :Assistant                        " Opens prompt buffer
 #   :Assistant 'explain this code'
-#   :Assistant 'summarize the following'
+#   :Assistant summarize the following
 export def RunAssistant(prompt: string): void
-    if prompt->empty()
-        echoerr "Prompt is required"
-        return
-    endif
-
-    # Get current buffer content
+    # Get current buffer content before doing anything
     const bufcontent = getline(1, '$')
     const input_text = bufcontent->join("\n")
 
+    if prompt->empty()
+        # Open prompt buffer for input
+        OpenPromptBuffer(input_text)
+        return
+    endif
+
+    # Execute with the given prompt
+    ExecuteAssistant(prompt, input_text)
+enddef
+
+# OpenPromptBuffer opens a buffer for entering the prompt.
+#
+# The buffer uses buftype=acwrite so :w triggers submission.
+def OpenPromptBuffer(input_text: string): void
+    # Save input text for later use
+    pending_input_text = input_text
+
+    # Create prompt buffer
+    new
+    setlocal buftype=acwrite
+    setlocal bufhidden=wipe
+    setlocal noswapfile
+    setlocal filetype=markdown
+    const bufname = 'Assistant(prompt:' .. localtime() .. ')'
+    execute 'file ' .. fnameescape(bufname)
+
+    # Set up autocmd for :w
+    const prompt_bufnr = bufnr()
+    execute 'autocmd BufWriteCmd <buffer=' .. prompt_bufnr .. '> ++once call ai_assistant#SubmitPrompt()'
+
+    # Add placeholder text
+    setline(1, ['# Enter your prompt here', '# :w to submit, :q to cancel', ''])
+    cursor(3, 1)
+    startinsert
+enddef
+
+# SubmitPrompt is called when user writes the prompt buffer.
+export def SubmitPrompt(): void
+    # Get prompt from current buffer (skip comment lines)
+    const lines = getline(1, '$')
+    const prompt_lines = lines->copy()->filter((_, line) => line !~# '^#')
+    const prompt = prompt_lines->join("\n")->trim()
+
+    if prompt->empty()
+        echohl WarningMsg
+        echo "Prompt is empty. Write your prompt and :w again, or :q to cancel."
+        echohl None
+        return
+    endif
+
+    # Close prompt buffer
+    setlocal nomodified
+    bwipeout
+
+    # Execute with saved input
+    ExecuteAssistant(prompt, pending_input_text)
+    pending_input_text = ''
+enddef
+
+# ExecuteAssistant runs the ai-assistant command and displays results.
+def ExecuteAssistant(prompt: string, input_text: string): void
     # Build command
     const cmd = [ChatCommand(), '--model=' .. Model(), prompt]
 

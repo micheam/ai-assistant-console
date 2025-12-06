@@ -14,4 +14,4 @@ vim9script
 import autoload '../autoload/ai_assistant.vim' as ai_assistant
 
 command! -nargs=0 AssistantModel ai_assistant.ShowModelSelector()
-command! -nargs=+ Assistant ai_assistant.RunAssistant(<q-args>)
+command! -nargs=* Assistant ai_assistant.RunAssistant(<q-args>)
