@@ -241,9 +241,14 @@ export def SubmitPrompt(): void
         return
     endif
 
-    # Close prompt buffer
+    # Close prompt buffer (defer wipe to allow :wq to complete)
     setlocal nomodified
-    bwipeout
+    const bufnr_to_wipe = bufnr()
+    timer_start(0, (_) => {
+        if bufexists(bufnr_to_wipe)
+            execute 'bwipeout ' .. bufnr_to_wipe
+        endif
+    })
 
     # Execute with saved input
     ExecuteAssistant(prompt, pending_input_text)
