@@ -161,7 +161,7 @@ def ExecuteAssistant(prompt: string, input_text: string): void
     setline(1, '# Waiting for response...')
     redraw
 
-    var output_lines: list<string> = []
+    var is_first_output = true
 
     # Start async job
     const job = job_start(cmd, {
@@ -169,18 +169,38 @@ def ExecuteAssistant(prompt: string, input_text: string): void
         out_io: 'pipe',
         err_io: 'pipe',
         out_cb: (ch, msg) => {
-            output_lines->add(msg)
+            if !bufexists(output_bufnr)
+                return
+            endif
+            if is_first_output
+                # Replace the "Waiting for response..." message
+                setbufline(output_bufnr, 1, msg)
+                is_first_output = false
+            else
+                appendbufline(output_bufnr, '$', msg)
+            endif
+            # Scroll to bottom to show new content
+            if win_id2win(output_winid) != 0
+                win_execute(output_winid, 'normal! G')
+            endif
+            redraw
         },
         err_cb: (ch, msg) => {
-            output_lines->add('[ERROR] ' .. msg)
+            if !bufexists(output_bufnr)
+                return
+            endif
+            if is_first_output
+                setbufline(output_bufnr, 1, '[ERROR] ' .. msg)
+                is_first_output = false
+            else
+                appendbufline(output_bufnr, '$', '[ERROR] ' .. msg)
+            endif
+            redraw
         },
         exit_cb: (job, status) => {
-            # Update buffer with output
             if bufexists(output_bufnr) && win_id2win(output_winid) != 0
-                deletebufline(output_bufnr, 1, '$')
-                if output_lines->len() > 0
-                    setbufline(output_bufnr, 1, output_lines)
-                else
+                if is_first_output
+                    # No output received at all
                     setbufline(output_bufnr, 1, '(No response)')
                 endif
                 win_execute(output_winid, 'cursor(1, 1)')
