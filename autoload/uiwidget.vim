@@ -247,4 +247,4 @@ export class Select
     enddef
 endclass
 
-defcompile
+silent! defcompile
