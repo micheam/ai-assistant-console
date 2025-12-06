@@ -9,6 +9,8 @@ endif
 
 const default_model = 'claude-opus-4-5'
 const default_chat_command = 'aico'
+const default_split_position = 'below'  # 'above', 'below', 'left', 'right'
+const default_split_size = 15  # lines for horizontal, columns for vertical
 
 # Option: g:ai_assistant_model
 export def Model(): string
@@ -36,6 +38,61 @@ enddef
 
 export def SetChatCommand(command: string): void
     g:ai_assistant_bin = command
+enddef
+
+# Option: g:ai_assistant_split_position
+#
+# The position of the output buffer split.
+# Values: 'above', 'below', 'left', 'right'
+# Default: 'above'
+export def SplitPosition(): string
+    if exists('g:ai_assistant_split_position')
+        return g:ai_assistant_split_position
+    endif
+    return default_split_position
+enddef
+
+export def SetSplitPosition(position: string): void
+    g:ai_assistant_split_position = position
+enddef
+
+# Option: g:ai_assistant_split_size
+#
+# The size of the output buffer split.
+# For horizontal splits (above/below): number of lines
+# For vertical splits (left/right): number of columns
+# Default: 15
+export def SplitSize(): number
+    if exists('g:ai_assistant_split_size')
+        return g:ai_assistant_split_size
+    endif
+    return default_split_size
+enddef
+
+export def SetSplitSize(size: number): void
+    g:ai_assistant_split_size = size
+enddef
+
+# OpenSplitBuffer opens a new buffer with configured position and size.
+def OpenSplitBuffer(): void
+    const pos = SplitPosition()
+    const size = SplitSize()
+
+    var cmd = ''
+    if pos == 'above'
+        cmd = $':topleft :{size}new'
+    elseif pos == 'below'
+        cmd = $':botright :{size}new'
+    elseif pos == 'left'
+        cmd = $':vertical topleft :{size}new'
+    elseif pos == 'right'
+        cmd = $':vertical botright :{size}new'
+    else
+        # Fallback to default
+        cmd = $':botright :{size}new'
+    endif
+
+    execute cmd
 enddef
 
 # ShowModelSelector shows a popup menu to select a ai-assistant model.
@@ -99,7 +156,7 @@ def OpenPromptBuffer(input_text: string): void
     pending_input_text = input_text
 
     # Create prompt buffer
-    new
+    OpenSplitBuffer()
     setlocal buftype=acwrite
     setlocal bufhidden=wipe
     setlocal noswapfile
@@ -149,7 +206,7 @@ def ExecuteAssistant(prompt: string, input_text: string): void
     const original_winid = win_getid()
 
     # Create a new scratch buffer for output
-    new
+    OpenSplitBuffer()
     setlocal buftype=nofile
     setlocal bufhidden=wipe
     setlocal noswapfile
