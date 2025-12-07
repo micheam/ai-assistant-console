@@ -1,6 +1,6 @@
 - After modifying the protobuf definition, make sure to run make protogen
 - To run integration tests that require API keys: `go test -tags=integration ./...`
-- GitHub Actions secrets required: `OPENAI_API_KEY` for integration tests on main branch
+- GitHub Actions secrets required: `AICO_OPENAI_API_KEY` for integration tests on main branch
 
 ## Commit Message Guidelines
 

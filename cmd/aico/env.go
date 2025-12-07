@@ -32,9 +32,9 @@ func runShowEnv(ctx context.Context, cmd *cli.Command) error {
 	fmt.Printf("Default Model: %s\n", model)
 	fmt.Printf("Config file: %s\n", config.ConfigFilePath())
 
-	fmt.Printf("ANTHROPIC_API_KEY: %s\n", maskAPIKey(os.Getenv("ANTHROPIC_API_KEY")))
-	fmt.Printf("OPENAI_API_KEY: %s\n", maskAPIKey(os.Getenv("OPENAI_API_KEY")))
-	fmt.Printf("CEREBRAS_API_KEY: %s\n", maskAPIKey(os.Getenv("CEREBRAS_API_KEY")))
+	fmt.Printf("AICO_ANTHROPIC_API_KEY: %s\n", maskAPIKey(os.Getenv("AICO_ANTHROPIC_API_KEY")))
+	fmt.Printf("AICO_OPENAI_API_KEY: %s\n", maskAPIKey(os.Getenv("AICO_OPENAI_API_KEY")))
+	fmt.Printf("AICO_CEREBRAS_API_KEY: %s\n", maskAPIKey(os.Getenv("AICO_CEREBRAS_API_KEY")))
 	return nil
 }
 

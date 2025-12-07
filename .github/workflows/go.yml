@@ -28,4 +28,4 @@ jobs:
       if: github.ref == 'refs/heads/main'
       run: go test -tags=integration -v ./...
       env:
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        AICO_OPENAI_API_KEY: ${{ secrets.AICO_OPENAI_API_KEY }}

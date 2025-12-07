@@ -13,7 +13,7 @@ import (
 
 func ExampleGPT4O_GenerateContent() {
 	ctx := context.TODO()
-	model := openai.NewGPT4O(os.Getenv("OPENAI_API_KEY"))
+	model := openai.NewGPT4O(os.Getenv("AICO_OPENAI_API_KEY"))
 	sess, err := assistant.StartChat(model)
 	if err != nil {
 		fmt.Printf("error: %v", err)
@@ -41,7 +41,7 @@ func ExampleGPT4O_GenerateContent() {
 
 func ExampleGPT4O_GenerateContentStream() {
 	ctx := context.TODO()
-	model := openai.NewGPT4O(os.Getenv("OPENAI_API_KEY"))
+	model := openai.NewGPT4O(os.Getenv("AICO_OPENAI_API_KEY"))
 	sess, err := assistant.StartChat(model)
 	if err != nil {
 		fmt.Printf("error: %v", err)
