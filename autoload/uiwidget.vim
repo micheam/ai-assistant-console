@@ -5,7 +5,7 @@ vim9script
 # Author: Michito Maeda <michto.maeda@gmail.com>
 # License: MIT
 # Created: 2025-01-20
-# Last Updated: 2025-12-06T13:26:13+09:00
+# Last Updated: 2025-12-08T09:17:30+09:00
 # Version: 0.1.0
 # Dependencies: 
 #   - Vim patch 9.1.1119 or higher

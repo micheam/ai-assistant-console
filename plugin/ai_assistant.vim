@@ -1,11 +1,12 @@
 vim9script
 #===============================================================================
 #
-# Vim plugin for AI Assistant chat window functionality
+# Vim plugin for AI Assistant (aico) integration.
 #
-# This script provides an interactive chat window for AI Assistant integration.
-# It includes functionality to manage context buffers, send/receive messages,
-# and handle asynchronous jobs.
+# This plugin provides commands to interact with the aico CLI tool:
+#   :AssistantModel    - Select an AI model interactively
+#   :AssistantPersona  - Select a persona interactively
+#   :Assistant [prompt] - Generate text using the current buffer as input
 #
 # Maintainer:  Michito Maeda <michito.maeda@gmail.com>
 # Last Change: 2025-12-06
