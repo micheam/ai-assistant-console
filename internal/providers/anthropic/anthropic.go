@@ -11,7 +11,10 @@ import (
 	"micheam.com/aico/internal/logging"
 )
 
-const ProviderName = "anthropic"
+const (
+	ProviderName     = "anthropic"
+	defaultMaxTokens = 1_024 * 8
+)
 
 // Anthropic available models and their descriptions from Anthropic Documentation:
 // * https://docs.claude.com/en/docs/about-claude/models/overview#latest-models-comparison
@@ -91,7 +94,7 @@ func buildRequestBody(ctx context.Context, model anthropic.Model, systemInstruct
 		return nil, fmt.Errorf("build message params: %w", err)
 	}
 	return &anthropic.MessageNewParams{
-		MaxTokens: anthropic.F(int64(1_024)),
+		MaxTokens: anthropic.F(int64(defaultMaxTokens)),
 		Model:     anthropic.F(model),
 		Messages:  anthropic.F(messages),
 		System:    anthropic.F(systemMessageParam(systemInstruction)),
