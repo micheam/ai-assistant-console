@@ -268,7 +268,7 @@ func QualifiedName(provider, modelName string) string {
 	return provider + ":" + modelName
 }
 
-// detectProviderByModelName detects the provider for a given model specification.
+// detectProviderByModelSpec detects the provider for a given model specification.
 //
 // Detection priority:
 //  1. If the spec contains an explicit provider (e.g., "groq:llama-3.3-70b"), use that.
