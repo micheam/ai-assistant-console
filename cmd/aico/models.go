@@ -12,6 +12,8 @@ import (
 	"micheam.com/aico/internal/config"
 	"micheam.com/aico/internal/logging"
 	"micheam.com/aico/internal/providers/anthropic"
+	"micheam.com/aico/internal/providers/cerebras"
+	"micheam.com/aico/internal/providers/groq"
 	"micheam.com/aico/internal/providers/openai"
 )
 
@@ -85,7 +87,12 @@ func runListModels(ctx context.Context, cmd *cli.Command) error {
 }
 
 func allAvailableModels() []assistant.ModelDescriptor {
-	return append(anthropic.AvailableModels(), openai.AvailableModels()...)
+	models := []assistant.ModelDescriptor{}
+	models = append(models, anthropic.AvailableModels()...)
+	models = append(models, openai.AvailableModels()...)
+	models = append(models, groq.AvailableModels()...)
+	models = append(models, cerebras.AvailableModels()...)
+	return models
 }
 
 type listItemView struct {
@@ -191,6 +198,12 @@ func detectModel(ctx context.Context, cmd *cli.Command) (assistant.GenerativeMod
 	case openai.ProviderName:
 		apikey := cmd.String(flagAPIKeyOpenAI.Name)
 		return openai.NewGenerativeModel(modelName, apikey)
+	case groq.ProviderName:
+		apikey := cmd.String(flagAPIKeyGroq.Name)
+		return groq.NewGenerativeModel(modelName, apikey)
+	case cerebras.ProviderName:
+		apikey := cmd.String(flagAPIKeyCerebras.Name)
+		return cerebras.NewGenerativeModel(modelName, apikey)
 	default:
 		logger.Warn("unsupported provider for model, using default model", "provider", provider, "model", modelName)
 		return DefaultModel(ctx, cmd)
@@ -203,6 +216,12 @@ func detectProvierByModelName(modelName string) (string, bool) {
 	}
 	if _, found := openai.DescribeModel(modelName); found {
 		return openai.ProviderName, true
+	}
+	if _, found := groq.DescribeModel(modelName); found {
+		return groq.ProviderName, true
+	}
+	if _, found := cerebras.DescribeModel(modelName); found {
+		return cerebras.ProviderName, true
 	}
 	return "", false
 }

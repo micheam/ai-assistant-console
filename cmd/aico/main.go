@@ -40,6 +40,8 @@ func run(args []string) error {
 
 			flagAPIKeyAnthropic,
 			flagAPIKeyOpenAI,
+			flagAPIKeyGroq,
+			flagAPIKeyCerebras,
 		},
 		Action: runGenerate,
 		Commands: []*cli.Command{
@@ -115,6 +117,20 @@ var (
 		Usage: "Anthropic API Key",
 		Sources: cli.NewValueSourceChain(
 			cli.EnvVar(envKeyWithPrefix(appname, "anthropic_api_key")),
+		),
+	}
+	flagAPIKeyGroq = &cli.StringFlag{
+		Name:  "groq-api-key",
+		Usage: "Groq API Key",
+		Sources: cli.NewValueSourceChain(
+			cli.EnvVar(envKeyWithPrefix(appname, "groq_api_key")),
+		),
+	}
+	flagAPIKeyCerebras = &cli.StringFlag{
+		Name:  "cerebras-api-key",
+		Usage: "Cerebras API Key",
+		Sources: cli.NewValueSourceChain(
+			cli.EnvVar(envKeyWithPrefix(appname, "cerebras_api_key")),
 		),
 	}
 )
