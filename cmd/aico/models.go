@@ -138,7 +138,7 @@ func runDescribeModel(ctx context.Context, cmd *cli.Command) error {
 
 		if matchesQualified || matchesSimple {
 			qualifiedName := QualifiedName(model.Provider(), model.Name())
-			if cmd.Bool("json") {
+			if cmd.Bool(flagJSON.Name) {
 				info := map[string]string{
 					"name":           model.Name(),
 					"qualified_name": qualifiedName,
