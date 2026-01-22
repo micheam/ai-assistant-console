@@ -48,9 +48,10 @@ var CmdModels = &cli.Command{
 				},
 			},
 			ShellComplete: func(ctx context.Context, cmd *cli.Command) {
-				// すべての利用可能なモデル名を補完候補として出力
+				// Output both simple and qualified names as completion candidates
 				for _, model := range allAvailableModels() {
 					fmt.Fprintln(cmd.Root().Writer, model.Name())
+					fmt.Fprintln(cmd.Root().Writer, QualifiedName(model.Provider(), model.Name()))
 				}
 			},
 			Action: runDescribeModel,
@@ -67,13 +68,23 @@ func runListModels(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return fmt.Errorf("load config: %w", err)
 	}
+
+	// Parse configured model spec to determine selection
+	var selectedProvider, selectedModel string
+	if conf.Model != "" {
+		selectedProvider, selectedModel, _ = detectProviderByModelSpec(conf.Model, conf.DefaultProvider)
+	}
+
 	models := []listItemView{}
 	for _, model := range allAvailableModels() {
+		qualifiedName := QualifiedName(model.Provider(), model.Name())
+		isSelected := model.Provider() == selectedProvider && model.Name() == selectedModel
 		models = append(models, listItemView{
-			Name:        model.Name(),
-			Provider:    model.Provider(),
-			Description: model.Description(),
-			Selected:    model.Name() == conf.Model,
+			Name:          model.Name(),
+			QualifiedName: qualifiedName,
+			Provider:      model.Provider(),
+			Description:   model.Description(),
+			Selected:      isSelected,
 		})
 	}
 	if cmd.Bool(flagJSON.Name) {
@@ -97,31 +108,42 @@ func allAvailableModels() []assistant.ModelDescriptor {
 }
 
 type listItemView struct {
-	Name        string `json:"name"`
-	Provider    string `json:"provider"`
-	Description string `json:"description"`
-	Selected    bool   `json:"selected"`
+	Name          string `json:"name"`
+	QualifiedName string `json:"qualified_name"`
+	Provider      string `json:"provider"`
+	Description   string `json:"description"`
+	Selected      bool   `json:"selected"`
 }
 
 func (m *listItemView) String() string {
 	if m.Selected {
-		return fmt.Sprintf("%s *", m.Name)
+		return fmt.Sprintf("%s *", m.QualifiedName)
 	}
-	return m.Name
+	return m.QualifiedName
 }
 
 func runDescribeModel(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() < 1 {
 		return fmt.Errorf("model name is required")
 	}
-	modelName := cmd.Args().Get(0)
+	modelSpec := cmd.Args().Get(0)
+	parsed := ParseModelSpec(modelSpec)
+
 	for _, model := range allAvailableModels() {
-		if model.Name() == modelName {
+		// Match by qualified name or simple name
+		matchesQualified := parsed.Provider != "" &&
+			model.Provider() == parsed.Provider &&
+			model.Name() == parsed.ModelName
+		matchesSimple := parsed.Provider == "" && model.Name() == parsed.ModelName
+
+		if matchesQualified || matchesSimple {
+			qualifiedName := QualifiedName(model.Provider(), model.Name())
 			if cmd.Bool("json") {
 				info := map[string]string{
-					"name":        model.Name(),
-					"provider":    model.Provider(),
-					"description": model.Description(),
+					"name":           model.Name(),
+					"qualified_name": qualifiedName,
+					"provider":       model.Provider(),
+					"description":    model.Description(),
 				}
 				encoder := json.NewEncoder(cmd.Root().Writer)
 				encoder.SetIndent("", "  ")
@@ -129,12 +151,13 @@ func runDescribeModel(ctx context.Context, cmd *cli.Command) error {
 			}
 
 			fmt.Fprintf(cmd.Root().Writer, "Model: %s\n", model.Name())
+			fmt.Fprintf(cmd.Root().Writer, "Qualified Name: %s\n", qualifiedName)
 			fmt.Fprintf(cmd.Root().Writer, "Provider: %s\n", model.Provider())
 			fmt.Fprintf(cmd.Root().Writer, "Description: %s\n", model.Description())
 			return nil
 		}
 	}
-	return fmt.Errorf("model not found: %s", modelName)
+	return fmt.Errorf("model not found: %s", modelSpec)
 }
 
 // -----------------------------------------------------------------------------
@@ -167,9 +190,13 @@ func DefaultModel(ctx context.Context, cmd *cli.Command) (assistant.GenerativeMo
 // detectModel attempts to detect the model from the app configuration and command flags.
 //
 // Following is the detection priority:
-// 1. If the --model flag is provided, use that model.
-// 2. Otherwise, use the model specified in the configuration file.
-// 3. If no model is specified in either place, return a default model.
+//  1. If the --model flag is provided, use that model.
+//  2. Otherwise, use the model specified in the configuration file.
+//  3. If no model is specified in either place, return a default model.
+//
+// Model specification formats:
+//   - Simple: "gpt-4o" (provider auto-detected, default_provider preferred if ambiguous)
+//   - Qualified: "openai:gpt-4o" (explicit provider)
 func detectModel(ctx context.Context, cmd *cli.Command) (assistant.GenerativeModel, error) {
 	logger := logging.LoggerFrom(ctx)
 	conf, err := config.Load()
@@ -178,17 +205,17 @@ func detectModel(ctx context.Context, cmd *cli.Command) (assistant.GenerativeMod
 		return DefaultModel(ctx, cmd)
 	}
 
-	modelName := cmd.String(flagModel.Name)
-	if modelName == "" {
-		modelName = conf.Model
+	modelSpec := cmd.String(flagModel.Name)
+	if modelSpec == "" {
+		modelSpec = conf.Model
 	}
-	if modelName == "" {
+	if modelSpec == "" {
 		return DefaultModel(ctx, cmd)
 	}
 
-	provider, found := detectProvierByModelName(modelName)
+	provider, modelName, found := detectProviderByModelSpec(modelSpec, conf.DefaultProvider)
 	if !found {
-		logger.Warn("unable to detect provider for model, using default model", "model", modelName)
+		logger.Warn("unable to detect provider for model, using default model", "model", modelSpec)
 		return DefaultModel(ctx, cmd)
 	}
 
@@ -211,18 +238,103 @@ func detectModel(ctx context.Context, cmd *cli.Command) (assistant.GenerativeMod
 	}
 }
 
+// ModelSpec represents a parsed model specification.
+// It supports both simple names ("gpt-4o") and qualified names ("openai:gpt-4o").
+type ModelSpec struct {
+	Provider  string // Provider name (empty if not specified)
+	ModelName string // Model name
+}
+
+// ParseModelSpec parses a model specification string.
+//
+// Supported formats:
+//   - "model-name" -> ModelSpec{Provider: "", ModelName: "model-name"}
+//   - "provider:model-name" -> ModelSpec{Provider: "provider", ModelName: "model-name"}
+func ParseModelSpec(spec string) ModelSpec {
+	// Find the first colon
+	for i, c := range spec {
+		if c == ':' {
+			return ModelSpec{
+				Provider:  spec[:i],
+				ModelName: spec[i+1:],
+			}
+		}
+	}
+	return ModelSpec{ModelName: spec}
+}
+
+// QualifiedName returns the fully qualified model name in "provider:model" format.
+func QualifiedName(provider, modelName string) string {
+	return provider + ":" + modelName
+}
+
+// detectProviderByModelName detects the provider for a given model specification.
+//
+// Detection priority:
+//  1. If the spec contains an explicit provider (e.g., "groq:llama-3.3-70b"), use that.
+//  2. If defaultProvider is set and supports the model, use that.
+//  3. Otherwise, search providers in order: anthropic, openai, groq, cerebras.
+//
+// Returns the provider name, the actual model name, and whether the model was found.
+func detectProviderByModelSpec(spec string, defaultProvider string) (provider string, modelName string, found bool) {
+	parsed := ParseModelSpec(spec)
+
+	// Case 1: Explicit provider in spec (e.g., "groq:llama-3.3-70b")
+	if parsed.Provider != "" {
+		if validateProviderModel(parsed.Provider, parsed.ModelName) {
+			return parsed.Provider, parsed.ModelName, true
+		}
+		return "", "", false
+	}
+
+	modelName = parsed.ModelName
+
+	// Case 2: Check default provider first if set
+	if defaultProvider != "" {
+		if validateProviderModel(defaultProvider, modelName) {
+			return defaultProvider, modelName, true
+		}
+	}
+
+	// Case 3: Search all providers in order
+	providers := []string{
+		anthropic.ProviderName,
+		openai.ProviderName,
+		groq.ProviderName,
+		cerebras.ProviderName,
+	}
+	for _, p := range providers {
+		if validateProviderModel(p, modelName) {
+			return p, modelName, true
+		}
+	}
+
+	return "", "", false
+}
+
+// validateProviderModel checks if a provider supports the given model name.
+func validateProviderModel(provider, modelName string) bool {
+	switch provider {
+	case anthropic.ProviderName:
+		_, found := anthropic.DescribeModel(modelName)
+		return found
+	case openai.ProviderName:
+		_, found := openai.DescribeModel(modelName)
+		return found
+	case groq.ProviderName:
+		_, found := groq.DescribeModel(modelName)
+		return found
+	case cerebras.ProviderName:
+		_, found := cerebras.DescribeModel(modelName)
+		return found
+	default:
+		return false
+	}
+}
+
+// detectProvierByModelName is kept for backward compatibility.
+// Deprecated: Use detectProviderByModelSpec instead.
 func detectProvierByModelName(modelName string) (string, bool) {
-	if _, found := anthropic.DescribeModel(modelName); found {
-		return anthropic.ProviderName, true
-	}
-	if _, found := openai.DescribeModel(modelName); found {
-		return openai.ProviderName, true
-	}
-	if _, found := groq.DescribeModel(modelName); found {
-		return groq.ProviderName, true
-	}
-	if _, found := cerebras.DescribeModel(modelName); found {
-		return cerebras.ProviderName, true
-	}
-	return "", false
+	provider, _, found := detectProviderByModelSpec(modelName, "")
+	return provider, found
 }
