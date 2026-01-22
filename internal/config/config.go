@@ -44,7 +44,17 @@ type Config struct {
 	// Logfile is the path to the logfile
 	logfile string `toml:"logfile"`
 
+	// DefaultProvider is the default provider to use when model name is ambiguous.
+	//
+	// When multiple providers support the same model name, this provider will be
+	// checked first. Valid values: "anthropic", "openai", "groq", "cerebras".
+	DefaultProvider string `toml:"default_provider"`
+
 	// Model is the model to use for text generation
+	//
+	// Supports two formats:
+	//   - Simple name: "claude-haiku-4-5" (uses DefaultProvider if ambiguous)
+	//   - Qualified name: "anthropic:claude-haiku-4-5" (explicit provider)
 	//
 	// If omitted, the default model for the application will be used.
 	Model string `toml:"model"`

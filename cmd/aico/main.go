@@ -81,7 +81,7 @@ var (
 	flagModel = &cli.StringFlag{
 		Name:    "model",
 		Aliases: []string{"m"},
-		Usage:   "The model to use",
+		Usage:   "Model to use (e.g., 'gpt-4o' or 'openai:gpt-4o' for explicit provider)",
 	}
 
 	flagNoStream = &cli.BoolFlag{
