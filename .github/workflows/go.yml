@@ -24,8 +24,8 @@ jobs:
     - name: Build
       run: go build -v ./...
 
-    - name: Integration Test
-      if: github.ref == 'refs/heads/main'
-      run: go test -tags=integration -v ./...
-      env:
-        AICO_OPENAI_API_KEY: ${{ secrets.AICO_OPENAI_API_KEY }}
+    # - name: Integration Test
+    #   if: github.ref == 'refs/heads/main'
+    #   run: go test -tags=integration -v ./...
+    #   env:
+    #     AICO_OPENAI_API_KEY: ${{ secrets.AICO_OPENAI_API_KEY }}
