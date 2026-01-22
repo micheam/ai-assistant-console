@@ -37,7 +37,8 @@ var CmdModels = &cli.Command{
 			Action: runListModels,
 		},
 		{
-			Name:      "show",
+			Name:      "describe",
+			Aliases:   []string{"desc"},
 			Usage:     "show model information",
 			ArgsUsage: "MODEL",
 			Flags: []cli.Flag{
@@ -52,7 +53,7 @@ var CmdModels = &cli.Command{
 					fmt.Fprintln(cmd.Root().Writer, model.Name())
 				}
 			},
-			Action: runShowModelInfo,
+			Action: runDescribeModel,
 		},
 	},
 }
@@ -109,7 +110,7 @@ func (m *listItemView) String() string {
 	return m.Name
 }
 
-func runShowModelInfo(ctx context.Context, cmd *cli.Command) error {
+func runDescribeModel(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() < 1 {
 		return fmt.Errorf("model name is required")
 	}
