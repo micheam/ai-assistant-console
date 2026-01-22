@@ -1,0 +1,43 @@
+# aico configuration file
+#
+# This file should be placed in one of the following locations:
+# 1. $AI_ASSISTANT_CONFIG_PATH (if set)
+# 2. $XDG_CONFIG_HOME/com.micheam.aico/config.toml (if XDG_CONFIG_HOME is set)
+# 3. $HOME/.config/com.micheam.aico/config.toml (default on macOS/Linux)
+#
+# If no config file is found, aico will automatically create one with default values.
+
+# Path to the log file
+# Default: aico.log (in the same directory as this config file)
+# Can be absolute or relative path (relative paths are resolved from config file location)
+logfile = "aico.log"
+
+# Default provider to use when model name is ambiguous
+# When multiple providers support the same model name, this provider will be checked first.
+# Valid values: "anthropic", "openai", "groq", "cerebras"
+# Default: "" (no default provider)
+default_provider = ""
+
+# Model to use for text generation
+# Supports two formats:
+#   - Simple name: "claude-haiku-4-5" (uses default_provider if ambiguous)
+#   - Qualified name: "anthropic:claude-haiku-4-5" (explicit provider)
+# Default: "claude-haiku-4-5"
+model = "claude-haiku-4-5"
+
+# Persona configurations
+# Each persona has a description and a system message that defines its behavior.
+# You can define multiple personas and switch between them during conversations.
+
+[persona.default]
+description = "Default"
+message = "You're aico, my personal AI assistant.You're here to help me with my daily tasks."
+
+# Example: Add more personas as needed
+# [persona.coding]
+# description = "Coding Assistant"
+# message = "You're an expert software engineer. Help me write clean, efficient code."
+#
+# [persona.writer]
+# description = "Creative Writer"
+# message = "You're a creative writing assistant. Help me craft engaging stories and content."
