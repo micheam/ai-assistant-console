@@ -15,6 +15,7 @@ import (
 	"micheam.com/aico/internal/providers/cerebras"
 	"micheam.com/aico/internal/providers/groq"
 	"micheam.com/aico/internal/providers/openai"
+	"micheam.com/aico/internal/theme"
 )
 
 var CmdModels = &cli.Command{
@@ -150,10 +151,10 @@ func runDescribeModel(ctx context.Context, cmd *cli.Command) error {
 				return encoder.Encode(info)
 			}
 
-			fmt.Fprintf(cmd.Root().Writer, "Model: %s\n", model.Name())
-			fmt.Fprintf(cmd.Root().Writer, "Qualified Name: %s\n", qualifiedName)
-			fmt.Fprintf(cmd.Root().Writer, "Provider: %s\n", model.Provider())
-			fmt.Fprintf(cmd.Root().Writer, "Description: %s\n", model.Description())
+			fmt.Fprintf(cmd.Root().Writer, "%s %s\n", theme.Bold("Model:"), model.Name())
+			fmt.Fprintf(cmd.Root().Writer, "%s %s\n", theme.Bold("Qualified Name:"), qualifiedName)
+			fmt.Fprintf(cmd.Root().Writer, "%s %s\n", theme.Bold("Provider:"), model.Provider())
+			fmt.Fprintf(cmd.Root().Writer, "%s %s\n", theme.Bold("Description:"), model.Description())
 			return nil
 		}
 	}
