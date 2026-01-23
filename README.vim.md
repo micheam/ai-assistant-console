@@ -87,6 +87,18 @@ let g:ai_assistant_split_size = 20
 let g:ai_assistant_persona = 'default'
 ```
 
+### Key Mappings
+
+The plugin does not provide default key mappings. You can define your own mappings in your `.vimrc`:
+
+```vim
+" Map <Leader>ai to :Assistant command (allows you to type prompt after)
+nnoremap <Leader>ai :Assistant<Space>
+
+" Map <Leader>a to open prompt buffer
+nnoremap <Leader>a :Assistant<CR>
+```
+
 ## Documentation
 
 For more details on how to use the AI Assistant Console, please refer to the `doc/ai_assistant_console.txt` file.
