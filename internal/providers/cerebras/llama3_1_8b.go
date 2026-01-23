@@ -26,14 +26,13 @@ func (m *Llama3_1_8B) Provider() string {
 }
 
 func (m *Llama3_1_8B) Name() string {
-	return "llama-3.1-8b"
+	return "llama3.1-8b"
 }
 
 func (m *Llama3_1_8B) Description() string {
-	return `Llama 3.1 8B on Cerebras Inference delivers ultra-fast inference (~1800-2200 tokens/sec).
-A lightweight model ideal for quick tasks while maintaining Cerebras' signature speed advantage.
-Best for: simple tasks, quick Q&A, and applications requiring minimal latency.
-Reference: https://inference-docs.cerebras.ai/`
+	return `Llama 3.1 8B - Lightweight and fast (~2200 tokens/sec).
+Best for: Simple question answering and lightweight tasks.
+Reference: https://inference-docs.cerebras.ai/models/llama-31-8b.md`
 }
 
 func (m *Llama3_1_8B) SetSystemInstruction(contents ...*assistant.TextContent) {
