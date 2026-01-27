@@ -2,7 +2,9 @@ package openai
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"iter"
 
 	"micheam.com/aico/internal/assistant"
 	"micheam.com/aico/internal/logging"
@@ -164,7 +166,8 @@ type ChatResponse struct {
 	Choices []Choice `json:"choices"`
 }
 
-func buildChatRequest(ctx context.Context, modelName string, systemInstruction []*assistant.TextContent, msgs []*assistant.Message) (*ChatRequest, error) {
+// BuildChatRequest builds a chat request for OpenAI-compatible APIs
+func BuildChatRequest(ctx context.Context, modelName string, systemInstruction []*assistant.TextContent, msgs []*assistant.Message) (*ChatRequest, error) {
 	if len(msgs) == 0 {
 		return nil, fmt.Errorf("no messages provided")
 	}
@@ -224,10 +227,51 @@ func buildChatRequest(ctx context.Context, modelName string, systemInstruction [
 	return req, nil
 }
 
-func toGenerateContentResponse(src *ChatResponse) *assistant.GenerateContentResponse {
+// ToGenerateContentResponse converts an OpenAI ChatResponse to a GenerateContentResponse
+func ToGenerateContentResponse(src *ChatResponse) *assistant.GenerateContentResponse {
 	if len(src.Choices) > 0 {
 		text := src.Choices[0].Message.Content[0].(*TextContent).Text
 		return &assistant.GenerateContentResponse{Content: &assistant.TextContent{Text: text}}
 	}
 	return &assistant.GenerateContentResponse{Content: nil}
+}
+
+// GenerateContent is a shared implementation for generating content with OpenAI-compatible APIs
+func GenerateContent(ctx context.Context, client *APIClient, apiEndpoint string, modelName string, systemInstruction []*assistant.TextContent, msgs []*assistant.Message) (*assistant.GenerateContentResponse, error) {
+	req, err := BuildChatRequest(ctx, modelName, systemInstruction, msgs)
+	if err != nil {
+		return nil, fmt.Errorf("build chat request: %w", err)
+	}
+	resp := new(ChatResponse)
+	if err := client.DoPost(ctx, apiEndpoint, req, resp); err != nil {
+		return nil, err
+	}
+	return ToGenerateContentResponse(resp), nil
+}
+
+// GenerateContentStream is a shared implementation for streaming content with OpenAI-compatible APIs
+func GenerateContentStream(ctx context.Context, client *APIClient, apiEndpoint string, modelName string, systemInstruction []*assistant.TextContent, msgs []*assistant.Message) (iter.Seq[*assistant.GenerateContentResponse], error) {
+	req, err := BuildChatRequest(ctx, modelName, systemInstruction, msgs)
+	if err != nil {
+		return nil, fmt.Errorf("build chat request: %w", err)
+	}
+	req.Stream = true
+	iter, err := client.DoStream(ctx, apiEndpoint, req)
+	if err != nil {
+		return nil, err
+	}
+	return func(yield func(*assistant.GenerateContentResponse) bool) {
+		for s := range iter {
+			var res *ChatResponse
+			err := json.Unmarshal([]byte(s), &res)
+			if err != nil {
+				logging.LoggerFrom(ctx).Error(fmt.Sprintf("error: %v", err))
+				continue
+			}
+			delta := assistant.NewTextContent(res.Choices[0].Delta.Content)
+			if !yield(&assistant.GenerateContentResponse{Content: delta}) {
+				break
+			}
+		}
+	}, nil
 }

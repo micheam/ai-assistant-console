@@ -42,9 +42,9 @@ func (m *Qwen3_235B_A22B_Instruct_2507) SetSystemInstruction(contents ...*assist
 }
 
 func (m *Qwen3_235B_A22B_Instruct_2507) GenerateContent(ctx context.Context, msgs ...*assistant.Message) (*assistant.GenerateContentResponse, error) {
-	return generateContent(ctx, m.client, m.Name(), m.systemInstruction, msgs)
+	return openai.GenerateContent(ctx, m.client, Endpoint, m.Name(), m.systemInstruction, msgs)
 }
 
 func (m *Qwen3_235B_A22B_Instruct_2507) GenerateContentStream(ctx context.Context, msgs ...*assistant.Message) (iter.Seq[*assistant.GenerateContentResponse], error) {
-	return generateContentStream(ctx, m.client, m.Name(), m.systemInstruction, msgs)
+	return openai.GenerateContentStream(ctx, m.client, Endpoint, m.Name(), m.systemInstruction, msgs)
 }

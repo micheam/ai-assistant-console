@@ -50,7 +50,7 @@ func (m *O1Mini) SetHttpClient(c *http.Client) {
 }
 
 func (m *O1Mini) GenerateContent(ctx context.Context, msgs ...*assistant.Message) (*assistant.GenerateContentResponse, error) {
-	req, err := buildChatRequest(ctx, m.Name(), m.systemInstruction, msgs)
+	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)
 	}
@@ -59,11 +59,11 @@ func (m *O1Mini) GenerateContent(ctx context.Context, msgs ...*assistant.Message
 	if err := m.client.DoPost(ctx, endpoint, req, resp); err != nil {
 		return nil, err
 	}
-	return toGenerateContentResponse(resp), nil
+	return ToGenerateContentResponse(resp), nil
 }
 
 func (m *O1Mini) GenerateContentStream(ctx context.Context, msgs ...*assistant.Message) (iter.Seq[*assistant.GenerateContentResponse], error) {
-	req, err := buildChatRequest(ctx, m.Name(), m.systemInstruction, msgs)
+	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)
 	}

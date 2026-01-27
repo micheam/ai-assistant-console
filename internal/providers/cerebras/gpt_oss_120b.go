@@ -40,9 +40,9 @@ func (m *GptOss120B) SetSystemInstruction(contents ...*assistant.TextContent) {
 }
 
 func (m *GptOss120B) GenerateContent(ctx context.Context, msgs ...*assistant.Message) (*assistant.GenerateContentResponse, error) {
-	return generateContent(ctx, m.client, m.Name(), m.systemInstruction, msgs)
+	return openai.GenerateContent(ctx, m.client, Endpoint, m.Name(), m.systemInstruction, msgs)
 }
 
 func (m *GptOss120B) GenerateContentStream(ctx context.Context, msgs ...*assistant.Message) (iter.Seq[*assistant.GenerateContentResponse], error) {
-	return generateContentStream(ctx, m.client, m.Name(), m.systemInstruction, msgs)
+	return openai.GenerateContentStream(ctx, m.client, Endpoint, m.Name(), m.systemInstruction, msgs)
 }
