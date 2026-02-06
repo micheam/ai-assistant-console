@@ -9,6 +9,7 @@ import (
 )
 
 type Qwen3_235B_A22B_Instruct_2507 struct {
+	assistant.DeprecationInfo
 	systemInstruction []*assistant.TextContent
 	client            *openai.APIClient
 }

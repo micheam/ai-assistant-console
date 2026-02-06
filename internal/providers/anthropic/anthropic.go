@@ -55,7 +55,7 @@ func AvailableModels() []assistant.ModelDescriptor {
 	return []assistant.ModelDescriptor{
 		&ClaudeOpus4_6{},
 		&ClaudeSonnet4_5{},
-		&ClaudeOpus4_5{},
+		&ClaudeOpus4_5{DeprecationInfo: assistant.DeprecationInfo{IsDeprecated: true, RemovedIn: "v2.0.0"}},
 		&ClaudeHaiku4_5{},
 	}
 }

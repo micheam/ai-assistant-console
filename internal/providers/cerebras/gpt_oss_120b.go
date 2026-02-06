@@ -9,6 +9,7 @@ import (
 )
 
 type GptOss120B struct {
+	assistant.DeprecationInfo
 	systemInstruction []*assistant.TextContent
 	client            *openai.APIClient
 }

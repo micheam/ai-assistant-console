@@ -9,6 +9,8 @@ type ModelDescriptor interface {
 	Name() string
 	Description() string
 	Provider() string
+	Deprecated() bool
+	DeprecatedRemovedIn() string
 }
 
 // GenerativeModel represents a generative model.

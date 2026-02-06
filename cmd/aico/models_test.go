@@ -76,6 +76,42 @@ func TestQualifiedName(t *testing.T) {
 	}
 }
 
+func TestListItemView_String(t *testing.T) {
+	tests := []struct {
+		name     string
+		view     listItemView
+		expected string
+	}{
+		{
+			name:     "normal model",
+			view:     listItemView{QualifiedName: "openai:gpt-5.2"},
+			expected: "openai:gpt-5.2",
+		},
+		{
+			name:     "selected model",
+			view:     listItemView{QualifiedName: "openai:gpt-5.2", Selected: true},
+			expected: "openai:gpt-5.2 *",
+		},
+		{
+			name:     "deprecated model",
+			view:     listItemView{QualifiedName: "openai:gpt-4o", Deprecated: true},
+			expected: "openai:gpt-4o [deprecated]",
+		},
+		{
+			name:     "deprecated and selected model",
+			view:     listItemView{QualifiedName: "openai:gpt-4o", Deprecated: true, Selected: true},
+			expected: "openai:gpt-4o [deprecated] *",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.view.String()
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
 func TestDetectProviderByModelSpec(t *testing.T) {
 	tests := []struct {
 		name            string

@@ -15,6 +15,7 @@ import (
 const ModelNameClaudeOpus4_6 = "claude-opus-4-6"
 
 type ClaudeOpus4_6 struct {
+	assistant.DeprecationInfo
 	systemInstruction []*assistant.TextContent
 	client            *anthropic.Client
 

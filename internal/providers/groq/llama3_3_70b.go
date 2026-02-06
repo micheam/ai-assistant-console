@@ -9,6 +9,7 @@ import (
 )
 
 type Llama3_3_70B struct {
+	assistant.DeprecationInfo
 	systemInstruction []*assistant.TextContent
 	client            *openai.APIClient
 }

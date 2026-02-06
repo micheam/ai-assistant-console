@@ -15,6 +15,7 @@ import (
 const ModelNameClaudeSonnet4 = "claude-sonnet-4-5"
 
 type ClaudeSonnet4_5 struct {
+	assistant.DeprecationInfo
 	systemInstruction []*assistant.TextContent
 	client            *anthropic.Client
 

@@ -12,6 +12,7 @@ import (
 )
 
 type O1Mini struct {
+	assistant.DeprecationInfo
 	systemInstruction []*assistant.TextContent
 	client            *APIClient
 }

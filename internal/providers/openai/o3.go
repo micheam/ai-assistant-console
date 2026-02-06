@@ -12,6 +12,7 @@ import (
 )
 
 type O3 struct {
+	assistant.DeprecationInfo
 	systemInstruction []*assistant.TextContent
 	client            *APIClient
 }

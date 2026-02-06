@@ -12,6 +12,7 @@ import (
 )
 
 type GPT4OMini struct {
+	assistant.DeprecationInfo
 	systemInstruction []*assistant.TextContent
 	client            *APIClient
 }

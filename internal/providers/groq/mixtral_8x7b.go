@@ -9,6 +9,7 @@ import (
 )
 
 type Mixtral8x7B struct {
+	assistant.DeprecationInfo
 	systemInstruction []*assistant.TextContent
 	client            *openai.APIClient
 }

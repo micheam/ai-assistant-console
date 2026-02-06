@@ -12,6 +12,7 @@ import (
 )
 
 type GPT52 struct {
+	assistant.DeprecationInfo
 	systemInstruction []*assistant.TextContent
 	client            *APIClient
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/urfave/cli/v3"
 
@@ -22,6 +23,13 @@ var CmdModels = &cli.Command{
 	Name:  "models",
 	Usage: "manage AI models",
 
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "all",
+			Usage: "include deprecated models",
+		},
+	},
+
 	// default action: list models
 	Action: runListModels,
 	Commands: []*cli.Command{
@@ -33,6 +41,10 @@ var CmdModels = &cli.Command{
 				&cli.BoolFlag{
 					Name:  "json",
 					Usage: "output in JSON format",
+				},
+				&cli.BoolFlag{
+					Name:  "all",
+					Usage: "include deprecated models",
 				},
 			},
 			Action: runListModels,
@@ -70,6 +82,8 @@ func runListModels(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("load config: %w", err)
 	}
 
+	showAll := cmd.Bool("all")
+
 	// Parse configured model spec to determine selection
 	var selectedProvider, selectedModel string
 	if conf.Model != "" {
@@ -78,14 +92,21 @@ func runListModels(ctx context.Context, cmd *cli.Command) error {
 
 	models := []listItemView{}
 	for _, model := range allAvailableModels() {
+		// Filter deprecated models unless --all is specified
+		if !showAll && model.Deprecated() {
+			continue
+		}
+
 		qualifiedName := QualifiedName(model.Provider(), model.Name())
 		isSelected := model.Provider() == selectedProvider && model.Name() == selectedModel
 		models = append(models, listItemView{
-			Name:          model.Name(),
-			QualifiedName: qualifiedName,
-			Provider:      model.Provider(),
-			Description:   model.Description(),
-			Selected:      isSelected,
+			Name:                model.Name(),
+			QualifiedName:       qualifiedName,
+			Provider:            model.Provider(),
+			Description:         model.Description(),
+			Selected:            isSelected,
+			Deprecated:          model.Deprecated(),
+			DeprecatedRemovedIn: model.DeprecatedRemovedIn(),
 		})
 	}
 	if cmd.Bool(flagJSON.Name) {
@@ -109,18 +130,24 @@ func allAvailableModels() []assistant.ModelDescriptor {
 }
 
 type listItemView struct {
-	Name          string `json:"name"`
-	QualifiedName string `json:"qualified_name"`
-	Provider      string `json:"provider"`
-	Description   string `json:"description"`
-	Selected      bool   `json:"selected"`
+	Name                string `json:"name"`
+	QualifiedName       string `json:"qualified_name"`
+	Provider            string `json:"provider"`
+	Description         string `json:"description"`
+	Selected            bool   `json:"selected"`
+	Deprecated          bool   `json:"deprecated,omitempty"`
+	DeprecatedRemovedIn string `json:"deprecated_removed_in,omitempty"`
 }
 
 func (m *listItemView) String() string {
-	if m.Selected {
-		return fmt.Sprintf("%s *", m.QualifiedName)
+	name := m.QualifiedName
+	if m.Deprecated {
+		name += " [deprecated]"
 	}
-	return m.QualifiedName
+	if m.Selected {
+		return name + " *"
+	}
+	return name
 }
 
 func runDescribeModel(ctx context.Context, cmd *cli.Command) error {
@@ -140,11 +167,15 @@ func runDescribeModel(ctx context.Context, cmd *cli.Command) error {
 		if matchesQualified || matchesSimple {
 			qualifiedName := QualifiedName(model.Provider(), model.Name())
 			if cmd.Bool(flagJSON.Name) {
-				info := map[string]string{
+				info := map[string]interface{}{
 					"name":           model.Name(),
 					"qualified_name": qualifiedName,
 					"provider":       model.Provider(),
 					"description":    model.Description(),
+				}
+				if model.Deprecated() {
+					info["deprecated"] = true
+					info["deprecated_removed_in"] = model.DeprecatedRemovedIn()
 				}
 				encoder := json.NewEncoder(cmd.Root().Writer)
 				encoder.SetIndent("", "  ")
@@ -155,6 +186,10 @@ func runDescribeModel(ctx context.Context, cmd *cli.Command) error {
 			fmt.Fprintf(cmd.Root().Writer, "%s %s\n", theme.Bold("Qualified Name:"), qualifiedName)
 			fmt.Fprintf(cmd.Root().Writer, "%s %s\n", theme.Bold("Provider:"), model.Provider())
 			fmt.Fprintf(cmd.Root().Writer, "%s %s\n", theme.Bold("Description:"), model.Description())
+			if model.Deprecated() {
+				fmt.Fprintf(cmd.Root().Writer, "%s %s\n", theme.Bold("Deprecated:"), "yes")
+				fmt.Fprintf(cmd.Root().Writer, "%s %s\n", theme.Bold("Removed In:"), model.DeprecatedRemovedIn())
+			}
 			return nil
 		}
 	}
@@ -220,23 +255,39 @@ func detectModel(ctx context.Context, cmd *cli.Command) (assistant.GenerativeMod
 		return DefaultModel(ctx, cmd)
 	}
 
+	var model assistant.GenerativeModel
 	switch provider {
 	case anthropic.ProviderName:
 		apikey := cmd.String(flagAPIKeyAnthropic.Name)
-		return anthropic.NewGenerativeModel(modelName, apikey)
+		model, err = anthropic.NewGenerativeModel(modelName, apikey)
 	case openai.ProviderName:
 		apikey := cmd.String(flagAPIKeyOpenAI.Name)
-		return openai.NewGenerativeModel(modelName, apikey)
+		model, err = openai.NewGenerativeModel(modelName, apikey)
 	case groq.ProviderName:
 		apikey := cmd.String(flagAPIKeyGroq.Name)
-		return groq.NewGenerativeModel(modelName, apikey)
+		model, err = groq.NewGenerativeModel(modelName, apikey)
 	case cerebras.ProviderName:
 		apikey := cmd.String(flagAPIKeyCerebras.Name)
-		return cerebras.NewGenerativeModel(modelName, apikey)
+		model, err = cerebras.NewGenerativeModel(modelName, apikey)
 	default:
 		logger.Warn("unsupported provider for model, using default model", "provider", provider, "model", modelName)
 		return DefaultModel(ctx, cmd)
 	}
+	if err != nil {
+		return nil, err
+	}
+
+	// Warn if the resolved model is deprecated
+	if model.Deprecated() {
+		removedIn := model.DeprecatedRemovedIn()
+		if removedIn != "" {
+			fmt.Fprintf(os.Stderr, "Warning: model %q is deprecated and will be removed in %s. Consider switching to a newer model.\n", model.Name(), removedIn)
+		} else {
+			fmt.Fprintf(os.Stderr, "Warning: model %q is deprecated. Consider switching to a newer model.\n", model.Name())
+		}
+	}
+
+	return model, nil
 }
 
 // ModelSpec represents a parsed model specification.

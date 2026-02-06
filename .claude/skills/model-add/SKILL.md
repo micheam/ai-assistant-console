@@ -1,5 +1,5 @@
 ---
-name: add-model
+name: model-add
 description: Add a new AI model to a provider (anthropic, openai, groq, cerebras). Use when a new model is announced and needs to be supported in aico.
 argument-hint: "[provider:model-id]"
 ---
@@ -103,11 +103,12 @@ Update the documentation comment block at the top of the provider file to includ
 
 ### 4. Deprecate predecessor (if requested)
 
-If the user requests deprecating an older model:
+If the user requests deprecating an older model, use the `/model-deprecate` skill instead, or apply the following changes manually:
 
-1. Prefix its `Description()` return with `[Deprecated] <Model Name> - superseded by <New Model>.`
-2. Move its entry in the doc comment to the bottom with `(Deprecated)` suffix
-3. Keep all code functional — do NOT remove the model
+1. Set `DeprecationInfo` in the model's `AvailableModels()` entry: `DeprecationInfo: assistant.DeprecationInfo{IsDeprecated: true, RemovedIn: "vX.Y.Z"}`
+2. Prefix its `Description()` return with `[Deprecated] <Model Name> - superseded by <New Model>.`
+3. Move its entry in the doc comment to the bottom with `(Deprecated)` suffix
+4. Keep all code functional — do NOT remove the model
 
 ### 5. Build and test
 

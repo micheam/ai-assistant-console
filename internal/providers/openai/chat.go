@@ -23,10 +23,10 @@ func AvailableModels() []assistant.ModelDescriptor {
 		&O4Mini{},
 		&O3Mini{},
 		// Deprecated
-		&GPT4O{},
-		&GPT4OMini{},
-		&O1{},
-		&O1Mini{},
+		&GPT4O{DeprecationInfo: assistant.DeprecationInfo{IsDeprecated: true, RemovedIn: "v2.0.0"}},
+		&GPT4OMini{DeprecationInfo: assistant.DeprecationInfo{IsDeprecated: true, RemovedIn: "v2.0.0"}},
+		&O1{DeprecationInfo: assistant.DeprecationInfo{IsDeprecated: true, RemovedIn: "v2.0.0"}},
+		&O1Mini{DeprecationInfo: assistant.DeprecationInfo{IsDeprecated: true, RemovedIn: "v2.0.0"}},
 	}
 }
 

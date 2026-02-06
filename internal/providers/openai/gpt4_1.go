@@ -12,6 +12,7 @@ import (
 )
 
 type GPT41 struct {
+	assistant.DeprecationInfo
 	systemInstruction []*assistant.TextContent
 	client            *APIClient
 }
