@@ -17,36 +17,43 @@ const (
 )
 
 // Anthropic available models and their descriptions from Anthropic Documentation:
-// * https://docs.claude.com/en/docs/about-claude/models/overview#latest-models-comparison
-// * https://docs.claude.com/en/docs/about-claude/models/choosing-a-model#model-selection-matrix
+// * https://platform.claude.com/docs/en/about-claude/models/overview
+//
+// Claude Opus 4.6:
+//
+//     * Our most intelligent model for building agents and coding
+//     * Top-tier results in reasoning, coding, multilingual tasks, and long-context handling
+//     * Supports extended thinking and adaptive thinking
+//     * Pricing: $5/MTok input, $25/MTok output
+//     * Supports 200K context window (1M with beta header) and 128K max output
 //
 // Claude Sonnet 4.5:
 //
-//     * Latest generation model with highest intelligence across most tasks
+//     * Our best combination of speed and intelligence
 //     * Best for complex agents and coding with superior tool orchestration
 //     * Ideal for autonomous coding agents, complex financial analysis, multi-hour research tasks
 //     * Pricing: $3/MTok input, $15/MTok output
-//
-// Claude Opus 4.5:
-//
-//     * State-of-the-art model for the world's hardest problems
-//     * Best for real-world software engineering, long-horizon autonomous tasks
-//     * Enhanced vision, reasoning, and mathematics skills
-//     * Superior tool calling and multi-agent coordination
-//     * Pricing: $5/MTok input, $25/MTok output
+//     * Supports 200K context window (1M with beta header) and 64K max output
 //
 // Claude Haiku 4.5:
 //
-//     * Fastest model with near-frontier performance
+//     * Our fastest model with near-frontier intelligence
 //     * Most economical price point with lightning-fast speed
 //     * Best for real-time applications, high-volume intelligent processing, sub-agent tasks
 //     * Pricing: $1/MTok input, $5/MTok output
+//     * Supports 200K context window and 64K max output
 //
-// All models support 200K token context window, 64K max output, and extended thinking capabilities.
+// Claude Opus 4.5 (Deprecated):
+//
+//     * State-of-the-art model for the world's hardest problems (legacy)
+//     * Superseded by Claude Opus 4.6
+//     * Pricing: $5/MTok input, $25/MTok output
+//     * Supports 200K context window and 64K max output
 
 // AvailableModels returns a list of available models
 func AvailableModels() []assistant.ModelDescriptor {
 	return []assistant.ModelDescriptor{
+		&ClaudeOpus4_6{},
 		&ClaudeSonnet4_5{},
 		&ClaudeOpus4_5{},
 		&ClaudeHaiku4_5{},
@@ -65,6 +72,8 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 	switch modelName {
 	default:
 		return nil, false
+	case "claude-opus-4-6":
+		return &ClaudeOpus4_6{}, true
 	case "claude-sonnet-4-5":
 		return &ClaudeSonnet4_5{}, true
 	case "claude-opus-4-5":
@@ -78,6 +87,8 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, error) {
 	client := anthropic.NewClient(option.WithAPIKey(apiKey))
 	switch modelName {
+	case "claude-opus-4-6":
+		return NewClaudeOpus4_6(client), nil
 	case "claude-sonnet-4-5":
 		return NewClaudeSonnet4(client), nil
 	case "claude-opus-4-5":
