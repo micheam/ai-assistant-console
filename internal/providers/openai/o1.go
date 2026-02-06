@@ -33,9 +33,9 @@ func (m *O1) Name() string {
 }
 
 func (m *O1) Description() string {
-	return `The o1 series of models are trained with reinforcement learning for complex reasoning tasks.
+	return `[Deprecated] o1 - superseded by o3.
+The o1 series of models are trained with reinforcement learning for complex reasoning tasks.
 These models generate a long internal chain of thought before responding.
-o1 is the latest reasoning model, supporting both text and image inputs.
 The knowledge cutoff date for o1 models is October 2023.
 Reference: https://platform.openai.com/docs/models#o1`
 }

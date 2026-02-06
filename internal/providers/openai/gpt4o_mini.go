@@ -33,10 +33,9 @@ func (m *GPT4OMini) Name() string {
 }
 
 func (m *GPT4OMini) Description() string {
-	return `GPT-4o-mini (“o” for “omni”) is a fast, affordable small model for focused tasks.
+	return `[Deprecated] GPT-4o-mini - superseded by gpt-4.1-mini.
+GPT-4o-mini is a fast, affordable small model for focused tasks.
 It accepts both text and image inputs, and produces text outputs, including structured outputs.
-Outputs from a larger model like GPT-4o can be distilled into GPT-4o-mini to achieve similar
-results with reduced cost and latency.
 The knowledge cutoff date for GPT-4o-mini models is October 2023.
 Reference: https://platform.openai.com/docs/models#gpt-4o-mini`
 }

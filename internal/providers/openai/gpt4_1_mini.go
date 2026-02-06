@@ -11,49 +11,47 @@ import (
 	"micheam.com/aico/internal/logging"
 )
 
-type O1Mini struct {
+type GPT41Mini struct {
 	systemInstruction []*assistant.TextContent
 	client            *APIClient
 }
 
-var _ assistant.GenerativeModel = (*O1Mini)(nil)
+var _ assistant.GenerativeModel = (*GPT41Mini)(nil)
 
-func NewO1Mini(apiKey string) *O1Mini {
-	return &O1Mini{
+func NewGPT41Mini(apiKey string) *GPT41Mini {
+	return &GPT41Mini{
 		client: NewAPIClient(apiKey),
 	}
 }
 
-func (m *O1Mini) Provider() string {
+func (m *GPT41Mini) Provider() string {
 	return ProviderName
 }
 
-func (m *O1Mini) Name() string {
-	return "o1-mini"
+func (m *GPT41Mini) Name() string {
+	return "gpt-4.1-mini"
 }
 
-func (m *O1Mini) Description() string {
-	return `[Deprecated] o1-mini - superseded by o4-mini.
-The o1 series of models are trained with reinforcement learning for complex reasoning tasks.
-These models generate a long internal chain of thought before responding.
-The knowledge cutoff date for o1-mini models is October 2023.
-Reference: https://platform.openai.com/docs/models#o1`
+func (m *GPT41Mini) Description() string {
+	return `GPT-4.1 mini is a fast, capable, and efficient small model with a 1M token context window and 32K max output tokens.
+It excels in instruction-following, coding, and overall intelligence at reduced cost and latency.
+Pricing: $0.40 / $1.60 per MTok (input / output).
+Reference: https://platform.openai.com/docs/models#gpt-4.1-mini`
 }
 
-func (m *O1Mini) SetSystemInstruction(contents ...*assistant.TextContent) {
+func (m *GPT41Mini) SetSystemInstruction(contents ...*assistant.TextContent) {
 	m.systemInstruction = contents
 }
 
-func (m *O1Mini) SetHttpClient(c *http.Client) {
+func (m *GPT41Mini) SetHttpClient(c *http.Client) {
 	m.client.SetHTTPClient(c)
 }
 
-func (m *O1Mini) GenerateContent(ctx context.Context, msgs ...*assistant.Message) (*assistant.GenerateContentResponse, error) {
+func (m *GPT41Mini) GenerateContent(ctx context.Context, msgs ...*assistant.Message) (*assistant.GenerateContentResponse, error) {
 	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)
 	}
-	// Send request
 	resp := new(ChatResponse)
 	if err := m.client.DoPost(ctx, endpoint, req, resp); err != nil {
 		return nil, err
@@ -61,18 +59,16 @@ func (m *O1Mini) GenerateContent(ctx context.Context, msgs ...*assistant.Message
 	return ToGenerateContentResponse(resp), nil
 }
 
-func (m *O1Mini) GenerateContentStream(ctx context.Context, msgs ...*assistant.Message) (iter.Seq[*assistant.GenerateContentResponse], error) {
+func (m *GPT41Mini) GenerateContentStream(ctx context.Context, msgs ...*assistant.Message) (iter.Seq[*assistant.GenerateContentResponse], error) {
 	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)
 	}
-	// Send request
 	req.Stream = true
 	iter, err := m.client.DoStream(ctx, endpoint, req)
 	if err != nil {
 		return nil, err
 	}
-	// return converter iter
 	return func(yield func(*assistant.GenerateContentResponse) bool) {
 		for s := range iter {
 			var res *ChatResponse

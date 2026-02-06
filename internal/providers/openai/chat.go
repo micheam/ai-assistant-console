@@ -16,11 +16,17 @@ const ProviderName = "openai"
 // AvailableModels returns a list of available models
 func AvailableModels() []assistant.ModelDescriptor {
 	return []assistant.ModelDescriptor{
+		&GPT52{},
+		&GPT41{},
+		&GPT41Mini{},
+		&O3{},
+		&O4Mini{},
+		&O3Mini{},
+		// Deprecated
 		&GPT4O{},
 		&GPT4OMini{},
 		&O1{},
 		&O1Mini{},
-		&O3Mini{},
 	}
 }
 
@@ -36,6 +42,19 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 	switch modelName {
 	default:
 		return nil, false
+	case "gpt-5.2":
+		return &GPT52{}, true
+	case "gpt-4.1":
+		return &GPT41{}, true
+	case "gpt-4.1-mini":
+		return &GPT41Mini{}, true
+	case "o3":
+		return &O3{}, true
+	case "o4-mini":
+		return &O4Mini{}, true
+	case "o3-mini":
+		return &O3Mini{}, true
+	// Deprecated
 	case "gpt-4o":
 		return &GPT4O{}, true
 	case "gpt-4o-mini":
@@ -44,14 +63,25 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 		return &O1{}, true
 	case "o1-mini":
 		return &O1Mini{}, true
-	case "o3-mini":
-		return &O3Mini{}, true
 	}
 }
 
 // NewGenerativeModel creates a new instance of a generative model
 func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, error) {
 	switch modelName {
+	case "gpt-5.2":
+		return NewGPT52(apiKey), nil
+	case "gpt-4.1":
+		return NewGPT41(apiKey), nil
+	case "gpt-4.1-mini":
+		return NewGPT41Mini(apiKey), nil
+	case "o3":
+		return NewO3(apiKey), nil
+	case "o4-mini":
+		return NewO4Mini(apiKey), nil
+	case "o3-mini":
+		return NewO3Mini(apiKey), nil
+	// Deprecated
 	case "gpt-4o":
 		return NewGPT4O(apiKey), nil
 	case "gpt-4o-mini":
@@ -60,8 +90,6 @@ func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, er
 		return NewO1(apiKey), nil
 	case "o1-mini":
 		return NewO1Mini(apiKey), nil
-	case "o3-mini":
-		return NewO3Mini(apiKey), nil
 	}
 	return nil, fmt.Errorf("unsupported model name: %s", modelName)
 }

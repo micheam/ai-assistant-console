@@ -33,10 +33,9 @@ func (m *GPT4O) Name() string {
 }
 
 func (m *GPT4O) Description() string {
-	return `GPT-4o (“o” for “omni”) is a versatile, high-intelligence flagship model of OpenAI.
+	return `[Deprecated] GPT-4o - superseded by gpt-5.2 and gpt-4.1.
+GPT-4o ("o" for "omni") is a versatile, high-intelligence flagship model of OpenAI.
 It supports both text and image inputs and generates text outputs, including structured responses.
-The model ID "chatgpt-4o-latest" dynamically points to the latest version of GPT-4o used in ChatGPT
-and is updated when significant changes occur.
 The knowledge cutoff date for GPT-4o models is October 2023.
 Reference: https://platform.openai.com/docs/models#gpt-4o`
 }

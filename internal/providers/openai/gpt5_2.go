@@ -11,44 +11,44 @@ import (
 	"micheam.com/aico/internal/logging"
 )
 
-type O1Mini struct {
+type GPT52 struct {
 	systemInstruction []*assistant.TextContent
 	client            *APIClient
 }
 
-var _ assistant.GenerativeModel = (*O1Mini)(nil)
+var _ assistant.GenerativeModel = (*GPT52)(nil)
 
-func NewO1Mini(apiKey string) *O1Mini {
-	return &O1Mini{
+func NewGPT52(apiKey string) *GPT52 {
+	return &GPT52{
 		client: NewAPIClient(apiKey),
 	}
 }
 
-func (m *O1Mini) Provider() string {
+func (m *GPT52) Provider() string {
 	return ProviderName
 }
 
-func (m *O1Mini) Name() string {
-	return "o1-mini"
+func (m *GPT52) Name() string {
+	return "gpt-5.2"
 }
 
-func (m *O1Mini) Description() string {
-	return `[Deprecated] o1-mini - superseded by o4-mini.
-The o1 series of models are trained with reinforcement learning for complex reasoning tasks.
-These models generate a long internal chain of thought before responding.
-The knowledge cutoff date for o1-mini models is October 2023.
-Reference: https://platform.openai.com/docs/models#o1`
+func (m *GPT52) Description() string {
+	return `GPT-5.2 is OpenAI's flagship model for coding and agentic tasks.
+It features a 400K context window and 128K max output tokens, with a knowledge cutoff of August 2025.
+It excels at complex reasoning, coding (SWE-Bench Pro: 55.6%), math (AIME 2025: 100%), and science (GPQA Diamond: ~93%).
+Pricing: $1.75 / $14.00 per MTok (input / output).
+Reference: https://platform.openai.com/docs/models#gpt-5.2`
 }
 
-func (m *O1Mini) SetSystemInstruction(contents ...*assistant.TextContent) {
+func (m *GPT52) SetSystemInstruction(contents ...*assistant.TextContent) {
 	m.systemInstruction = contents
 }
 
-func (m *O1Mini) SetHttpClient(c *http.Client) {
+func (m *GPT52) SetHttpClient(c *http.Client) {
 	m.client.SetHTTPClient(c)
 }
 
-func (m *O1Mini) GenerateContent(ctx context.Context, msgs ...*assistant.Message) (*assistant.GenerateContentResponse, error) {
+func (m *GPT52) GenerateContent(ctx context.Context, msgs ...*assistant.Message) (*assistant.GenerateContentResponse, error) {
 	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)
@@ -61,7 +61,7 @@ func (m *O1Mini) GenerateContent(ctx context.Context, msgs ...*assistant.Message
 	return ToGenerateContentResponse(resp), nil
 }
 
-func (m *O1Mini) GenerateContentStream(ctx context.Context, msgs ...*assistant.Message) (iter.Seq[*assistant.GenerateContentResponse], error) {
+func (m *GPT52) GenerateContentStream(ctx context.Context, msgs ...*assistant.Message) (iter.Seq[*assistant.GenerateContentResponse], error) {
 	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)
