@@ -62,6 +62,9 @@ func (m *ClaudeOpus4_6) GenerateContent(
 	if res.StopReason != "end_turn" {
 		logger.Warn(fmt.Sprintf("anthropic response stop with reason: %s", res.StopReason))
 	}
+	if len(res.Content) == 0 {
+		return nil, fmt.Errorf("anthropic response has no content")
+	}
 	if len(res.Content) > 1 {
 		logger.Warn("anthropic response has more than one content", "content", fmt.Sprintf("%+v", res.Content))
 	}
