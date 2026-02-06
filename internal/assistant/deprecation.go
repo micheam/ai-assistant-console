@@ -8,4 +8,4 @@ type DeprecationInfo struct {
 }
 
 func (d DeprecationInfo) Deprecated() bool            { return d.IsDeprecated }
-func (d DeprecationInfo) DeprecatedRemovedIn() string  { return d.RemovedIn }
+func (d DeprecationInfo) DeprecatedRemovedIn() string { return d.RemovedIn }
