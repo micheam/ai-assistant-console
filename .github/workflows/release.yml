@@ -38,10 +38,10 @@ jobs:
     - name: Build binaries
       run: |
         # Build for multiple platforms
-        GOOS=linux GOARCH=amd64 go build -ldflags "-X main.version=${{ steps.tag.outputs.tag }}" -o aico-linux-amd64 ./cmd/chat
-        GOOS=linux GOARCH=arm64 go build -ldflags "-X main.version=${{ steps.tag.outputs.tag }}" -o aico-linux-arm64 ./cmd/chat
-        GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.version=${{ steps.tag.outputs.tag }}" -o aico-darwin-amd64 ./cmd/chat
-        GOOS=darwin GOARCH=arm64 go build -ldflags "-X main.version=${{ steps.tag.outputs.tag }}" -o aico-darwin-arm64 ./cmd/chat
+        GOOS=linux GOARCH=amd64 go build -ldflags "-X main.version=${{ steps.tag.outputs.tag }}" -o aico-linux-amd64 ./cmd/aico
+        GOOS=linux GOARCH=arm64 go build -ldflags "-X main.version=${{ steps.tag.outputs.tag }}" -o aico-linux-arm64 ./cmd/aico
+        GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.version=${{ steps.tag.outputs.tag }}" -o aico-darwin-amd64 ./cmd/aico
+        GOOS=darwin GOARCH=arm64 go build -ldflags "-X main.version=${{ steps.tag.outputs.tag }}" -o aico-darwin-arm64 ./cmd/aico
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
