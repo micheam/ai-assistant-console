@@ -83,6 +83,9 @@ func (m *O3Mini) GenerateContentStream(ctx context.Context, msgs ...*assistant.M
 				logging.LoggerFrom(ctx).Error(fmt.Sprintf("error: %v", err))
 				continue
 			}
+			if len(res.Choices) == 0 || res.Choices[0].Delta == nil {
+				continue
+			}
 			delta := assistant.NewTextContent(res.Choices[0].Delta.Content)
 			if !yield(&assistant.GenerateContentResponse{Content: delta}) {
 				break
