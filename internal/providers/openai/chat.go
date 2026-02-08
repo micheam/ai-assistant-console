@@ -278,7 +278,7 @@ func GenerateContent(ctx context.Context, client *APIClient, apiEndpoint string,
 }
 
 // GenerateContentStream is a shared implementation for streaming content with OpenAI-compatible APIs
-func GenerateContentStream(ctx context.Context, client *APIClient, apiEndpoint string, modelName string, systemInstruction []*assistant.TextContent, msgs []*assistant.Message) (iter.Seq[*assistant.GenerateContentResponse], error) {
+func GenerateContentStream(ctx context.Context, client *APIClient, apiEndpoint string, modelName string, systemInstruction []*assistant.TextContent, msgs []*assistant.Message) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
 	req, err := BuildChatRequest(ctx, modelName, systemInstruction, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)
@@ -288,19 +288,22 @@ func GenerateContentStream(ctx context.Context, client *APIClient, apiEndpoint s
 	if err != nil {
 		return nil, err
 	}
-	return func(yield func(*assistant.GenerateContentResponse) bool) {
+	return func(yield func(*assistant.GenerateContentResponse, error) bool) {
 		for s := range iter {
 			var res *ChatResponse
 			err := json.Unmarshal([]byte(s), &res)
 			if err != nil {
-				logging.LoggerFrom(ctx).Error(fmt.Sprintf("error: %v", err))
+				logging.LoggerFrom(ctx).Error(fmt.Sprintf("unmarshal error: %v", err))
+				if !yield(nil, fmt.Errorf("failed to unmarshal stream response: %w", err)) {
+					break
+				}
 				continue
 			}
 			if len(res.Choices) == 0 || res.Choices[0].Delta == nil {
 				continue
 			}
 			delta := assistant.NewTextContent(res.Choices[0].Delta.Content)
-			if !yield(&assistant.GenerateContentResponse{Content: delta}) {
+			if !yield(&assistant.GenerateContentResponse{Content: delta}, nil) {
 				break
 			}
 		}

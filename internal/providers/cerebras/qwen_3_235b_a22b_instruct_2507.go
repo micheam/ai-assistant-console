@@ -45,6 +45,6 @@ func (m *Qwen3_235B_A22B_Instruct_2507) GenerateContent(ctx context.Context, msg
 	return openai.GenerateContent(ctx, m.client, Endpoint, m.Name(), m.systemInstruction, msgs)
 }
 
-func (m *Qwen3_235B_A22B_Instruct_2507) GenerateContentStream(ctx context.Context, msgs ...*assistant.Message) (iter.Seq[*assistant.GenerateContentResponse], error) {
+func (m *Qwen3_235B_A22B_Instruct_2507) GenerateContentStream(ctx context.Context, msgs ...*assistant.Message) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
 	return openai.GenerateContentStream(ctx, m.client, Endpoint, m.Name(), m.systemInstruction, msgs)
 }

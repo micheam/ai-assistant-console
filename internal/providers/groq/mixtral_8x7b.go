@@ -44,6 +44,6 @@ func (m *Mixtral8x7B) GenerateContent(ctx context.Context, msgs ...*assistant.Me
 	return openai.GenerateContent(ctx, m.client, Endpoint, m.Name(), m.systemInstruction, msgs)
 }
 
-func (m *Mixtral8x7B) GenerateContentStream(ctx context.Context, msgs ...*assistant.Message) (iter.Seq[*assistant.GenerateContentResponse], error) {
+func (m *Mixtral8x7B) GenerateContentStream(ctx context.Context, msgs ...*assistant.Message) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
 	return openai.GenerateContentStream(ctx, m.client, Endpoint, m.Name(), m.systemInstruction, msgs)
 }

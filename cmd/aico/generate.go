@@ -99,7 +99,11 @@ func runGenerate(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	// Print the generated content
-	for resp := range iter {
+	for resp, err := range iter {
+		if err != nil {
+			fmt.Fprintf(cmd.ErrWriter, "\nError: %v\n", err)
+			return fmt.Errorf("stream error: %w", err)
+		}
 		switch content := resp.Content.(type) {
 		case *assistant.TextContent:
 			fmt.Fprintf(cmd.Writer, "%s", content.Text)

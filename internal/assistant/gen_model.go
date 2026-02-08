@@ -16,7 +16,7 @@ type GenerativeModel interface {
 	ModelDescriptor
 	SetSystemInstruction(...*TextContent)
 	GenerateContent(context.Context, ...*Message) (*GenerateContentResponse, error)
-	GenerateContentStream(context.Context, ...*Message) (iter.Seq[*GenerateContentResponse], error)
+	GenerateContentStream(context.Context, ...*Message) (iter.Seq2[*GenerateContentResponse, error], error)
 }
 
 type GenerateContentResponse struct {

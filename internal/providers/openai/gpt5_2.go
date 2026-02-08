@@ -61,7 +61,7 @@ func (m *GPT52) GenerateContent(ctx context.Context, msgs ...*assistant.Message)
 	return ToGenerateContentResponse(resp), nil
 }
 
-func (m *GPT52) GenerateContentStream(ctx context.Context, msgs ...*assistant.Message) (iter.Seq[*assistant.GenerateContentResponse], error) {
+func (m *GPT52) GenerateContentStream(ctx context.Context, msgs ...*assistant.Message) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
 	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)
@@ -73,19 +73,20 @@ func (m *GPT52) GenerateContentStream(ctx context.Context, msgs ...*assistant.Me
 		return nil, err
 	}
 	// return converter iter
-	return func(yield func(*assistant.GenerateContentResponse) bool) {
+	return func(yield func(*assistant.GenerateContentResponse, error) bool) {
 		for s := range iter {
 			var res *ChatResponse
 			err := json.Unmarshal([]byte(s), &res)
 			if err != nil {
-				logging.LoggerFrom(ctx).Error(fmt.Sprintf("error: %v", err))
+				logging.LoggerFrom(ctx).Error(fmt.Sprintf("unmarshal error: %v", err))
+				yield(nil, fmt.Errorf("failed to unmarshal stream response: %w", err))
 				continue
 			}
 			if len(res.Choices) == 0 || res.Choices[0].Delta == nil {
 				continue
 			}
 			delta := assistant.NewTextContent(res.Choices[0].Delta.Content)
-			if !yield(&assistant.GenerateContentResponse{Content: delta}) {
+			if !yield(&assistant.GenerateContentResponse{Content: delta}, nil) {
 				break
 			}
 		}

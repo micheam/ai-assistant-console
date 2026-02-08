@@ -75,7 +75,7 @@ func (m *ClaudeSonnet4_5) GenerateContent(
 func (m *ClaudeSonnet4_5) GenerateContentStream(
 	ctx context.Context,
 	msgs ...*assistant.Message,
-) (iter.Seq[*assistant.GenerateContentResponse], error) {
+) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
 	logger := logging.LoggerFrom(ctx).With("provider", "anthropic", "model", m.Name())
 
 	// Request to Anthropics API
@@ -91,7 +91,7 @@ func (m *ClaudeSonnet4_5) GenerateContentStream(
 
 	// return converter iter
 	message := anthropic.Message{}
-	return func(yield func(*assistant.GenerateContentResponse) bool) {
+	return func(yield func(*assistant.GenerateContentResponse, error) bool) {
 		for stream.Next() {
 			event := stream.Current()
 			message.Accumulate(event)
@@ -102,14 +102,15 @@ func (m *ClaudeSonnet4_5) GenerateContentStream(
 					resp := &assistant.GenerateContentResponse{
 						Content: assistant.NewTextContent(delta.Text),
 					}
-					if !yield(resp) {
+					if !yield(resp, nil) {
 						return
 					}
 				}
 			}
 		}
 		if err := stream.Err(); err != nil {
-			logger.Error(fmt.Sprintf("error: %v", err))
+			logger.Error(fmt.Sprintf("stream error: %v", err))
+			yield(nil, fmt.Errorf("anthropic stream error: %w", err))
 		}
 	}, nil
 }

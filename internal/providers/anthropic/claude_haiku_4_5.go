@@ -74,7 +74,7 @@ func (m *ClaudeHaiku4_5) GenerateContent(
 	}, nil
 }
 
-func (m *ClaudeHaiku4_5) GenerateContentStream(ctx context.Context, msgs ...*assistant.Message) (iter.Seq[*assistant.GenerateContentResponse], error) {
+func (m *ClaudeHaiku4_5) GenerateContentStream(ctx context.Context, msgs ...*assistant.Message) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
 	logger := logging.LoggerFrom(ctx).With("provider", "anthropic", "model", m.Name())
 	body, err := buildRequestBody(
 		logging.ContextWith(ctx, logger),
@@ -90,7 +90,7 @@ func (m *ClaudeHaiku4_5) GenerateContentStream(ctx context.Context, msgs ...*ass
 
 	// return converter iter
 	message := anthropic.Message{}
-	return func(yield func(*assistant.GenerateContentResponse) bool) {
+	return func(yield func(*assistant.GenerateContentResponse, error) bool) {
 		for stream.Next() {
 			event := stream.Current()
 			message.Accumulate(event)
@@ -101,14 +101,15 @@ func (m *ClaudeHaiku4_5) GenerateContentStream(ctx context.Context, msgs ...*ass
 					resp := &assistant.GenerateContentResponse{
 						Content: assistant.NewTextContent(delta.Text),
 					}
-					if !yield(resp) {
+					if !yield(resp, nil) {
 						return
 					}
 				}
 			}
 		}
 		if err := stream.Err(); err != nil {
-			logger.Error(fmt.Sprintf("error: %v", err))
+			logger.Error(fmt.Sprintf("stream error: %v", err))
+			yield(nil, fmt.Errorf("anthropic stream error: %w", err))
 		}
 	}, nil
 }
