@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    
+
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -43,6 +43,39 @@ jobs:
         GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.version=${{ steps.tag.outputs.tag }}" -o aico-darwin-amd64 ./cmd/aico
         GOOS=darwin GOARCH=arm64 go build -ldflags "-X main.version=${{ steps.tag.outputs.tag }}" -o aico-darwin-arm64 ./cmd/aico
 
+    - name: Create tar.gz archives
+      run: |
+        # Create archives for each platform
+        # Archive format: aico_<os>_<arch>.tar.gz containing a single binary named "aico"
+
+        # Linux AMD64
+        cp aico-linux-amd64 aico
+        tar -czf aico_linux_amd64.tar.gz aico
+        rm aico
+
+        # Linux ARM64
+        cp aico-linux-arm64 aico
+        tar -czf aico_linux_arm64.tar.gz aico
+        rm aico
+
+        # Darwin AMD64
+        cp aico-darwin-amd64 aico
+        tar -czf aico_darwin_amd64.tar.gz aico
+        rm aico
+
+        # Darwin ARM64
+        cp aico-darwin-arm64 aico
+        tar -czf aico_darwin_arm64.tar.gz aico
+        rm aico
+
+    - name: Generate checksums
+      run: |
+        # Generate SHA256 checksums for each tar.gz archive
+        shasum -a 256 aico_linux_amd64.tar.gz > aico_linux_amd64.tar.gz.sha256
+        shasum -a 256 aico_linux_arm64.tar.gz > aico_linux_arm64.tar.gz.sha256
+        shasum -a 256 aico_darwin_amd64.tar.gz > aico_darwin_amd64.tar.gz.sha256
+        shasum -a 256 aico_darwin_arm64.tar.gz > aico_darwin_arm64.tar.gz.sha256
+
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
@@ -51,6 +84,14 @@ jobs:
           aico-linux-arm64
           aico-darwin-amd64
           aico-darwin-arm64
+          aico_linux_amd64.tar.gz
+          aico_linux_arm64.tar.gz
+          aico_darwin_amd64.tar.gz
+          aico_darwin_arm64.tar.gz
+          aico_linux_amd64.tar.gz.sha256
+          aico_linux_arm64.tar.gz.sha256
+          aico_darwin_amd64.tar.gz.sha256
+          aico_darwin_arm64.tar.gz.sha256
         body: ${{ steps.release_body.outputs.body }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

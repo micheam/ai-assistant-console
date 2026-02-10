@@ -9,9 +9,52 @@ AICO is an AI-powered console application that supports multiple AI providers in
 
 ## Install
 
-### Option 1: Download Pre-built Binaries (macOS/Linux only)
+### Option 1: Quick Install with Installation Script (macOS/Linux only)
 
-Pre-built binaries are available for macOS and Linux from the [GitHub Releases page](https://github.com/micheam/ai-assistant-console/releases). 
+The easiest way to install AICO is using our installation script, which automatically downloads and installs the latest release:
+
+**One-line installation:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/micheam/ai-assistant-console/main/install.sh | bash
+```
+
+**Two-step installation (recommended for security):**
+
+For security-conscious users, we recommend reviewing the script before execution:
+
+```bash
+# Download the installation script
+curl -fsSL https://raw.githubusercontent.com/micheam/ai-assistant-console/main/install.sh -o install.sh
+
+# Review the script contents
+less install.sh
+
+# Execute the script
+bash install.sh
+```
+
+The installation script will:
+- Detect your platform (OS and architecture)
+- Download the latest release from GitHub
+- Verify the SHA256 checksum
+- Install the binary to `$HOME/.local/bin/aico`
+
+**PATH Configuration:**
+
+If `$HOME/.local/bin` is not in your PATH, add the following line to your `~/.bashrc` or `~/.zshrc`:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+After adding this line, reload your shell configuration:
+```bash
+source ~/.bashrc  # or source ~/.zshrc
+```
+
+### Option 2: Download Pre-built Binaries (macOS/Linux only)
+
+Pre-built binaries are available for macOS and Linux from the [GitHub Releases page](https://github.com/micheam/ai-assistant-console/releases).
 
 > **Note**: Windows binaries are not provided as we don't have a Windows testing environment. Windows users should build from source.
 
@@ -19,7 +62,7 @@ Pre-built binaries are available for macOS and Linux from the [GitHub Releases p
 2. Download the appropriate binary for your platform
 3. Extract and place the binary in your PATH
 
-### Option 2: Build from Source
+### Option 3: Build from Source
 
 To build from source, you'll need to install Go.
 Make sure you have _Go version 1.20 or higher_ installed on your system. 
@@ -148,6 +191,26 @@ Before submitting your changes, ensure the following:
 
 - All tests pass by running `make test`
 - The code formatting is consistent and adheres to [Go standards](https://golang.org/doc/effective_go)
+
+### Testing the Installation Script
+
+To test the installation script in a clean container environment:
+
+```bash
+./test/integration/run-integration-test.sh
+```
+
+This will:
+1. Auto-detect your container runtime (Apple Container or Docker)
+2. Build a container image with Ubuntu 22.04
+3. Run the installation script in the container
+4. Verify the installation and basic functionality
+
+**Supported Container Runtimes:**
+- [Apple Container](https://github.com/apple/container) (macOS with Apple Silicon, recommended)
+- [Docker](https://www.docker.com/) (all platforms)
+
+See [test/integration/README.md](test/integration/README.md) for more details.
 
 ## License
 The AICO project is released under the [MIT License](LICENSE).
