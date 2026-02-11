@@ -158,7 +158,7 @@ type Message interface {
 }
 
 type SystemMessage struct {
-	Content string
+	Content []Content
 	Name    *string
 }
 
@@ -218,7 +218,20 @@ func (msg *SystemMessage) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &m); err != nil {
 		return err
 	}
-	msg.Content = m["content"].(string)
+	// NOTE: 'content' will be an array of strings or single string.
+	//       We need to handle both cases.
+	v := reflect.ValueOf(m["content"])
+	switch v.Kind() {
+	case reflect.String:
+		msg.Content = []Content{&TextContent{Text: v.String()}}
+	case reflect.Slice:
+		msg.Content = make([]Content, v.Len())
+		for i := 0; i < v.Len(); i++ {
+			msg.Content = append(msg.Content, &TextContent{Text: v.Index(i).String()})
+		}
+	default:
+		return fmt.Errorf("unexpected type for 'content': %T", m["content"])
+	}
 	if n, ok := m["name"].(string); ok {
 		msg.Name = &n
 	}

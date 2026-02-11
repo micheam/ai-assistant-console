@@ -7,6 +7,8 @@ import (
 	"os"
 
 	"github.com/urfave/cli/v3"
+
+	"micheam.com/aico/internal/logging"
 )
 
 const (
@@ -16,7 +18,7 @@ const (
 
 func main() {
 	if err := run(os.Args); err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		fmt.Fprintf(os.Stderr, "\nERROR: %v\n", err)
 		os.Exit(1)
 	}
 }
@@ -32,6 +34,7 @@ func run(args []string) error {
 			flagJSON,
 			flagModel,
 
+			flagSessionID,
 			flagNoStream,
 			flagPersona,
 			flagSystemPrompt,
@@ -43,7 +46,8 @@ func run(args []string) error {
 			flagAPIKeyGroq,
 			flagAPIKeyCerebras,
 		},
-		Action: runGenerate,
+		Action:         runGenerate,
+		ExitErrHandler: handleExitError,
 		Commands: []*cli.Command{
 			CmdEnv,
 			CmdConfig,
@@ -61,44 +65,41 @@ var (
 		Aliases: []string{"s"},
 		Usage:   "source string or @file path - the primary subject of the prompt (e.g., --source @code.go)",
 	}
-
 	flagContext = &cli.StringSliceFlag{
 		Name:    "context",
 		Aliases: []string{"c"},
 		Usage:   "context string or @file path (e.g., --context 'text' or --context @file.txt)",
 	}
-
 	flagDebug = &cli.BoolFlag{
 		Name:  "debug",
 		Usage: "Enable debug logging",
 	}
-
 	flagJSON = &cli.BoolFlag{
 		Name:  "json",
 		Usage: "Output the models in JSON format",
 	}
-
 	flagModel = &cli.StringFlag{
 		Name:    "model",
 		Aliases: []string{"m"},
 		Usage:   "Model to use (e.g., 'gpt-4o' or 'openai:gpt-4o' for explicit provider)",
 	}
-
 	flagNoStream = &cli.BoolFlag{
 		Name:  "no-stream",
 		Usage: "disable streaming output",
 	}
-
 	flagPersona = &cli.StringFlag{
 		Name:    "persona",
 		Aliases: []string{"p"},
 		Usage:   "The persona to use",
 		Value:   "default",
 	}
-
 	flagSystemPrompt = &cli.StringFlag{
 		Name:  "system",
 		Usage: "system prompt",
+	}
+	flagSessionID = &cli.StringFlag{
+		Name:  "session",
+		Usage: "session `ID` for conversation history",
 	}
 
 	//
@@ -139,3 +140,9 @@ var (
 var (
 	ErrConfigFileNotFound = errors.New("config file not found")
 )
+
+func handleExitError(ctx context.Context, cmd *cli.Command, err error) {
+	logging.LoggerFrom(ctx).
+		With("cmd", cmd.Name).
+		Error("exiting with error", "error", err)
+}

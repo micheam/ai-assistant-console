@@ -48,7 +48,7 @@ func (m *GPT52) SetHttpClient(c *http.Client) {
 	m.client.SetHTTPClient(c)
 }
 
-func (m *GPT52) GenerateContent(ctx context.Context, msgs ...*assistant.Message) (*assistant.GenerateContentResponse, error) {
+func (m *GPT52) GenerateContent(ctx context.Context, msgs ...assistant.Message) (*assistant.GenerateContentResponse, error) {
 	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)
@@ -61,7 +61,7 @@ func (m *GPT52) GenerateContent(ctx context.Context, msgs ...*assistant.Message)
 	return ToGenerateContentResponse(resp), nil
 }
 
-func (m *GPT52) GenerateContentStream(ctx context.Context, msgs ...*assistant.Message) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
+func (m *GPT52) GenerateContentStream(ctx context.Context, msgs ...assistant.Message) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
 	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)

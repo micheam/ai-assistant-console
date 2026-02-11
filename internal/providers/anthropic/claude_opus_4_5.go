@@ -39,7 +39,7 @@ func (m *ClaudeOpus4_5) SetSystemInstruction(contents ...*assistant.TextContent)
 
 func (m *ClaudeOpus4_5) GenerateContent(
 	ctx context.Context,
-	msgs ...*assistant.Message,
+	msgs ...assistant.Message,
 ) (*assistant.GenerateContentResponse, error) {
 	logger := logging.LoggerFrom(ctx).With("provider", "anthropic", "model", m.Name())
 
@@ -72,7 +72,7 @@ func (m *ClaudeOpus4_5) GenerateContent(
 
 func (m *ClaudeOpus4_5) GenerateContentStream(
 	ctx context.Context,
-	msgs ...*assistant.Message,
+	msgs ...assistant.Message,
 ) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
 	logger := logging.LoggerFrom(ctx).With("provider", "anthropic", "model", m.Name())
 

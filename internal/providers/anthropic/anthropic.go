@@ -99,7 +99,7 @@ func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, er
 	return nil, fmt.Errorf("unsupported model name: %s", modelName)
 }
 
-func buildRequestBody(ctx context.Context, model anthropic.Model, systemInstruction []*assistant.TextContent, msgs []*assistant.Message) (*anthropic.MessageNewParams, error) {
+func buildRequestBody(ctx context.Context, model anthropic.Model, systemInstruction []*assistant.TextContent, msgs []assistant.Message) (*anthropic.MessageNewParams, error) {
 	messages, err := messageParams(ctx, msgs...)
 	if err != nil {
 		return nil, fmt.Errorf("build message params: %w", err)
@@ -115,46 +115,42 @@ func buildRequestBody(ctx context.Context, model anthropic.Model, systemInstruct
 func messageParamFrom(ctx context.Context, src assistant.Message) (*anthropic.MessageParam, error) {
 	logger := logging.LoggerFrom(ctx)
 
-	switch src.Author {
+	contents := []anthropic.ContentBlockParamUnion{}
+	for _, content := range src.GetContents() {
+		c, err := convertContentBlockParamUnion(content)
+		if err != nil {
+			logger.Warn("ignore unsupported content type", "type", fmt.Sprintf("%T", content))
+			continue
+		}
+		contents = append(contents, c)
+	}
+	switch src.(type) {
+	case *assistant.AssistantMessage:
+		m := anthropic.NewAssistantMessage(contents...)
+		return &m, nil
+	case *assistant.UserMessage:
+		m := anthropic.NewUserMessage(contents...)
+		return &m, nil
 	default:
-		return nil, fmt.Errorf("unknown author: %s", src.Author)
-
-	case assistant.MessageAuthorAssistant:
-		if len(src.Contents) == 0 {
-			return nil, fmt.Errorf("empty assistant message")
-		}
-		var msg anthropic.MessageParam
-		switch v := src.GetContents()[0].(type) {
-		case *assistant.TextContent:
-			msg = anthropic.NewAssistantMessage(anthropic.NewTextBlock(v.Text))
-		case *assistant.AttachmentContent:
-			msg = anthropic.NewAssistantMessage(anthropic.NewTextBlock(v.ToText()))
-		default:
-			return nil, fmt.Errorf("unsupported assistant message content type: %T", v)
-		}
-		return &msg, nil
-
-	case assistant.MessageAuthorUser:
-		contents := []anthropic.ContentBlockParamUnion{}
-		for _, content := range src.Contents {
-			switch c := content.(type) {
-			case *assistant.TextContent:
-				contents = append(contents, anthropic.NewTextBlock(c.Text))
-			case *assistant.AttachmentContent:
-				contents = append(contents, anthropic.NewTextBlock(c.ToText()))
-			default:
-				logger.Warn("ignore unsupported content type", "type", fmt.Sprintf("%T", c))
-			}
-		}
-		msg := anthropic.NewUserMessage(contents...)
-		return &msg, nil
+		return nil, fmt.Errorf("unknown message type: %T", src)
 	}
 }
 
-func messageParams(ctx context.Context, msgs ...*assistant.Message) ([]anthropic.MessageParam, error) {
+func convertContentBlockParamUnion(src assistant.MessageContent) (anthropic.ContentBlockParamUnion, error) {
+	switch m := src.(type) {
+	case *assistant.TextContent:
+		return anthropic.NewTextBlock(m.Text), nil
+	case *assistant.AttachmentContent:
+		return anthropic.NewTextBlock(m.ToText()), nil
+	default:
+		return nil, fmt.Errorf("unsupported content type: %T", src)
+	}
+}
+
+func messageParams(ctx context.Context, msgs ...assistant.Message) ([]anthropic.MessageParam, error) {
 	var messages []anthropic.MessageParam
 	for _, msg := range msgs {
-		m, err := messageParamFrom(ctx, *msg)
+		m, err := messageParamFrom(ctx, msg)
 		if err != nil {
 			return nil, fmt.Errorf("anthropic message param from: %w", err)
 		}

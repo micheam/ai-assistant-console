@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/BurntSushi/toml"
 
@@ -61,6 +62,11 @@ type Config struct {
 
 	// PersonaMap is the persona to use for text generation
 	PersonaMap map[string]Personality `toml:"persona"`
+
+	// SessionDir is the directory to store session files
+	//
+	// If omitted, the default session directory will be used.
+	sessionDir string `toml:"session_dir"`
 }
 
 // Location returns the location of the configuration file
@@ -231,6 +237,18 @@ func (c *Config) GetPersona(name string) (*Personality, bool) {
 	return nil, false
 }
 
+// GetSessionDir returns the session directory
+func (c *Config) GetSessionDir() string {
+	if c.sessionDir != "" {
+		return c.sessionDir
+	}
+	return DefaulSetSessionDir()
+}
+
+//
+// Default Setting Values ...
+//
+
 // DefaultConfig returns the default configuration
 // This is used when initializing the configuration for the first time.
 func DefaultConfig() *Config {
@@ -245,4 +263,27 @@ func DefaultConfig() *Config {
 			},
 		},
 	}
+}
+
+// DefaulSetSessionDir returns the default session directory
+//
+// This follows the XDG Base Directory Specification.
+// Otherwise, it uses the appropriate directory for the OS.
+// Unix/Linux: ~/.local/share/com.micheam.aico/sessions
+// macOS: ~/Library/Application Support/com.micheam.aico/sessions
+// Windows: %APPDATA%\com.micheam.aico\sessions
+func DefaulSetSessionDir() string {
+	rootDir := os.Getenv("XDG_DATA_HOME")
+	if rootDir == "" {
+		switch runtime.GOOS {
+		case "windows":
+			rootDir = filepath.Join(os.Getenv("APPDATA"))
+		case "darwin", "ios":
+			rootDir = filepath.Join(os.Getenv("HOME"), "Library", "Application Support")
+		default:
+			rootDir, _ = os.UserHomeDir()
+			rootDir = filepath.Join(rootDir, ".local", "share")
+		}
+	}
+	return filepath.Join(rootDir, ApplicationFQN, "sessions")
 }

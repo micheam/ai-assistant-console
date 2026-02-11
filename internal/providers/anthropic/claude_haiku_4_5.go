@@ -43,7 +43,7 @@ func (m *ClaudeHaiku4_5) SetSystemInstruction(contents ...*assistant.TextContent
 
 func (m *ClaudeHaiku4_5) GenerateContent(
 	ctx context.Context,
-	msgs ...*assistant.Message,
+	msgs ...assistant.Message,
 ) (*assistant.GenerateContentResponse, error) {
 	logger := logging.LoggerFrom(ctx).With("provider", "anthropic", "model", m.Name())
 
@@ -74,7 +74,7 @@ func (m *ClaudeHaiku4_5) GenerateContent(
 	}, nil
 }
 
-func (m *ClaudeHaiku4_5) GenerateContentStream(ctx context.Context, msgs ...*assistant.Message) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
+func (m *ClaudeHaiku4_5) GenerateContentStream(ctx context.Context, msgs ...assistant.Message) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
 	logger := logging.LoggerFrom(ctx).With("provider", "anthropic", "model", m.Name())
 	body, err := buildRequestBody(
 		logging.ContextWith(ctx, logger),

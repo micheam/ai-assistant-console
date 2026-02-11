@@ -41,7 +41,7 @@ func (m *ClaudeSonnet4_5) SetSystemInstruction(contents ...*assistant.TextConten
 
 func (m *ClaudeSonnet4_5) GenerateContent(
 	ctx context.Context,
-	msgs ...*assistant.Message,
+	msgs ...assistant.Message,
 ) (*assistant.GenerateContentResponse, error) {
 	logger := logging.LoggerFrom(ctx).With("provider", "anthropic", "model", m.Name())
 
@@ -74,7 +74,7 @@ func (m *ClaudeSonnet4_5) GenerateContent(
 
 func (m *ClaudeSonnet4_5) GenerateContentStream(
 	ctx context.Context,
-	msgs ...*assistant.Message,
+	msgs ...assistant.Message,
 ) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
 	logger := logging.LoggerFrom(ctx).With("provider", "anthropic", "model", m.Name())
 

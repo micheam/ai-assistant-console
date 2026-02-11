@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"micheam.com/aico/internal/assistant"
 )
 
 func TestReadSource_WithContent(t *testing.T) {
@@ -75,5 +77,54 @@ func TestResolveSource_FileNotFound(t *testing.T) {
 	_, err := resolveSource("@/nonexistent/file.go")
 	if err == nil {
 		t.Error("expected error for nonexistent file")
+	}
+}
+
+func TestUserMessage_WithSource(t *testing.T) {
+	source := "<source>\nhello world\n</source>"
+	prompt := "summarize this"
+
+	userContents := make([]assistant.MessageContent, 0, 2)
+	userContents = append(userContents, assistant.NewTextContent(source))
+	userContents = append(userContents, assistant.NewTextContent(prompt))
+	userMsg := assistant.NewUserMessage(userContents...)
+
+	contents := userMsg.GetContents()
+	if len(contents) != 2 {
+		t.Fatalf("expected 2 contents, got %d", len(contents))
+	}
+	src, ok := contents[0].(*assistant.TextContent)
+	if !ok {
+		t.Fatalf("expected first content to be *TextContent")
+	}
+	if src.Text != source {
+		t.Errorf("expected source text %q, got %q", source, src.Text)
+	}
+	msg, ok := contents[1].(*assistant.TextContent)
+	if !ok {
+		t.Fatalf("expected second content to be *TextContent")
+	}
+	if msg.Text != prompt {
+		t.Errorf("expected prompt text %q, got %q", prompt, msg.Text)
+	}
+}
+
+func TestUserMessage_WithoutSource(t *testing.T) {
+	prompt := "hello"
+
+	userContents := make([]assistant.MessageContent, 0, 1)
+	userContents = append(userContents, assistant.NewTextContent(prompt))
+	userMsg := assistant.NewUserMessage(userContents...)
+
+	contents := userMsg.GetContents()
+	if len(contents) != 1 {
+		t.Fatalf("expected 1 content, got %d", len(contents))
+	}
+	msg, ok := contents[0].(*assistant.TextContent)
+	if !ok {
+		t.Fatalf("expected content to be *TextContent")
+	}
+	if msg.Text != prompt {
+		t.Errorf("expected prompt text %q, got %q", prompt, msg.Text)
 	}
 }

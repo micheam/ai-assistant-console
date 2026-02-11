@@ -195,64 +195,61 @@ type ChatResponse struct {
 }
 
 // BuildChatRequest builds a chat request for OpenAI-compatible APIs
-func BuildChatRequest(ctx context.Context, modelName string, systemInstruction []*assistant.TextContent, msgs []*assistant.Message) (*ChatRequest, error) {
-	if len(msgs) == 0 {
+func BuildChatRequest(ctx context.Context, modelName string, systemInstruction []*assistant.TextContent, messages []assistant.Message) (*ChatRequest, error) {
+	if len(messages) == 0 {
 		return nil, fmt.Errorf("no messages provided")
 	}
 	req := &ChatRequest{
 		Model:    modelName,
-		Messages: make([]Message, 0, len(msgs)+1),
+		Messages: make([]Message, 0, len(messages)),
 	}
+	// System instructions
 	if len(systemInstruction) > 0 {
+		content := make([]Content, 0, len(systemInstruction))
 		for _, c := range systemInstruction {
-			req.Messages = append(req.Messages, &SystemMessage{Content: c.Text})
+			content = append(content, &TextContent{Text: c.Text})
 		}
+		req.Messages = append(req.Messages, &SystemMessage{Content: content})
 	}
-	for _, msg := range msgs {
-		for _, content := range msg.Contents {
-			switch v := content.(type) {
-			case *assistant.AttachmentContent:
-				content := []Content{&TextContent{
-					Text: v.ToText(),
-				}}
-				switch msg.Author {
-				case "user":
-					req.Messages = append(req.Messages, &UserMessage{Content: content})
-				case "assistant":
-					req.Messages = append(req.Messages, &AssistantMessage{Content: content})
-				}
-
-			case *assistant.TextContent:
-				switch msg.Author {
-				case "user":
-					req.Messages = append(req.Messages, &UserMessage{
-						Content: []Content{&TextContent{Text: v.Text}},
-					})
-				case "assistant":
-					req.Messages = append(req.Messages, &AssistantMessage{
-						Content: []Content{&TextContent{Text: v.Text}},
-					})
-				}
-
-			case *assistant.URLImageContent:
-				switch msg.Author {
-				case "user":
-					req.Messages = append(req.Messages, &UserMessage{
-						Content: []Content{&ImageContent{URL: v.URL}},
-					})
-				case "assistant":
-					req.Messages = append(req.Messages, &AssistantMessage{
-						Content: []Content{&ImageContent{URL: v.URL}},
-					})
-				}
-
-			default:
-				// fmt.Printf("Unsupported message content type: %s\n", reflect.TypeOf(v))
-				logging.LoggerFrom(ctx).Warn(fmt.Sprintf("Unsupported message content type: %T", v))
-			}
+	// User and Assistant messages
+	for _, msg := range messages {
+		converted, err := convertToContentArray(msg.GetContents())
+		if err != nil {
+			return nil, fmt.Errorf("convert message contents: %w", err)
+		}
+		switch msg.(type) {
+		case *assistant.UserMessage:
+			req.Messages = append(req.Messages, &UserMessage{Content: converted})
+		case *assistant.AssistantMessage:
+			req.Messages = append(req.Messages, &AssistantMessage{Content: converted})
+		default:
+			logging.LoggerFrom(ctx).Warn(fmt.Sprintf("Unsupported message type: %T", msg))
 		}
 	}
 	return req, nil
+}
+
+func convertToContentArray(contents []assistant.MessageContent) ([]Content, error) {
+	result := make([]Content, 0, len(contents))
+	for i, content := range contents {
+		converted, err := convertToContent(content)
+		if err != nil {
+			return nil, fmt.Errorf("at index %d: %w", i, err)
+		}
+		result = append(result, converted)
+	}
+	return result, nil
+}
+
+func convertToContent(src assistant.MessageContent) (Content, error) {
+	switch v := src.(type) {
+	case *assistant.TextContent:
+		return &TextContent{Text: v.Text}, nil
+	case *assistant.URLImageContent:
+		return &ImageContent{URL: v.URL}, nil
+	default:
+		return nil, fmt.Errorf("unsupported message content type: %T", v)
+	}
 }
 
 // ToGenerateContentResponse converts an OpenAI ChatResponse to a GenerateContentResponse
@@ -265,7 +262,7 @@ func ToGenerateContentResponse(src *ChatResponse) *assistant.GenerateContentResp
 }
 
 // GenerateContent is a shared implementation for generating content with OpenAI-compatible APIs
-func GenerateContent(ctx context.Context, client *APIClient, apiEndpoint string, modelName string, systemInstruction []*assistant.TextContent, msgs []*assistant.Message) (*assistant.GenerateContentResponse, error) {
+func GenerateContent(ctx context.Context, client *APIClient, apiEndpoint string, modelName string, systemInstruction []*assistant.TextContent, msgs []assistant.Message) (*assistant.GenerateContentResponse, error) {
 	req, err := BuildChatRequest(ctx, modelName, systemInstruction, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)
@@ -278,7 +275,7 @@ func GenerateContent(ctx context.Context, client *APIClient, apiEndpoint string,
 }
 
 // GenerateContentStream is a shared implementation for streaming content with OpenAI-compatible APIs
-func GenerateContentStream(ctx context.Context, client *APIClient, apiEndpoint string, modelName string, systemInstruction []*assistant.TextContent, msgs []*assistant.Message) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
+func GenerateContentStream(ctx context.Context, client *APIClient, apiEndpoint string, modelName string, systemInstruction []*assistant.TextContent, msgs []assistant.Message) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
 	req, err := BuildChatRequest(ctx, modelName, systemInstruction, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)
