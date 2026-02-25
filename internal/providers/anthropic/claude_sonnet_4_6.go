@@ -12,34 +12,34 @@ import (
 	"micheam.com/aico/internal/logging"
 )
 
-const ModelNameClaudeSonnet4 = "claude-sonnet-4-5"
+const ModelNameClaudeSonnet4_6 = "claude-sonnet-4-6"
 
-type ClaudeSonnet4_5 struct {
+type ClaudeSonnet4_6 struct {
 	systemInstruction []*assistant.TextContent
 	client            *anthropic.Client
 
 	opts []anthropicopt.RequestOption
 }
 
-var _ assistant.GenerativeModel = (*ClaudeSonnet4_5)(nil)
+var _ assistant.GenerativeModel = (*ClaudeSonnet4_6)(nil)
 
-func NewClaudeSonnet4(client *anthropic.Client) *ClaudeSonnet4_5 {
-	return &ClaudeSonnet4_5{client: client}
+func NewClaudeSonnet4_6(client *anthropic.Client) *ClaudeSonnet4_6 {
+	return &ClaudeSonnet4_6{client: client}
 }
-func (m *ClaudeSonnet4_5) Provider() string { return ProviderName }
-func (m *ClaudeSonnet4_5) Name() string     { return ModelNameClaudeSonnet4 }
-func (m *ClaudeSonnet4_5) Description() string {
-	return `[Deprecated] Claude Sonnet 4.5 - superseded by Claude Sonnet 4.6.
-Best for complex agents and coding with superior tool orchestration for long-running
-autonomous tasks. Ideal for autonomous coding agents, complex financial analysis,
-multi-hour research tasks, and multi-agent frameworks. Supports 200K context window.`
+func (m *ClaudeSonnet4_6) Provider() string { return ProviderName }
+func (m *ClaudeSonnet4_6) Name() string     { return ModelNameClaudeSonnet4_6 }
+func (m *ClaudeSonnet4_6) Description() string {
+	return `Claude Sonnet 4.6 is the best combination of speed and intelligence.
+Supports extended thinking and adaptive thinking. Fast comparative latency.
+Pricing: $3/MTok input, $15/MTok output.
+Supports 200K context window (1M with beta header) and 64K max output.`
 }
 
-func (m *ClaudeSonnet4_5) SetSystemInstruction(contents ...*assistant.TextContent) {
+func (m *ClaudeSonnet4_6) SetSystemInstruction(contents ...*assistant.TextContent) {
 	m.systemInstruction = contents
 }
 
-func (m *ClaudeSonnet4_5) GenerateContent(
+func (m *ClaudeSonnet4_6) GenerateContent(
 	ctx context.Context,
 	msgs ...assistant.Message,
 ) (*assistant.GenerateContentResponse, error) {
@@ -64,6 +64,9 @@ func (m *ClaudeSonnet4_5) GenerateContent(
 	if res.StopReason != "end_turn" {
 		logger.Warn(fmt.Sprintf("anthropic response stop with reason: %s", res.StopReason))
 	}
+	if len(res.Content) == 0 {
+		return nil, fmt.Errorf("anthropic response has no content")
+	}
 	if len(res.Content) > 1 {
 		logger.Warn("anthropic response has more than one content", "content", fmt.Sprintf("%+v", res.Content))
 	}
@@ -72,7 +75,7 @@ func (m *ClaudeSonnet4_5) GenerateContent(
 	}, nil
 }
 
-func (m *ClaudeSonnet4_5) GenerateContentStream(
+func (m *ClaudeSonnet4_6) GenerateContentStream(
 	ctx context.Context,
 	msgs ...assistant.Message,
 ) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {

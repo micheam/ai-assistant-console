@@ -27,11 +27,11 @@ const (
 //     * Pricing: $5/MTok input, $25/MTok output
 //     * Supports 200K context window (1M with beta header) and 128K max output
 //
-// Claude Sonnet 4.5:
+// Claude Sonnet 4.6:
 //
-//     * Our best combination of speed and intelligence
-//     * Best for complex agents and coding with superior tool orchestration
-//     * Ideal for autonomous coding agents, complex financial analysis, multi-hour research tasks
+//     * The best combination of speed and intelligence
+//     * Supports extended thinking and adaptive thinking
+//     * Fast comparative latency
 //     * Pricing: $3/MTok input, $15/MTok output
 //     * Supports 200K context window (1M with beta header) and 64K max output
 //
@@ -42,6 +42,13 @@ const (
 //     * Best for real-time applications, high-volume intelligent processing, sub-agent tasks
 //     * Pricing: $1/MTok input, $5/MTok output
 //     * Supports 200K context window and 64K max output
+//
+// Claude Sonnet 4.5 (Deprecated):
+//
+//     * Best combination of speed and intelligence (legacy)
+//     * Superseded by Claude Sonnet 4.6
+//     * Pricing: $3/MTok input, $15/MTok output
+//     * Supports 200K context window (1M with beta header) and 64K max output
 //
 // Claude Opus 4.5 (Deprecated):
 //
@@ -54,6 +61,7 @@ const (
 func AvailableModels() []assistant.ModelDescriptor {
 	return []assistant.ModelDescriptor{
 		&ClaudeOpus4_6{},
+		&ClaudeSonnet4_6{},
 		&ClaudeSonnet4_5{},
 		&ClaudeOpus4_5{},
 		&ClaudeHaiku4_5{},
@@ -74,6 +82,8 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 		return nil, false
 	case "claude-opus-4-6":
 		return &ClaudeOpus4_6{}, true
+	case "claude-sonnet-4-6":
+		return &ClaudeSonnet4_6{}, true
 	case "claude-sonnet-4-5":
 		return &ClaudeSonnet4_5{}, true
 	case "claude-opus-4-5":
@@ -89,6 +99,8 @@ func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, er
 	switch modelName {
 	case "claude-opus-4-6":
 		return NewClaudeOpus4_6(client), nil
+	case "claude-sonnet-4-6":
+		return NewClaudeSonnet4_6(client), nil
 	case "claude-sonnet-4-5":
 		return NewClaudeSonnet4(client), nil
 	case "claude-opus-4-5":
