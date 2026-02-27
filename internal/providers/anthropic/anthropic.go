@@ -42,28 +42,12 @@ const (
 //     * Best for real-time applications, high-volume intelligent processing, sub-agent tasks
 //     * Pricing: $1/MTok input, $5/MTok output
 //     * Supports 200K context window and 64K max output
-//
-// Claude Sonnet 4.5 (Deprecated):
-//
-//     * Best combination of speed and intelligence (legacy)
-//     * Superseded by Claude Sonnet 4.6
-//     * Pricing: $3/MTok input, $15/MTok output
-//     * Supports 200K context window (1M with beta header) and 64K max output
-//
-// Claude Opus 4.5 (Deprecated):
-//
-//     * State-of-the-art model for the world's hardest problems (legacy)
-//     * Superseded by Claude Opus 4.6
-//     * Pricing: $5/MTok input, $25/MTok output
-//     * Supports 200K context window and 64K max output
 
 // AvailableModels returns a list of available models
 func AvailableModels() []assistant.ModelDescriptor {
 	return []assistant.ModelDescriptor{
 		&ClaudeOpus4_6{},
 		&ClaudeSonnet4_6{},
-		&ClaudeSonnet4_5{},
-		&ClaudeOpus4_5{},
 		&ClaudeHaiku4_5{},
 	}
 }
@@ -84,10 +68,6 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 		return &ClaudeOpus4_6{}, true
 	case "claude-sonnet-4-6":
 		return &ClaudeSonnet4_6{}, true
-	case "claude-sonnet-4-5":
-		return &ClaudeSonnet4_5{}, true
-	case "claude-opus-4-5":
-		return &ClaudeOpus4_5{}, true
 	case "claude-haiku-4-5":
 		return &ClaudeHaiku4_5{}, true
 	}
@@ -101,10 +81,6 @@ func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, er
 		return NewClaudeOpus4_6(client), nil
 	case "claude-sonnet-4-6":
 		return NewClaudeSonnet4_6(client), nil
-	case "claude-sonnet-4-5":
-		return NewClaudeSonnet4(client), nil
-	case "claude-opus-4-5":
-		return NewClaudeOpus4_5(client), nil
 	case "claude-haiku-4-5":
 		return NewClaudeHaiku4_5(client), nil
 	}

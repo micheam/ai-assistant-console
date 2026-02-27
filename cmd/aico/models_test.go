@@ -14,13 +14,13 @@ func TestParseModelSpec(t *testing.T) {
 	}{
 		{
 			name:     "simple model name",
-			input:    "gpt-4o",
-			expected: ModelSpec{Provider: "", ModelName: "gpt-4o"},
+			input:    "gpt-4.1",
+			expected: ModelSpec{Provider: "", ModelName: "gpt-4.1"},
 		},
 		{
 			name:     "qualified name with provider",
-			input:    "openai:gpt-4o",
-			expected: ModelSpec{Provider: "openai", ModelName: "gpt-4o"},
+			input:    "openai:gpt-4.1",
+			expected: ModelSpec{Provider: "openai", ModelName: "gpt-4.1"},
 		},
 		{
 			name:     "anthropic provider",
@@ -63,7 +63,7 @@ func TestQualifiedName(t *testing.T) {
 		modelName string
 		expected  string
 	}{
-		{"openai", "gpt-4o", "openai:gpt-4o"},
+		{"openai", "gpt-4.1", "openai:gpt-4.1"},
 		{"anthropic", "claude-haiku-4-5", "anthropic:claude-haiku-4-5"},
 		{"groq", "llama-3.3-70b-versatile", "groq:llama-3.3-70b-versatile"},
 	}
@@ -87,10 +87,10 @@ func TestDetectProviderByModelSpec(t *testing.T) {
 	}{
 		{
 			name:            "explicit provider openai",
-			spec:            "openai:gpt-4o",
+			spec:            "openai:gpt-4.1",
 			defaultProvider: "",
 			wantProvider:    "openai",
-			wantModelName:   "gpt-4o",
+			wantModelName:   "gpt-4.1",
 			wantFound:       true,
 		},
 		{
@@ -111,15 +111,15 @@ func TestDetectProviderByModelSpec(t *testing.T) {
 		},
 		{
 			name:            "simple name auto-detect openai",
-			spec:            "gpt-4o",
+			spec:            "gpt-4.1",
 			defaultProvider: "",
 			wantProvider:    "openai",
-			wantModelName:   "gpt-4o",
+			wantModelName:   "gpt-4.1",
 			wantFound:       true,
 		},
 		{
 			name:            "invalid provider in spec",
-			spec:            "invalid:gpt-4o",
+			spec:            "invalid:gpt-4.1",
 			defaultProvider: "",
 			wantProvider:    "",
 			wantModelName:   "",
@@ -143,10 +143,10 @@ func TestDetectProviderByModelSpec(t *testing.T) {
 		},
 		{
 			name:            "default provider ignored when model not supported",
-			spec:            "gpt-4o",
+			spec:            "gpt-4.1",
 			defaultProvider: "anthropic",
 			wantProvider:    "openai",
-			wantModelName:   "gpt-4o",
+			wantModelName:   "gpt-4.1",
 			wantFound:       true,
 		},
 	}

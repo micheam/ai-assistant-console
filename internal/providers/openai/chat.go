@@ -22,11 +22,6 @@ func AvailableModels() []assistant.ModelDescriptor {
 		&O3{},
 		&O4Mini{},
 		&O3Mini{},
-		// Deprecated
-		&GPT4O{},
-		&GPT4OMini{},
-		&O1{},
-		&O1Mini{},
 	}
 }
 
@@ -54,15 +49,6 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 		return &O4Mini{}, true
 	case "o3-mini":
 		return &O3Mini{}, true
-	// Deprecated
-	case "gpt-4o":
-		return &GPT4O{}, true
-	case "gpt-4o-mini":
-		return &GPT4OMini{}, true
-	case "o1":
-		return &O1{}, true
-	case "o1-mini":
-		return &O1Mini{}, true
 	}
 }
 
@@ -81,15 +67,6 @@ func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, er
 		return NewO4Mini(apiKey), nil
 	case "o3-mini":
 		return NewO3Mini(apiKey), nil
-	// Deprecated
-	case "gpt-4o":
-		return NewGPT4O(apiKey), nil
-	case "gpt-4o-mini":
-		return NewGPT4OMini(apiKey), nil
-	case "o1":
-		return NewO1(apiKey), nil
-	case "o1-mini":
-		return NewO1Mini(apiKey), nil
 	}
 	return nil, fmt.Errorf("unsupported model name: %s", modelName)
 }
