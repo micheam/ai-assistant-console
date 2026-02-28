@@ -7,7 +7,6 @@ if !has('patch-9.1.1119')
     finish
 endif
 
-const default_model = 'claude-opus-4-5'
 const default_chat_command = 'aico'
 const default_split_position = 'below'  # 'above', 'below', 'left', 'right'
 const default_split_size = 15  # lines for horizontal, columns for vertical
@@ -18,7 +17,7 @@ export def Model(): string
     if exists('g:ai_assistant_model')
         return g:ai_assistant_model
     endif
-    return default_model
+    return ''
 enddef
 
 export def SetModel(model_name: string): void
