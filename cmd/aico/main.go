@@ -11,7 +11,7 @@ import (
 	"micheam.com/aico/internal/logging"
 )
 
-const (
+var (
 	version = "devel"
 	appname = "aico"
 )
