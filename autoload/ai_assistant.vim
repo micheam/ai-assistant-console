@@ -186,25 +186,41 @@ var pending_input_text: string = ''
 #   :Assistant                        " Opens prompt buffer
 #   :Assistant 'explain this code'
 #   :Assistant summarize the following
-export def RunAssistant(prompt: string): void
-    # Get current buffer content before doing anything
+export def RunAssistant(prompt: string, line1: number, line2: number, range_count: number): void
+    if range_count > 0
+        # 範囲指定あり: 選択行をコードブロックに変換
+        const selected_lines = getline(line1, line2)
+        const code_block = ['```'] + selected_lines + ['```']
+        const code_block_text = code_block->join("\n")
+
+        # 範囲のみ → コードブロックを pre-fill してプロンプトバッファを開く
+        if prompt->empty()
+            OpenPromptBuffer('', code_block_text)
+            return
+        endif
+
+        # 範囲 + プロンプト → コードブロック + プロンプトで即実行
+        const full_prompt = code_block_text .. "\n\n" .. prompt
+        ExecuteAssistant(full_prompt, '')
+        return 
+    endif
+
+    # 範囲指定なし → 既存動作
     const bufcontent = getline(1, '$')
     const input_text = bufcontent->join("\n")
 
     if prompt->empty()
-        # Open prompt buffer for input
         OpenPromptBuffer(input_text)
         return
     endif
 
-    # Execute with the given prompt
     ExecuteAssistant(prompt, input_text)
 enddef
 
 # OpenPromptBuffer opens a buffer for entering the prompt.
 #
 # The buffer uses buftype=acwrite so :w triggers submission.
-def OpenPromptBuffer(input_text: string): void
+def OpenPromptBuffer(input_text: string, prefill: string = ''): void
     # Save input text for later use
     pending_input_text = input_text
 
@@ -222,6 +238,13 @@ def OpenPromptBuffer(input_text: string): void
     execute 'autocmd BufWriteCmd <buffer=' .. prompt_bufnr .. '> ++once call ai_assistant#SubmitPrompt()'
 
     # Add placeholder text
+    if !prefill->empty()
+        const prefill_lines = split(prefill, "\n", true)
+        setline(1, ['# Enter your prompt here', '# :w to submit, :q to cancel', ''] + prefill_lines + ['', ''])
+        cursor(len(prefill_lines) + 5, 1)
+        return
+    endif
+
     setline(1, ['# Enter your prompt here', '# :w to submit, :q to cancel', ''])
     cursor(3, 1)
 enddef
