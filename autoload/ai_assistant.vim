@@ -36,6 +36,16 @@ export def ChatCommand(): string
     return default_chat_command
 enddef
 
+# Option: g:ai_assistant_debug
+# Debug mode for ai-assistant plugin.
+# Default: false (no debug output)
+export def Debug(): bool
+    if exists('g:ai_assistant_debug')
+        return g:ai_assistant_debug
+    endif
+    return false
+enddef
+
 export def SetChatCommand(command: string): void
     g:ai_assistant_bin = command
 enddef
@@ -116,7 +126,11 @@ enddef
 # TODO: Show Description of the model.
 #       May be mappping to 'K' or something.
 export def ShowModelSelector(): void
-    const cmd = [ ChatCommand(), "models", "--json" ]
+    var cmd = [ ChatCommand() ]
+    if Debug()
+        cmd->add('--debug')
+    endif
+    cmd->add("models")->add("--json")
     const models = json_decode(system(cmd->join(' ')))
     if len(models) == 0
         echom "No models available."
@@ -139,7 +153,11 @@ enddef
 
 # ShowPersonaSelector shows a popup menu to select a ai-assistant persona.
 export def ShowPersonaSelector(): void
-    const cmd = [ ChatCommand(), "--json", "persona", "list" ]
+    var cmd = [ ChatCommand() ]
+    if Debug()
+        cmd->add('--debug')
+    endif
+    cmd->add("--json")->add("personas")->add("list")
     const personas = json_decode(system(cmd->join(' ')))
     if len(personas) == 0
         echom "No personas available."
@@ -187,6 +205,10 @@ var pending_input_text: string = ''
 #   :Assistant 'explain this code'
 #   :Assistant summarize the following
 export def RunAssistant(prompt: string, line1: number, line2: number, range_count: number): void
+    # バッファ全体をコンテキストとして取得（範囲指定の有無に関わらず）
+    const bufcontent = getline(1, '$')
+    const input_text = bufcontent->join("\n")
+
     if range_count > 0
         # 範囲指定あり: 選択行をコードブロックに変換
         const selected_lines = getline(line1, line2)
@@ -195,19 +217,15 @@ export def RunAssistant(prompt: string, line1: number, line2: number, range_coun
 
         # 範囲のみ → コードブロックを pre-fill してプロンプトバッファを開く
         if prompt->empty()
-            OpenPromptBuffer('', code_block_text)
+            OpenPromptBuffer(input_text, code_block_text)
             return
         endif
 
         # 範囲 + プロンプト → コードブロック + プロンプトで即実行
         const full_prompt = code_block_text .. "\n\n" .. prompt
-        ExecuteAssistant(full_prompt, '')
-        return 
+        ExecuteAssistant(full_prompt, input_text)
+        return
     endif
-
-    # 範囲指定なし → 既存動作
-    const bufcontent = getline(1, '$')
-    const input_text = bufcontent->join("\n")
 
     if prompt->empty()
         OpenPromptBuffer(input_text)
@@ -280,11 +298,17 @@ enddef
 # ExecuteAssistant runs the ai-assistant command and displays results.
 def ExecuteAssistant(prompt: string, input_text: string): void
     # Build command
-    var cmd = [ChatCommand(), '--model=' .. Model()]
+    var cmd = [ChatCommand()]
+    if Debug()
+        cmd->add('--debug')
+    endif
+    if !(Model()->empty())
+        cmd->add('--model')->add(Model())
+    endif
     # Add persona if specified
     const persona = Persona()
     if !persona->empty()
-        cmd->add('--persona=' .. persona)
+        cmd->add('--persona')->add(persona)
     endif
     cmd->add(prompt)
 
@@ -362,3 +386,5 @@ def ExecuteAssistant(prompt: string, input_text: string): void
     ch_sendraw(channel, input_text)
     ch_close_in(channel)
 enddef
+
+defcompile
