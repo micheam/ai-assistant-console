@@ -13,95 +13,116 @@ Add a new AI model to the aico codebase.
 `$ARGUMENTS` should be in the format `provider:model-id` (e.g. `anthropic:claude-opus-4-6`).
 If only a model ID is given, infer the provider from the model name prefix:
 - `claude-*` → `anthropic`
-- `gpt-*`, `o1*`, `o3*` → `openai`
+- `gpt-*`, `o1*`, `o3*`, `o4*` → `openai`
 - `llama*`, `mixtral*` → `groq`
+- `qwen*` → `cerebras`
 - Other → ask the user
 
 ## Prerequisite: Gather Model Information
 
 Before writing any code, gather the following from the user or from provided reference URLs:
 
-1. **Model ID** (e.g. `claude-opus-4-6`)
-2. **Description** - what the model is best at
-3. **Pricing** - input/output per MTok
+1. **Model ID** — the exact string used in API calls (e.g. `claude-opus-4-6`, `gpt-4.1`)
+2. **Description** — what the model is best at
+3. **Pricing** — input/output per MTok
 4. **Context window** and **max output tokens**
 5. **Notable capabilities** (e.g. extended thinking, vision, tool calling)
 6. **Predecessor model to deprecate** (optional)
 
 If the user provides a reference URL, fetch it to extract this information.
-
-### Provider Reference URLs
-
-When the user does not provide a reference URL, consult the official documentation for the relevant provider:
-
-| Provider  | Models Documentation                                              | Pricing Documentation             |
-|-----------|-------------------------------------------------------------------|-----------------------------------|
-| Anthropic | https://platform.claude.com/docs/en/about-claude/models/overview  | https://claude.com/pricing#api    |
-| OpenAI    | https://platform.openai.com/docs/models                           | https://openai.com/api/pricing/   |
-| Groq      | https://console.groq.com/docs/models                              | https://groq.com/pricing/         |
-| Cerebras  | https://inference-docs.cerebras.ai/models/overview                | https://www.cerebras.ai/pricing   |
-
-Fetch the relevant page(s) to extract:
-- The exact model ID string used in API calls
-- Context window size and max output tokens
-- Input/output pricing per million tokens
-- Release date and predecessor model (if applicable)
-- Special capabilities or limitations
+Otherwise, search the web for the latest model information from the provider's official documentation.
 
 ## Step-by-step Procedure
 
-### 1. Create the model Go file
+### 1. Read the existing model files in the target provider
+
+Before creating any file, **read at least one existing model file** in the same provider directory to understand the exact current pattern. The patterns described below are guidelines — always match the actual code.
+
+Provider directories:
+- `internal/providers/anthropic/`
+- `internal/providers/openai/`
+- `internal/providers/groq/`
+- `internal/providers/cerebras/`
+
+### 2. Create the model Go file
 
 Create a new file at `internal/providers/<provider>/<model_file_name>.go`.
 
-The file name convention uses underscores for separators:
+**File naming convention** — replace hyphens and dots with underscores, drop suffixes like `-versatile` or `-instant` for brevity:
 - `claude-opus-4-6` → `claude_opus_4_6.go`
-- `gpt-4o` → `gpt4o.go`
+- `gpt-4.1` → `gpt4_1.go`
+- `gpt-4.1-mini` → `gpt4_1_mini.go`
+- `o3` → `o3.go`
 - `llama-3.3-70b-versatile` → `llama3_3_70b.go`
 
-Use the existing model files in the same provider as a template. Each provider has a different pattern:
+**All models must:**
+- Add the interface compliance check: `var _ assistant.GenerativeModel = (*TypeName)(nil)`
+- Implement all methods of `assistant.GenerativeModel`:
+  - `Provider() string`
+  - `Name() string`
+  - `Description() string`
+  - `SetSystemInstruction(...*assistant.TextContent)`
+  - `GenerateContent(ctx, ...Message) (*GenerateContentResponse, error)`
+  - `GenerateContentStream(ctx, ...Message) (iter.Seq2[*GenerateContentResponse, error], error)`
 
-#### Anthropic models (`internal/providers/anthropic/`)
+**Provider-specific patterns:**
 
-- Uses `github.com/anthropics/anthropic-sdk-go` SDK
-- Struct has `client *anthropic.Client` and `opts []anthropicopt.RequestOption`
-- Constructor takes `*anthropic.Client`
-- Uses `buildRequestBody()` helper and `m.client.Messages.New()` / `m.client.Messages.NewStreaming()`
-- Must define a `ModelName` constant: `const ModelNameXxx = "model-id"`
+#### Anthropic (`internal/providers/anthropic/`)
 
-Template reference: any existing `claude_*.go` file in the same directory.
+```
+- Import: anthropic "github.com/anthropics/anthropic-sdk-go", anthropicopt "github.com/anthropics/anthropic-sdk-go/option"
+- Define: const ModelNameXxx = "model-id"
+- Struct fields: client *anthropic.Client, opts []anthropicopt.RequestOption
+- Constructor: takes *anthropic.Client (NOT apiKey)
+- GenerateContent: buildRequestBody() → m.client.Messages.New()
+- GenerateContentStream: buildRequestBody() → m.client.Messages.NewStreaming()
+```
 
-#### OpenAI models (`internal/providers/openai/`)
+Template: `claude_opus_4_6.go`
 
-- Uses the in-house `openai.APIClient`
-- Constructor takes `apiKey string`
-- Uses `BuildChatRequest()` and `m.client.DoPost()` / `m.client.DoStream()`
+#### OpenAI (`internal/providers/openai/`)
 
-Template reference: `gpt4o.go`
+```
+- Struct fields: systemInstruction []*assistant.TextContent, client *APIClient
+- Constructor: takes apiKey string → NewAPIClient(apiKey)
+- GenerateContent: BuildChatRequest() → m.client.DoPost(ctx, endpoint, req, resp)
+- GenerateContentStream: BuildChatRequest() → m.client.DoStream(ctx, endpoint, req)
+- Also implements SetHttpClient(c *http.Client) (not part of interface, but required for this provider)
+```
 
-#### Groq / Cerebras models (OpenAI-compatible)
+Template: `gpt4_1.go`
 
-- Uses `openai.APIClient` from the openai package
-- Constructor takes `apiKey string`
-- Delegates to `openai.GenerateContent()` / `openai.GenerateContentStream()` with the provider's `Endpoint`
+#### Groq / Cerebras (OpenAI-compatible)
 
-Template reference: any model file in `internal/providers/groq/` or `internal/providers/cerebras/`
+```
+- Import: "micheam.com/aico/internal/providers/openai"
+- Struct fields: systemInstruction []*assistant.TextContent, client *openai.APIClient
+- Constructor: takes apiKey string → openai.NewAPIClient(apiKey)
+- GenerateContent: delegates to openai.GenerateContent(ctx, m.client, Endpoint, m.Name(), ...)
+- GenerateContentStream: delegates to openai.GenerateContentStream(ctx, m.client, Endpoint, m.Name(), ...)
+- Uses the provider's Endpoint constant (defined in the provider main file)
+```
 
-### 2. Register the model in the provider file
+Template: `llama3_3_70b.go` (groq) or `gpt_oss_120b.go` (cerebras)
 
-Edit the provider's main file (`internal/providers/<provider>/<provider>.go` or `anthropic.go`):
+### 3. Register the model in the provider file
 
-1. **`AvailableModels()`** - Add the new model struct to the returned slice
-2. **`selectModel()`** - Add a `case` for the model ID
-3. **`NewGenerativeModel()`** - Add a `case` for the model ID with the constructor
+Edit the provider's main file (e.g. `anthropic.go`, `chat.go` for openai, `groq.go`, `cerebras.go`).
+Update **all three** registration points:
 
-Place the new model at an appropriate position (typically at the top for the latest/best model).
+1. **`AvailableModels()`** — add the new model struct to the returned slice
+2. **`selectModel()`** — add a `case` for the model ID string
+3. **`NewGenerativeModel()`** — add a `case` for the model ID with the constructor call
 
-### 3. Update the doc comment
+Place the new model at the top of each list/switch (latest model first).
 
-Update the documentation comment block at the top of the provider file to include the new model's description and pricing.
+> **Note:** `cmd/aico/models.go` does NOT need changes. It aggregates models from all providers automatically via each provider's `AvailableModels()` function.
 
-### 4. Deprecate predecessor (if requested)
+### 4. Update the doc comment
+
+Update the documentation comment block at the top of the provider file to include the new model's description, capabilities, and pricing.
+
+### 5. Deprecate predecessor (if requested)
 
 If the user requests deprecating an older model:
 
@@ -109,15 +130,15 @@ If the user requests deprecating an older model:
 2. Move its entry in the doc comment to the bottom with `(Deprecated)` suffix
 3. Keep all code functional — do NOT remove the model
 
-### 5. Build and test
+### 6. Build and test
 
-Run:
 ```
-go build ./...
-go test ./...
+make test
 ```
 
-### 6. Verify with CLI
+This runs `go vet ./...` and `go test -tags e2e ./...`.
+
+### 7. Verify with CLI
 
 Run and show the user the output of:
 ```
@@ -130,14 +151,14 @@ If a predecessor was deprecated, also show:
 go run ./cmd/aico models describe <deprecated-model-id>
 ```
 
-### 7. Commit
+### 8. Commit
 
-Follow the Conventional Commits format defined in CLAUDE.md:
+Follow the Conventional Commits format:
 ```
 feat(api): add <Model Name> support
 ```
 
-If a predecessor was deprecated, mention it:
+If a predecessor was deprecated:
 ```
 feat(api): add <Model Name> support and deprecate <Old Model>
 ```
