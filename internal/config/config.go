@@ -160,9 +160,30 @@ func ConfigFilePath() string {
 	return filepath.Join(dir, ApplicationFQN, ConfigFileName)
 }
 
+// defaultStateDir returns the default state directory following the XDG Base Directory Specification.
+//
+// Platform defaults:
+//   - Linux:   ~/.local/state/com.micheam.aico/
+//   - macOS:   ~/Library/Logs/com.micheam.aico/
+//   - Windows: %LOCALAPPDATA%\com.micheam.aico\
+func defaultStateDir() string {
+	rootDir := os.Getenv("XDG_STATE_HOME")
+	if rootDir == "" {
+		switch runtime.GOOS {
+		case "windows":
+			rootDir = os.Getenv("LOCALAPPDATA")
+		case "darwin", "ios":
+			rootDir = filepath.Join(os.Getenv("HOME"), "Library", "Logs")
+		default:
+			rootDir, _ = os.UserHomeDir()
+			rootDir = filepath.Join(rootDir, ".local", "state")
+		}
+	}
+	return filepath.Join(rootDir, ApplicationFQN)
+}
+
 func defaultLogfilePath() string {
-	// Same directory as the config file
-	return filepath.Join(filepath.Dir(ConfigFilePath()), LogFileName)
+	return filepath.Join(defaultStateDir(), LogFileName)
 }
 
 const (
@@ -242,7 +263,7 @@ func (c *Config) GetSessionDir() string {
 	if c.sessionDir != "" {
 		return c.sessionDir
 	}
-	return DefaulSetSessionDir()
+	return DefaultSessionDir()
 }
 
 //
@@ -265,14 +286,14 @@ func DefaultConfig() *Config {
 	}
 }
 
-// DefaulSetSessionDir returns the default session directory
+// DefaultSessionDir returns the default session directory
 //
 // This follows the XDG Base Directory Specification.
 // Otherwise, it uses the appropriate directory for the OS.
 // Unix/Linux: ~/.local/share/com.micheam.aico/sessions
 // macOS: ~/Library/Application Support/com.micheam.aico/sessions
 // Windows: %APPDATA%\com.micheam.aico\sessions
-func DefaulSetSessionDir() string {
+func DefaultSessionDir() string {
 	rootDir := os.Getenv("XDG_DATA_HOME")
 	if rootDir == "" {
 		switch runtime.GOOS {

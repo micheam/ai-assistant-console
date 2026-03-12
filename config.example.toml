@@ -8,7 +8,10 @@
 # If no config file is found, aico will automatically create one with default values.
 
 # Path to the log file
-# Default: aico.log (in the same directory as this config file)
+# Default: $XDG_STATE_HOME/com.micheam.aico/aico.log
+#   Linux:   ~/.local/state/com.micheam.aico/aico.log
+#   macOS:   ~/Library/Logs/com.micheam.aico/aico.log
+#   Windows: %LOCALAPPDATA%\com.micheam.aico\aico.log
 # Can be absolute or relative path (relative paths are resolved from config file location)
 logfile = "aico.log"
 
