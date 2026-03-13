@@ -179,7 +179,7 @@ type model struct {
 //	So, if an API key for Anthropic is not provided, it returns an error.
 func DefaultModel(ctx context.Context, cmd *cli.Command) (assistant.GenerativeModel, error) {
 	apikey := cmd.String(flagAPIKeyAnthropic.Name)
-	if apikey != "" {
+	if apikey == "" {
 		return nil, errors.New(flagAPIKeyAnthropic.Name + " is required for default model, but not provided")
 	}
 	return anthropic.NewGenerativeModel(
@@ -192,13 +192,14 @@ func DefaultModel(ctx context.Context, cmd *cli.Command) (assistant.GenerativeMo
 //
 // Following is the detection priority:
 //  1. If the --model flag is provided, use that model.
-//  2. Otherwise, use the model specified in the configuration file.
-//  3. If no model is specified in either place, return a default model.
+//  2. If sessionModel is non-empty (restored from a resumed session), use that.
+//  3. Otherwise, use the model specified in the configuration file.
+//  4. If no model is specified in any place, return a default model.
 //
 // Model specification formats:
 //   - Simple: "gpt-4o" (provider auto-detected, default_provider preferred if ambiguous)
 //   - Qualified: "openai:gpt-4o" (explicit provider)
-func detectModel(ctx context.Context, cmd *cli.Command) (assistant.GenerativeModel, error) {
+func detectModel(ctx context.Context, cmd *cli.Command, sessionModel string) (assistant.GenerativeModel, error) {
 	logger := logging.LoggerFrom(ctx)
 	conf, err := config.Load()
 	if err != nil {
@@ -207,6 +208,9 @@ func detectModel(ctx context.Context, cmd *cli.Command) (assistant.GenerativeMod
 	}
 
 	modelSpec := cmd.String(flagModel.Name)
+	if modelSpec == "" {
+		modelSpec = sessionModel
+	}
 	if modelSpec == "" {
 		modelSpec = conf.Model
 	}

@@ -21,13 +21,16 @@ import (
 // -----------------------------------------------------------------------------
 
 func runGenerate(ctx context.Context, cmd *cli.Command) error {
+	return doGenerate(ctx, cmd, cmd.Args().First())
+}
+
+func doGenerate(ctx context.Context, cmd *cli.Command, prompt string) error {
 	logger, cleanup, err := initializeLogger(ctx, cmd)
 	if err != nil {
 		return err
 	}
 	defer cleanup()
 
-	prompt := cmd.Args().First()
 	if prompt == "" {
 		return fmt.Errorf("prompt is required")
 	}
@@ -50,19 +53,24 @@ func runGenerate(ctx context.Context, cmd *cli.Command) error {
 		logger = logger.With(slog.String("source", srcFlag))
 	}
 
-	model, err := detectModel(ctx, cmd)
-	logger = logger.With(slog.String("model", model.Name()))
-	if err != nil {
-		return fmt.Errorf("failed to detect model: %w", err)
-	}
-
 	// Persona / System Instruction:
 	systemInstruction := make([]*assistant.TextContent, 0)
 	conf, err := config.Load()
 	if err != nil {
 		conf = config.DefaultConfig()
 	}
-	isResumedSession := cmd.String(flagSessionID.Name) != ""
+	isResumedSession := cmd.String(flagSessionID.Name) != "" || cmd.Bool(flagLast.Name)
+
+	// Use session's saved model as fallback for resumed sessions
+	sessionModel := ""
+	if isResumedSession {
+		sessionModel = sess.Model
+	}
+	model, err := detectModel(ctx, cmd, sessionModel)
+	if err != nil {
+		return fmt.Errorf("failed to detect model: %w", err)
+	}
+	logger = logger.With(slog.String("model", model.Name()))
 	if isResumedSession && len(sess.SystemInstruction) > 0 {
 		// Existing session: use saved instructions (maintains persona consistency)
 		systemInstruction = append(systemInstruction, sess.SystemInstruction...)
@@ -139,6 +147,7 @@ func runGenerate(ctx context.Context, cmd *cli.Command) error {
 	if len(sess.SystemInstruction) == 0 {
 		sess.SystemInstruction = baseSystemInstruction
 	}
+	sess.Model = QualifiedName(model.Provider(), model.Name())
 	if err := sess.Save(ctx, model); err != nil {
 		return err
 	}
@@ -181,8 +190,8 @@ func getSource(srcFlag string, stdin io.Reader) (string, error) {
 // If the string starts with '@', it reads from the file path after '@'.
 // Otherwise, it returns the string as-is wrapped in <source> tags.
 func resolveSource(src string) (string, error) {
-	if strings.HasPrefix(src, "@") {
-		filePath := strings.TrimPrefix(src, "@")
+	if after, ok := strings.CutPrefix(src, "@"); ok {
+		filePath := after
 		data, err := os.ReadFile(filePath)
 		if err != nil {
 			return "", fmt.Errorf("failed to read file %q: %w", filePath, err)
@@ -205,8 +214,8 @@ func resolveSource(src string) (string, error) {
 // If the string starts with '@', it reads from the file path after '@'.
 // Otherwise, it returns the string as-is.
 func resolveContext(ctx string) (string, error) {
-	if strings.HasPrefix(ctx, "@") {
-		filePath := strings.TrimPrefix(ctx, "@")
+	if after, ok := strings.CutPrefix(ctx, "@"); ok {
+		filePath := after
 		data, err := os.ReadFile(filePath)
 		if err != nil {
 			return "", fmt.Errorf("failed to read file %q: %w", filePath, err)
@@ -250,15 +259,31 @@ func loadSession(ctx context.Context, cmd *cli.Command) (*assistant.Session, err
 		return nil, fmt.Errorf("can't load config: %w", err)
 	}
 	dir := conf.GetSessionDir()
-	if cmd.String(flagSessionID.Name) == "" {
+
+	sessionID := cmd.String(flagSessionID.Name)
+	useLast := cmd.Bool(flagLast.Name)
+
+	if sessionID != "" && useLast {
+		return nil, fmt.Errorf("--session and --last are mutually exclusive")
+	}
+
+	if useLast {
+		id, err := assistant.LatestSessionID(dir)
+		if err != nil {
+			return nil, fmt.Errorf("find latest session: %w", err)
+		}
+		sessionID = id
+	}
+
+	if sessionID == "" {
 		logger.Debug("creating new session")
 		return assistant.NewSession(dir), nil
 	}
-	id := cmd.String(flagSessionID.Name)
-	existing, err := assistant.LoadSession(ctx, dir, id)
+
+	existing, err := assistant.LoadSession(ctx, dir, sessionID)
 	if err != nil {
-		return nil, fmt.Errorf("load existing session %q: %w", id, err)
+		return nil, fmt.Errorf("load existing session %q: %w", sessionID, err)
 	}
-	logger.Debug("loaded existing session", "session_id", id)
+	logger.Debug("loaded existing session", "session_id", sessionID)
 	return existing, nil
 }

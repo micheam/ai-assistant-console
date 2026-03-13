@@ -353,7 +353,7 @@ type Usage struct {
 
 // Choice is the choice of the Chat API
 type Choice struct {
-	Message      AssistantMessage `json:"message,omitempty"`
+	Message      AssistantMessage `json:"message"`
 	Delta        *DeltaMessage    `json:"delta,omitempty"`
 	FinishReason string           `json:"finish_reason"`
 	Index        int              `json:"index"`

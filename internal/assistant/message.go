@@ -70,7 +70,7 @@ func (u *UserMessage) UnmarshalJSON(data []byte) error {
 	// Unmarshal each content by detecting its type
 	u.Contents = make([]MessageContent, 0, len(aux.Contents))
 	for _, raw := range aux.Contents {
-		var m map[string]interface{}
+		var m map[string]any
 		if err := json.Unmarshal(raw, &m); err != nil {
 			return err
 		}
@@ -156,7 +156,7 @@ func (a *AssistantMessage) UnmarshalJSON(data []byte) error {
 	// Unmarshal each content by detecting its type
 	a.Contents = make([]MessageContent, 0, len(aux.Contents))
 	for _, raw := range aux.Contents {
-		var m map[string]interface{}
+		var m map[string]any
 		if err := json.Unmarshal(raw, &m); err != nil {
 			return err
 		}

@@ -35,6 +35,7 @@ func run(args []string) error {
 			flagModel,
 
 			flagSessionID,
+			flagLast,
 			flagNoStream,
 			flagPersona,
 			flagSystemPrompt,
@@ -53,6 +54,7 @@ func run(args []string) error {
 			CmdConfig,
 			CmdModels,
 			CmdPersona,
+			CmdSession,
 		},
 	}
 	return app.Run(context.Background(), args)
@@ -100,6 +102,10 @@ var (
 	flagSessionID = &cli.StringFlag{
 		Name:  "session",
 		Usage: "session `ID` for conversation history",
+	}
+	flagLast = &cli.BoolFlag{
+		Name:  "last",
+		Usage: "resume the most recent session",
 	}
 
 	//

@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
+	"strings"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -14,6 +17,7 @@ import (
 
 type Session struct {
 	ID                string         `json:"id"`
+	Model             string         `json:"model,omitempty"`
 	SystemInstruction []*TextContent `json:"system_instruction"`
 	Messages          []Message      `json:"messages"`
 
@@ -130,6 +134,7 @@ func (s Session) MarshalJSON() ([]byte, error) {
 func (s *Session) UnmarshalJSON(data []byte) error {
 	var temp struct {
 		ID                string            `json:"id"`
+		Model             string            `json:"model,omitempty"`
 		SystemInstruction []json.RawMessage `json:"system_instruction"`
 		Messages          []json.RawMessage `json:"messages"`
 	}
@@ -139,6 +144,7 @@ func (s *Session) UnmarshalJSON(data []byte) error {
 	}
 
 	s.ID = temp.ID
+	s.Model = temp.Model
 
 	// Unmarshal system instructions
 	s.SystemInstruction = make([]*TextContent, 0, len(temp.SystemInstruction))
@@ -183,4 +189,96 @@ func (s *Session) UnmarshalJSON(data []byte) error {
 	}
 
 	return nil
+}
+
+// -------------------------------------------
+// Session Listing
+// -------------------------------------------
+
+// SessionSummary holds lightweight metadata for session listing.
+type SessionSummary struct {
+	ID       string
+	ModTime  time.Time
+	Preview  string // first user message preview
+	MsgCount int
+}
+
+// ListSessions returns summaries of all sessions in the given directory,
+// sorted by modification time (newest first).
+func ListSessions(dir string) ([]SessionSummary, error) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, fmt.Errorf("read session dir: %w", err)
+	}
+
+	var summaries []SessionSummary
+	for _, e := range entries {
+		if e.IsDir() || filepath.Ext(e.Name()) != ".json" {
+			continue
+		}
+		info, err := e.Info()
+		if err != nil {
+			continue
+		}
+		id := strings.TrimSuffix(e.Name(), ".json")
+		preview, msgCount := sessionPreview(filepath.Join(dir, e.Name()))
+		summaries = append(summaries, SessionSummary{
+			ID:       id,
+			ModTime:  info.ModTime(),
+			Preview:  preview,
+			MsgCount: msgCount,
+		})
+	}
+
+	slices.SortFunc(summaries, func(a, b SessionSummary) int {
+		return b.ModTime.Compare(a.ModTime) // newest first
+	})
+	return summaries, nil
+}
+
+// LatestSessionID returns the ID of the most recently modified session.
+func LatestSessionID(dir string) (string, error) {
+	summaries, err := ListSessions(dir)
+	if err != nil {
+		return "", err
+	}
+	if len(summaries) == 0 {
+		return "", fmt.Errorf("no sessions found")
+	}
+	return summaries[0].ID, nil
+}
+
+// sessionPreview reads a session file and extracts the first user message text.
+func sessionPreview(path string) (string, int) {
+	f, err := os.Open(path)
+	if err != nil {
+		return "", 0
+	}
+	defer f.Close()
+
+	sess, err := decodeSession(f)
+	if err != nil {
+		return "", 0
+	}
+
+	for _, msg := range sess.Messages {
+		if msg.GetAuthor() != MessageAuthorUser {
+			continue
+		}
+		for _, c := range msg.GetContents() {
+			tc, ok := c.(*TextContent)
+			if !ok || tc.Text == "" {
+				continue
+			}
+			text := tc.Text
+			if strings.HasPrefix(text, "<source") || strings.HasPrefix(text, "<context") {
+				continue
+			}
+			if len(text) > 80 {
+				text = text[:80] + "..."
+			}
+			return text, len(sess.Messages)
+		}
+	}
+	return "(empty)", len(sess.Messages)
 }
