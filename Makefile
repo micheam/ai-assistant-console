@@ -1,9 +1,9 @@
 BIN_NAME = aico
 ENTRY_POINT = ./cmd/aico
-TARGET = bin/$(BIN_NAME)
+TARGET = dist/$(BIN_NAME)
 SOURCE = $(shell find . -name '*.go')
 INSTALL_PATH ?= /usr/local/bin
-BIN_DIR = ./bin
+BIN_DIR = ./dist
 USER_BIN = $(shell echo $$HOME)/bin
 TEST_OPTS = -tags e2e
 .DEFAULT_GOAL := help

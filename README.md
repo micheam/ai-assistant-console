@@ -84,7 +84,7 @@ Once you have Go installed, follow these steps to install AICO:
    ```bash
    make
    ```
-   This will create a binary executable in the `bin/` directory.
+   This will create a binary executable in the `dist/` directory.
 
 Now, you can use commands as described in the [Usage](#usage) section.
 
