@@ -12,8 +12,9 @@ import (
 )
 
 var (
-	version = "devel"
-	appname = "aico"
+	version   = "devel"   // will be injected at build time via ldflags
+	buildTime = "unknown" // will be injected at build time via ldflags
+	appname   = "aico"
 )
 
 func main() {
@@ -27,7 +28,7 @@ func run(args []string) error {
 	app := &cli.Command{
 		Name:                  appname,
 		Usage:                 "AI Assistant Console",
-		Version:               version,
+		Version:               fmt.Sprintf("%s (built at %s)", version, buildTime),
 		EnableShellCompletion: true,
 		Flags: []cli.Flag{
 			flagDebug,
