@@ -2,7 +2,7 @@ BIN_NAME = aico
 ENTRY_POINT = ./cmd/aico
 TARGET = dist/$(BIN_NAME)
 SOURCE = $(shell find . -name '*.go')
-INSTALL_PATH ?= /usr/local/bin
+INSTALL_PATH ?= $(shell echo $$HOME)/bin
 BIN_DIR = ./dist
 USER_BIN = $(shell echo $$HOME)/bin
 TEST_OPTS = -tags e2e
@@ -31,7 +31,7 @@ $(TARGET): $(SOURCE)
 clean: ## Clean up build artifacts
 	rm -f $(BIN_DIR)/*
 
-install: $(TARGET) ## Install the binary to INSTALL_PATH (default: /usr/local/bin)
+install: $(TARGET) ## Install the binary to INSTALL_PATH (default: ~/bin)
 	install -m 755 $(TARGET) $(INSTALL_PATH)/$(BIN_NAME)
 
 test: ## Run tests with specified options
