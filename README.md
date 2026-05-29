@@ -5,7 +5,7 @@
 [![Go](https://github.com/micheam/ai-assistant-console/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/micheam/ai-assistant-console/actions/workflows/go.yml)
 [![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/micheam/ai-assistant-console?include_prereleases)](https://github.com/micheam/ai-assistant-console/releases)
 
-AICO is an AI-powered console application that supports multiple AI providers including OpenAI's GPT models and Anthropic's Claude models. It provides simple text generation with Vim plugin integration.
+AICO is an AI-powered console application that supports multiple AI providers including OpenAI's GPT models and Anthropic's Claude models. It provides simple text generation, and can also be used from Vim via the [vim-aico](https://github.com/micheam/vim-aico) plugin.
 
 ## Install
 
@@ -176,8 +176,9 @@ $ aico persona list
 
 ## Usage as a Vim Plugin
 
-AICO can be used as a Vim plugin to generate text in Vim buffers.
-Please see the [Vim plugin documentation](README.vim.md) for more information.
+AICO can be used from Vim to generate text in Vim buffers.
+The Vim plugin lives in a separate repository: [micheam/vim-aico](https://github.com/micheam/vim-aico).
+Please see its README for installation and usage.
 
 ## Environment Variables
 
