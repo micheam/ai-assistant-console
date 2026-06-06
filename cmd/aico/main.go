@@ -79,7 +79,7 @@ var (
 	}
 	flagJSON = &cli.BoolFlag{
 		Name:  "json",
-		Usage: "Output the models in JSON format",
+		Usage: "Output in JSON format",
 	}
 	flagModel = &cli.StringFlag{
 		Name:    "model",

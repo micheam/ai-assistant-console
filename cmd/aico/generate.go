@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log/slog"
@@ -122,8 +123,30 @@ func doGenerate(ctx context.Context, cmd *cli.Command, prompt string) error {
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
 
-	// Print the generated content
+	// Print the generated content.
+	// In JSON mode, suppress incremental streaming output and emit a single
+	// JSON object at the end so stdout stays valid JSON.
+	//
+	// TODO(micheam): JSONL streaming output for real-time consumption by other tools with --json and --stream flags.
+	jsonOutput := cmd.Bool(flagJSON.Name)
 	acc := strings.Builder{}
+
+	var writer ChunkHandler
+	if jsonOutput {
+		writer = &JSONLineStreamWriter{
+			enc: json.NewEncoder(cmd.Writer),
+			metaData: map[string]interface{}{
+				"session": sess.ID,
+				"model":   sess.Model,
+			},
+		}
+	} else {
+		writer = &ConsoleLineStreamWriter{
+			out: cmd.Writer,
+		}
+	}
+	defer writer.Close()
+
 	for resp, err := range iter {
 		if err != nil {
 			fmt.Fprintf(cmd.ErrWriter, "\nError: %v\n", err)
@@ -131,14 +154,14 @@ func doGenerate(ctx context.Context, cmd *cli.Command, prompt string) error {
 		}
 		switch content := resp.Content.(type) {
 		case *assistant.TextContent:
-			fmt.Fprintf(cmd.Writer, "%s", content.Text)
+			writer.HandleChunk(content.Text)
 			acc.WriteString(content.Text)
 		default:
 			// Ignore other content types for now
-			logger.Warn("ignore unsupported content type", "type", fmt.Sprintf("%T", content))
+			logger.Warn("ignore unsupported content type",
+				"type", fmt.Sprintf("%T", content))
 		}
 	}
-	fmt.Fprintln(cmd.Writer)
 
 	if acc.Len() > 0 {
 		sess.AddMessage(assistant.NewAssistantMessage(assistant.NewTextContent(acc.String())))
@@ -151,8 +174,15 @@ func doGenerate(ctx context.Context, cmd *cli.Command, prompt string) error {
 	if err := sess.Save(ctx, model); err != nil {
 		return err
 	}
-	fmt.Fprintf(cmd.ErrWriter, "session: %s\n", sess.ID)
+	// fmt.Fprintf(cmd.ErrWriter, "session: %s\n", sess.ID)
 	return nil
+}
+
+// generateView is the JSON output shape for the generate action when --json is set.
+type generateView struct {
+	Session string `json:"session"`
+	Model   string `json:"model"`
+	Content string `json:"content"`
 }
 
 // -----------------------------------------------------------------------------
