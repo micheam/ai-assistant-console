@@ -71,6 +71,7 @@ func doGenerate(ctx context.Context, cmd *cli.Command, prompt string) error {
 	if err != nil {
 		return fmt.Errorf("failed to detect model: %w", err)
 	}
+	sess.Model = QualifiedName(model.Provider(), model.Name())
 	logger = logger.With(slog.String("model", model.Name()))
 	if isResumedSession && len(sess.SystemInstruction) > 0 {
 		// Existing session: use saved instructions (maintains persona consistency)
@@ -123,30 +124,12 @@ func doGenerate(ctx context.Context, cmd *cli.Command, prompt string) error {
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
 
-	// Print the generated content.
-	// In JSON mode, suppress incremental streaming output and emit a single
-	// JSON object at the end so stdout stays valid JSON.
-	//
-	// TODO(micheam): JSONL streaming output for real-time consumption by other tools with --json and --stream flags.
-	jsonOutput := cmd.Bool(flagJSON.Name)
-	acc := strings.Builder{}
-
-	var writer ChunkHandler
-	if jsonOutput {
-		writer = &JSONLineStreamWriter{
-			enc: json.NewEncoder(cmd.Writer),
-			metaData: map[string]interface{}{
-				"session": sess.ID,
-				"model":   sess.Model,
-			},
-		}
-	} else {
-		writer = &ConsoleLineStreamWriter{
-			out: cmd.Writer,
-		}
-	}
+	// Stream content and accumulate text for session history
+	var (
+		acc    = new(strings.Builder)
+		writer = detectWriter(cmd, *sess)
+	)
 	defer writer.Close()
-
 	for resp, err := range iter {
 		if err != nil {
 			fmt.Fprintf(cmd.ErrWriter, "\nError: %v\n", err)
@@ -154,7 +137,10 @@ func doGenerate(ctx context.Context, cmd *cli.Command, prompt string) error {
 		}
 		switch content := resp.Content.(type) {
 		case *assistant.TextContent:
-			writer.HandleChunk(content.Text)
+			_, err := writer.Write([]byte(content.Text))
+			if err != nil {
+				return fmt.Errorf("failed to write content: %w", err)
+			}
 			acc.WriteString(content.Text)
 		default:
 			// Ignore other content types for now
@@ -162,7 +148,6 @@ func doGenerate(ctx context.Context, cmd *cli.Command, prompt string) error {
 				"type", fmt.Sprintf("%T", content))
 		}
 	}
-
 	if acc.Len() > 0 {
 		sess.AddMessage(assistant.NewAssistantMessage(assistant.NewTextContent(acc.String())))
 	}
@@ -174,7 +159,6 @@ func doGenerate(ctx context.Context, cmd *cli.Command, prompt string) error {
 	if err := sess.Save(ctx, model); err != nil {
 		return err
 	}
-	// fmt.Fprintf(cmd.ErrWriter, "session: %s\n", sess.ID)
 	return nil
 }
 
@@ -316,4 +300,22 @@ func loadSession(ctx context.Context, cmd *cli.Command) (*assistant.Session, err
 	}
 	logger.Debug("loaded existing session", "session_id", sessionID)
 	return existing, nil
+}
+
+func detectWriter(cmd *cli.Command, sess assistant.Session) io.WriteCloser {
+	if cmd.Bool(flagJSON.Name) {
+		return &JSONLineStreamWriter{
+			enc: json.NewEncoder(cmd.Writer),
+			metaData: struct {
+				Session string
+				Model   string
+			}{
+				Session: sess.ID,
+				Model:   sess.Model,
+			},
+		}
+	}
+	return &ConsoleLineStreamWriter{
+		out: cmd.Writer,
+	}
 }
