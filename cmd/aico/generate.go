@@ -32,10 +32,6 @@ func doGenerate(ctx context.Context, cmd *cli.Command, prompt string) error {
 	}
 	defer cleanup()
 
-	if prompt == "" {
-		return fmt.Errorf("prompt is required")
-	}
-
 	// Session Management:
 	sess, err := loadSession(logging.ContextWith(ctx, logger), cmd)
 	if err != nil {
