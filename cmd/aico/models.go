@@ -10,7 +10,6 @@ import (
 
 	"micheam.com/aico/internal/assistant"
 	"micheam.com/aico/internal/config"
-	"micheam.com/aico/internal/logging"
 	"micheam.com/aico/internal/providers/anthropic"
 	"micheam.com/aico/internal/providers/cerebras"
 	"micheam.com/aico/internal/providers/groq"
@@ -177,7 +176,7 @@ type model struct {
 //
 //	Currently, only **Anthropic models** are supported as default model.
 //	So, if an API key for Anthropic is not provided, it returns an error.
-func DefaultModel(ctx context.Context, cmd *cli.Command) (assistant.GenerativeModel, error) {
+func DefaultModel(cmd *cli.Command) (assistant.GenerativeModel, error) {
 	apikey := cmd.String(flagAPIKeyAnthropic.Name)
 	if apikey == "" {
 		return nil, errors.New(flagAPIKeyAnthropic.Name + " is required for default model, but not provided")
@@ -192,38 +191,38 @@ func DefaultModel(ctx context.Context, cmd *cli.Command) (assistant.GenerativeMo
 //
 // Following is the detection priority:
 //  1. If the --model flag is provided, use that model.
-//  2. If sessionModel is non-empty (restored from a resumed session), use that.
-//  3. Otherwise, use the model specified in the configuration file.
-//  4. If no model is specified in any place, return a default model.
+//  2. Otherwise, use the model specified in the configuration file.
+//  3. If no model is specified in any place, return a default model.
 //
 // Model specification formats:
 //   - Simple: "gpt-4o" (provider auto-detected, default_provider preferred if ambiguous)
 //   - Qualified: "openai:gpt-4o" (explicit provider)
-func detectModel(ctx context.Context, cmd *cli.Command, sessionModel string) (assistant.GenerativeModel, error) {
-	logger := logging.LoggerFrom(ctx)
+func detectModel(cmd *cli.Command) (assistant.GenerativeModel, error) {
 	conf, err := config.Load()
 	if err != nil {
-		logger.Warn("failed to load config", "error", err)
-		return DefaultModel(ctx, cmd)
+		return DefaultModel(cmd)
 	}
 
 	modelSpec := cmd.String(flagModel.Name)
 	if modelSpec == "" {
-		modelSpec = sessionModel
-	}
-	if modelSpec == "" {
 		modelSpec = conf.Model
 	}
 	if modelSpec == "" {
-		return DefaultModel(ctx, cmd)
+		return DefaultModel(cmd)
 	}
 
-	provider, modelName, found := detectProviderByModelSpec(modelSpec, conf.DefaultProvider)
+	return modelByName(cmd, modelSpec)
+}
+
+func modelByName(cmd *cli.Command, name string) (assistant.GenerativeModel, error) {
+	conf, err := config.Load()
+	if err != nil {
+		return DefaultModel(cmd)
+	}
+	provider, modelName, found := detectProviderByModelSpec(name, conf.DefaultProvider)
 	if !found {
-		logger.Warn("unable to detect provider for model, using default model", "model", modelSpec)
-		return DefaultModel(ctx, cmd)
+		return DefaultModel(cmd)
 	}
-
 	switch provider {
 	case anthropic.ProviderName:
 		apikey := cmd.String(flagAPIKeyAnthropic.Name)
@@ -238,8 +237,7 @@ func detectModel(ctx context.Context, cmd *cli.Command, sessionModel string) (as
 		apikey := cmd.String(flagAPIKeyCerebras.Name)
 		return cerebras.NewGenerativeModel(modelName, apikey)
 	default:
-		logger.Warn("unsupported provider for model, using default model", "provider", provider, "model", modelName)
-		return DefaultModel(ctx, cmd)
+		return DefaultModel(cmd)
 	}
 }
 

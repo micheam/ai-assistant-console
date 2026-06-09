@@ -32,89 +32,37 @@ func doGenerate(ctx context.Context, cmd *cli.Command, prompt string) error {
 	}
 	defer cleanup()
 
-	// Session Management:
-	sess, err := loadSession(logging.ContextWith(ctx, logger), cmd)
+	sess, err := loadSession(cmd)
 	if err != nil {
 		return fmt.Errorf("failed to load session: %w", err)
 	}
+
 	logger = logger.With(slog.String("session_id", sess.ID))
 	ctx = logging.ContextWith(ctx, logger)
 
-	// Source: --source flag or stdin (mutually exclusive)
-	srcFlag := cmd.String(flagSource.Name)
-	source, err := getSource(srcFlag, os.Stdin)
-	if err != nil {
-		return err
-	}
-	if srcFlag != "" {
-		logger = logger.With(slog.String("source", srcFlag))
-	}
-
-	// Persona / System Instruction:
-	systemInstruction := make([]*assistant.TextContent, 0)
-	conf, err := config.Load()
-	if err != nil {
-		conf = config.DefaultConfig()
-	}
-	isResumedSession := cmd.String(flagSessionID.Name) != "" || cmd.Bool(flagLast.Name)
-
-	// Use session's saved model as fallback for resumed sessions
-	sessionModel := ""
-	if isResumedSession {
-		sessionModel = sess.Model
-	}
-	model, err := detectModel(ctx, cmd, sessionModel)
-	if err != nil {
-		return fmt.Errorf("failed to detect model: %w", err)
-	}
-	sess.Model = QualifiedName(model.Provider(), model.Name())
-	logger = logger.With(slog.String("model", model.Name()))
-	if isResumedSession && len(sess.SystemInstruction) > 0 {
-		// Existing session: use saved instructions (maintains persona consistency)
-		systemInstruction = append(systemInstruction, sess.SystemInstruction...)
-	} else {
-		// New session or legacy session: build from config
-		persona, ok := conf.PersonaMap[cmd.String(flagPersona.Name)]
-		if !ok {
-			return fmt.Errorf("persona %q not found", cmd.String(flagPersona.Name))
-		}
-		systemInstruction = append(systemInstruction, assistant.NewTextContent(persona.Message))
-		logger = logger.With(slog.String("persona", cmd.String(flagPersona.Name)))
-	}
-
-	// Save base system instruction (without per-invocation context) for session persistence
-	baseSystemInstruction := make([]*assistant.TextContent, len(systemInstruction))
-	copy(baseSystemInstruction, systemInstruction)
-
-	// Context (per-invocation, not persisted in session):
-	contexts := cmd.StringSlice(flagContext.Name)
-	logger = logger.With(slog.String("contexts", strings.Join(contexts, ",")))
-	if len(contexts) > 0 {
-		systemInstruction = append(systemInstruction,
-			assistant.NewTextContent("The following context is provided for the prompt."))
-	}
-	for _, ctx := range contexts {
-		content, err := resolveContext(ctx)
+	{
+		userContents := []assistant.MessageContent{}
+		source, err := detectSource(cmd.String(flagSource.Name), os.Stdin)
 		if err != nil {
-			return fmt.Errorf("failed to resolve context %q: %w", ctx, err)
+			return err
 		}
-		systemInstruction = append(systemInstruction, assistant.NewTextContent(content))
+		if source != "" {
+			userContents = append(userContents, assistant.NewTextContent(source))
+		}
+		if prompt := cmd.Args().First(); prompt != "" {
+			userContents = append(userContents, assistant.NewTextContent(prompt))
+		}
+		userMsg := assistant.NewUserMessage(userContents...)
+		sess.AddMessage(userMsg)
 	}
 
-	// Wrap up system instructions:
-	model.SetSystemInstruction(systemInstruction...)
-	logger.Debug("prepared system instruction", "system_instruction", systemInstruction)
-
-	// Generate Content
-	// Source is included as the first content of the user message so it persists in session history
-	userContents := make([]assistant.MessageContent, 0, 2)
-	if source != "" {
-		userContents = append(userContents, assistant.NewTextContent(source))
+	model, err := modelByName(cmd, sess.Model)
+	if err != nil {
+		return fmt.Errorf("model by name: %w", err)
 	}
-	userContents = append(userContents, assistant.NewTextContent(prompt))
-	userMsg := assistant.NewUserMessage(userContents...)
-	sess.AddMessage(userMsg)
-	logger.Debug("sending generate request", "history_len", len(sess.Messages))
+	model.SetSystemInstruction(sess.SystemInstruction...)
+	defer sess.Save(ctx, model)
+
 	iter, err := model.GenerateContentStream(ctx, sess.GetMessages()...)
 	if err != nil {
 		return fmt.Errorf("failed to generate content: %w", err)
@@ -147,14 +95,6 @@ func doGenerate(ctx context.Context, cmd *cli.Command, prompt string) error {
 	if acc.Len() > 0 {
 		sess.AddMessage(assistant.NewAssistantMessage(assistant.NewTextContent(acc.String())))
 	}
-	// Persist base system instruction for new sessions (not overwriting existing saved instruction)
-	if len(sess.SystemInstruction) == 0 {
-		sess.SystemInstruction = baseSystemInstruction
-	}
-	sess.Model = QualifiedName(model.Provider(), model.Name())
-	if err := sess.Save(ctx, model); err != nil {
-		return err
-	}
 	return nil
 }
 
@@ -169,9 +109,9 @@ type generateView struct {
 // Helpers
 // -----------------------------------------------------------------------------
 
-// getSource returns the source content from either --source flag or stdin.
+// detectSource returns the source content from either --source flag or stdin.
 // It returns an error if both are specified.
-func getSource(srcFlag string, stdin io.Reader) (string, error) {
+func detectSource(srcFlag string, stdin io.Reader) (string, error) {
 	stdinContent, err := readSource(stdin)
 	if err != nil {
 		return "", fmt.Errorf("failed to read source from stdin: %w", err)
@@ -262,40 +202,84 @@ func readSource(r io.Reader) (string, error) {
 	return string(data), nil
 }
 
-func loadSession(ctx context.Context, cmd *cli.Command) (*assistant.Session, error) {
-	logger := logging.LoggerFrom(ctx)
+type SessionMode int
+
+const (
+	SessionModeNew SessionMode = iota
+	SessionModeLast
+	SessionModeExisting
+)
+
+func detectSessionMode(cmd *cli.Command) (SessionMode, error) {
+	givenSessionID := cmd.String(flagSessionID.Name)
+	useLast := cmd.Bool(flagLast.Name)
+
+	if givenSessionID != "" && useLast {
+		return SessionMode(0), fmt.Errorf("--session and --last are mutually exclusive")
+	}
+	if givenSessionID != "" {
+		return SessionModeExisting, nil
+	}
+	if useLast {
+		return SessionModeLast, nil
+	}
+	return SessionModeNew, nil
+}
+
+func loadSession(cmd *cli.Command) (*assistant.Session, error) {
 	conf, err := config.Load()
 	if err != nil {
 		return nil, fmt.Errorf("can't load config: %w", err)
 	}
-	dir := conf.GetSessionDir()
 
-	sessionID := cmd.String(flagSessionID.Name)
-	useLast := cmd.Bool(flagLast.Name)
-
-	if sessionID != "" && useLast {
-		return nil, fmt.Errorf("--session and --last are mutually exclusive")
-	}
-
-	if useLast {
-		id, err := assistant.LatestSessionID(dir)
-		if err != nil {
-			return nil, fmt.Errorf("find latest session: %w", err)
-		}
-		sessionID = id
-	}
-
-	if sessionID == "" {
-		logger.Debug("creating new session")
-		return assistant.NewSession(dir), nil
-	}
-
-	existing, err := assistant.LoadSession(ctx, dir, sessionID)
+	sessMode, err := detectSessionMode(cmd)
 	if err != nil {
-		return nil, fmt.Errorf("load existing session %q: %w", sessionID, err)
+		return nil, err
 	}
-	logger.Debug("loaded existing session", "session_id", sessionID)
-	return existing, nil
+	givenSessionID := cmd.String(flagSessionID.Name)
+
+	switch sessMode {
+	case SessionModeLast:
+		return assistant.LoadLatestSession(conf.GetSessionDir())
+	case SessionModeExisting:
+		return assistant.LoadSession(conf.GetSessionDir(), givenSessionID)
+	case SessionModeNew:
+		sess := assistant.NewSession(conf.GetSessionDir())
+		{ // Model
+			model, err := detectModel(cmd)
+			if err != nil {
+				return nil, fmt.Errorf("detect model: %w", err)
+			}
+			sess.Model = QualifiedName(model.Provider(), model.Name())
+		}
+		{ // Persona
+			personaName := cmd.String(flagPersona.Name)
+			persona, ok := conf.PersonaMap[personaName]
+			if !ok {
+				return nil, fmt.Errorf("persona %q not found", cmd.String(flagPersona.Name))
+			}
+			sess.SystemInstruction = append(sess.SystemInstruction, assistant.NewTextContent(persona.Message))
+		}
+		{ // Contexts
+			contexts := cmd.StringSlice(flagContext.Name)
+			instructions := make([]*assistant.TextContent, 0)
+			if len(contexts) > 0 {
+				instructions = append(instructions,
+					assistant.NewTextContent("The following context is provided for the prompt."))
+			}
+			for _, ctx := range contexts {
+				content, err := resolveContext(ctx)
+				if err != nil {
+					return nil, fmt.Errorf("failed to resolve context %q: %w", ctx, err)
+				}
+				instructions = append(instructions, assistant.NewTextContent(content))
+			}
+			sess.SystemInstruction = append(sess.SystemInstruction, instructions...)
+		}
+		return sess, nil
+	default:
+		return nil, fmt.Errorf("unsupported session_mode(%v)", sessMode)
+	}
 }
 
 func detectWriter(cmd *cli.Command, sess assistant.Session) io.WriteCloser {

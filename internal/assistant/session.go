@@ -3,6 +3,7 @@ package assistant
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -63,22 +64,39 @@ func (s *Session) FilePath() string {
 	return s.filePath
 }
 
-func LoadSession(ctx context.Context, dir, id string) (*Session, error) {
+// LoadSession tries to load an existing session by dir and id.
+// It returns error if no session file found with the given id.
+func LoadSession(dir, id string) (*Session, error) {
+	if id == "" {
+		return nil, errors.New("id must be specified")
+	}
+	if dir == "" {
+		return nil, errors.New("base dir must be specified")
+	}
 	f, err := os.Open(sessionFilePath(dir, id))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("open session: %w", err)
 	}
 	defer f.Close()
 	sess, err := decodeSession(f)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("decode found session: %w", err)
 	}
 	// Set Unexported fields...
 	sess.filePath = sessionFilePath(dir, id)
 	return sess, nil
 }
 
-// Save saves the session to file.
+// LoadLatestSession loads last used session and returns it.
+func LoadLatestSession(dir string) (*Session, error) {
+	id, err := latestSessionID(dir)
+	if err != nil {
+		return nil, err
+	}
+	return LoadSession(dir, id)
+}
+
+// Save saves the session to a file.
 // This will overwrite any existing session file.
 func (s *Session) Save(ctx context.Context, model GenerativeModel) error {
 	logger := logging.LoggerFrom(ctx)
@@ -100,7 +118,7 @@ func (s *Session) Save(ctx context.Context, model GenerativeModel) error {
 }
 
 // -------------------------------------------
-// Helper: Encoding/Decoding Session into file
+// Helper: Encoding/Decoding a Session to/from a file
 // -------------------------------------------
 
 func decodeSession(file *os.File) (*Session, error) {
@@ -236,8 +254,8 @@ func ListSessions(dir string) ([]SessionSummary, error) {
 	return summaries, nil
 }
 
-// LatestSessionID returns the ID of the most recently modified session.
-func LatestSessionID(dir string) (string, error) {
+// latestSessionID returns the ID of the most recently modified session.
+func latestSessionID(dir string) (string, error) {
 	summaries, err := ListSessions(dir)
 	if err != nil {
 		return "", err
