@@ -27,7 +27,8 @@ func NewClaudeOpus4_6(client *anthropic.Client) *ClaudeOpus4_6 { return &ClaudeO
 func (m *ClaudeOpus4_6) Provider() string                      { return ProviderName }
 func (m *ClaudeOpus4_6) Name() string                          { return ModelNameClaudeOpus4_6 }
 func (m *ClaudeOpus4_6) Description() string {
-	return `Claude Opus 4.6 is the most intelligent model for building agents and coding.
+	return `[Deprecated] Claude Opus 4.6 - superseded by Claude Opus 4.8.
+Claude Opus 4.6 is the most intelligent model for building agents and coding.
 Top-tier results in reasoning, coding, multilingual tasks, and long-context handling.
 Supports extended thinking and adaptive thinking. Pricing: $5/MTok input, $25/MTok output.
 Supports 200K context window (1M with beta header) and 128K max output.`
