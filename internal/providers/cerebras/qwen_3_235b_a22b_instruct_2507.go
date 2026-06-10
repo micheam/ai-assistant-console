@@ -30,7 +30,8 @@ func (m *Qwen3_235B_A22B_Instruct_2507) Name() string {
 }
 
 func (m *Qwen3_235B_A22B_Instruct_2507) Description() string {
-	return `Qwen 3 235B A22B Instruct 2507 - High-quality Preview model (~1400 tokens/sec).
+	return `[Deprecated] Qwen 3 235B A22B Instruct 2507 - superseded by GPT-OSS 120B (deprecated by Cerebras on 2026-05-27).
+Qwen 3 235B A22B Instruct 2507 - High-quality Preview model (~1400 tokens/sec).
 Best for: Complex analysis, high-quality code generation, and detailed instruction following.
 WARNING: This is a Preview model that may be discontinued on short notice.
 Consider fallback to gpt-oss-120b for critical processes.

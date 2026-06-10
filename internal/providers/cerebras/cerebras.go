@@ -15,8 +15,8 @@ const ProviderName = "cerebras"
 // AvailableModels returns a list of available models
 func AvailableModels() []assistant.ModelDescriptor {
 	return []assistant.ModelDescriptor{
-		&Llama3_1_8B{},
 		&GptOss120B{},
+		&Llama3_1_8B{},
 		&Qwen3_235B_A22B_Instruct_2507{},
 	}
 }

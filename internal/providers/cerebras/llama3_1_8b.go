@@ -30,7 +30,8 @@ func (m *Llama3_1_8B) Name() string {
 }
 
 func (m *Llama3_1_8B) Description() string {
-	return `Llama 3.1 8B - Lightweight and fast (~2200 tokens/sec).
+	return `[Deprecated] Llama 3.1 8B - superseded by GPT-OSS 120B (deprecated by Cerebras on 2026-05-27).
+Llama 3.1 8B - Lightweight and fast (~2200 tokens/sec).
 Best for: Simple question answering and lightweight tasks.
 Reference: https://inference-docs.cerebras.ai/models/llama-31-8b.md`
 }
