@@ -19,6 +19,21 @@ const (
 // Anthropic available models and their descriptions from Anthropic Documentation:
 // * https://platform.claude.com/docs/en/about-claude/models/overview
 //
+// Claude Fable 5:
+//
+//     * Our most powerful model, excelling at creative, agentic, and coding tasks
+//     * Supports adaptive thinking and effort control
+//     * Pricing: $10/MTok input, $50/MTok output
+//     * Supports 1M context window and 128K max output
+//
+// Claude Opus 4.8:
+//
+//     * The latest Opus model for building agents and coding
+//     * Top-tier results in reasoning, coding, multilingual tasks, and long-context handling
+//     * Supports adaptive thinking and effort control
+//     * Pricing: $5/MTok input, $25/MTok output
+//     * Supports 1M context window and 128K max output
+//
 // Claude Opus 4.6:
 //
 //     * Our most intelligent model for building agents and coding
@@ -46,6 +61,8 @@ const (
 // AvailableModels returns a list of available models
 func AvailableModels() []assistant.ModelDescriptor {
 	return []assistant.ModelDescriptor{
+		&ClaudeFable5{},
+		&ClaudeOpus4_8{},
 		&ClaudeOpus4_6{},
 		&ClaudeSonnet4_6{},
 		&ClaudeHaiku4_5{},
@@ -64,6 +81,10 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 	switch modelName {
 	default:
 		return nil, false
+	case "claude-fable-5":
+		return &ClaudeFable5{}, true
+	case "claude-opus-4-8":
+		return &ClaudeOpus4_8{}, true
 	case "claude-opus-4-6":
 		return &ClaudeOpus4_6{}, true
 	case "claude-sonnet-4-6":
@@ -77,6 +98,10 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, error) {
 	client := anthropic.NewClient(option.WithAPIKey(apiKey))
 	switch modelName {
+	case "claude-fable-5":
+		return NewClaudeFable5(client), nil
+	case "claude-opus-4-8":
+		return NewClaudeOpus4_8(client), nil
 	case "claude-opus-4-6":
 		return NewClaudeOpus4_6(client), nil
 	case "claude-sonnet-4-6":
