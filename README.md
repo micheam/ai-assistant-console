@@ -1,11 +1,8 @@
-> [!WARNING]
-> This project is still in development and is not ready for use.
-
 # AICO - AI Assistant Console
 [![Go](https://github.com/micheam/ai-assistant-console/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/micheam/ai-assistant-console/actions/workflows/go.yml)
 [![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/micheam/ai-assistant-console?include_prereleases)](https://github.com/micheam/ai-assistant-console/releases)
 
-AICO is an AI-powered console application that supports multiple AI providers including OpenAI's GPT models and Anthropic's Claude models. It provides simple text generation, and can also be used from Vim via the [vim-aico](https://github.com/micheam/vim-aico) plugin.
+AICO is a Unix-friendly CLI for LLM chat and text generation. It provides one interface for multiple AI providers — Anthropic Claude, OpenAI GPT, Groq, and Cerebras — with streaming responses, reusable personas, and file-based context. Pipe stdin, reference files with `@path`, and bring LLMs into your shell workflows. It can also be used from Vim via the [vim-aico](https://github.com/micheam/vim-aico) plugin.
 
 ## Install
 
@@ -65,7 +62,7 @@ Pre-built binaries are available for macOS and Linux from the [GitHub Releases p
 ### Option 3: Build from Source
 
 To build from source, you'll need to install Go.
-Make sure you have _Go version 1.20 or higher_ installed on your system. 
+Make sure you have _Go version 1.25 or higher_ installed on your system. 
 You can check the installed version by running `go version`.
 
 If you do not have Go installed or your version is outdated, download and install it from the [Go website](https://golang.org/dl/).
@@ -110,6 +107,24 @@ You can get an API key from [Anthropic Console](https://console.anthropic.com/).
 export AICO_ANTHROPIC_API_KEY=<your Anthropic API key>
 ```
 
+### Groq API Key
+
+To use models hosted on Groq, you need a Groq API key.
+You can get an API key from the [Groq Console](https://console.groq.com/keys).
+
+```bash
+export AICO_GROQ_API_KEY=<your Groq API key>
+```
+
+### Cerebras API Key
+
+To use models hosted on Cerebras, you need a Cerebras API key.
+You can get an API key from [Cerebras Cloud](https://cloud.cerebras.ai/).
+
+```bash
+export AICO_CEREBRAS_API_KEY=<your Cerebras API key>
+```
+
 ## Usage
 
 After installation, you can use the `aico` command to generate text with AI.
@@ -126,19 +141,26 @@ COMMANDS:
    config   Manage the configuration for the AI assistant
    models   manage AI models
    persona  manage personas
+   session  Manage chat sessions
    help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --debug                  Enable debug logging
-   --json                   Output in JSON format
-   --model, -m              The model to use
-   --no-stream              Disable streaming output
-   --persona, -p            The persona to use (default: "default")
-   --system                 System prompt
-   --source, -s             Source string or @file path
-   --context, -c            Context string or @file path
-   --help, -h               show help
-   --version, -v            print the version
+   --debug                                                      Enable debug logging (default: false)
+   --json                                                       Output in JSON format (default: false)
+   --model string, -m string                                    Model to use (e.g., 'gpt-4o' or 'openai:gpt-4o' for explicit provider)
+   --session ID                                                 session ID for conversation history
+   --last                                                       resume the most recent session (default: false)
+   --no-stream                                                  disable streaming output (default: false)
+   --persona string, -p string                                  The persona to use (default: "default")
+   --system string                                              system prompt
+   --source string, -s string                                   source string or @file path - the primary subject of the prompt (e.g., --source @code.go)
+   --context string, -c string [ --context string, -c string ]  context string or @file path (e.g., --context 'text' or --context @file.txt)
+   --anthropic-api-key string                                   Anthropic API Key [$AICO_ANTHROPIC_API_KEY]
+   --openai-api-key string                                      OpenAI API Key [$AICO_OPENAI_API_KEY]
+   --groq-api-key string                                        Groq API Key [$AICO_GROQ_API_KEY]
+   --cerebras-api-key string                                    Cerebras API Key [$AICO_CEREBRAS_API_KEY]
+   --help, -h                                                   show help
+   --version, -v                                                print the version
 ```
 
 ### Basic Text Generation
@@ -156,6 +178,29 @@ You can provide source content and additional context:
 
 ```bash
 $ aico "Explain this code" --source=@main.go --context=@README.md --context="$(go list ./...)"
+```
+
+### Piping from Stdin
+
+When no `--source` is given, AICO reads the source from stdin, so it fits naturally into shell pipelines:
+
+```bash
+$ git diff --staged | aico "Write a commit message for this change"
+```
+
+### Chat Sessions
+
+Conversation history is stored as sessions. Use `--last` to continue the most recent conversation, or `--session` to resume a specific one:
+
+```bash
+$ aico "What are goroutines?"
+$ aico --last "Show me an example"
+```
+
+Manage stored sessions with the `session` command:
+
+```bash
+$ aico session list
 ```
 
 ### Available Models
@@ -184,6 +229,8 @@ Please see its README for installation and usage.
 
 - `AICO_OPENAI_API_KEY`: Your OpenAI API key for accessing GPT models
 - `AICO_ANTHROPIC_API_KEY`: Your Anthropic API key for accessing Claude models
+- `AICO_GROQ_API_KEY`: Your Groq API key for accessing models hosted on Groq
+- `AICO_CEREBRAS_API_KEY`: Your Cerebras API key for accessing models hosted on Cerebras
 
 ## Development
 
