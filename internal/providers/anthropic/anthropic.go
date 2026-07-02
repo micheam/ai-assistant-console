@@ -34,6 +34,14 @@ const (
 //     * Pricing: $5/MTok input, $25/MTok output
 //     * Supports 1M context window and 128K max output
 //
+// Claude Sonnet 5:
+//
+//     * The best combination of speed and intelligence
+//     * Successor to Claude Sonnet 4.6
+//     * Supports adaptive thinking and effort control
+//     * Pricing: $3/MTok input, $15/MTok output
+//     * Supports 1M context window and 128K max output
+//
 // Claude Sonnet 4.6:
 //
 //     * The best combination of speed and intelligence
@@ -64,6 +72,7 @@ func AvailableModels() []assistant.ModelDescriptor {
 		&ClaudeFable5{},
 		&ClaudeOpus4_8{},
 		&ClaudeOpus4_6{},
+		&ClaudeSonnet5{},
 		&ClaudeSonnet4_6{},
 		&ClaudeHaiku4_5{},
 	}
@@ -87,6 +96,8 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 		return &ClaudeOpus4_8{}, true
 	case "claude-opus-4-6":
 		return &ClaudeOpus4_6{}, true
+	case "claude-sonnet-5":
+		return &ClaudeSonnet5{}, true
 	case "claude-sonnet-4-6":
 		return &ClaudeSonnet4_6{}, true
 	case "claude-haiku-4-5":
@@ -104,6 +115,8 @@ func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, er
 		return NewClaudeOpus4_8(client), nil
 	case "claude-opus-4-6":
 		return NewClaudeOpus4_6(client), nil
+	case "claude-sonnet-5":
+		return NewClaudeSonnet5(client), nil
 	case "claude-sonnet-4-6":
 		return NewClaudeSonnet4_6(client), nil
 	case "claude-haiku-4-5":
