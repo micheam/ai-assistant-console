@@ -74,10 +74,15 @@ func doGenerate(ctx context.Context, cmd *cli.Command, prompt string) error {
 		writer = detectWriter(cmd, *sess)
 	)
 	defer writer.Close()
+	var usage *assistant.Usage
 	for resp, err := range iter {
 		if err != nil {
 			fmt.Fprintf(cmd.ErrWriter, "\nError: %v\n", err)
 			return fmt.Errorf("stream error: %w", err)
+		}
+		if resp.Usage != nil {
+			usage = resp.Usage
+			continue
 		}
 		switch content := resp.Content.(type) {
 		case *assistant.TextContent:
@@ -90,6 +95,15 @@ func doGenerate(ctx context.Context, cmd *cli.Command, prompt string) error {
 			// Ignore other content types for now
 			logger.Warn("ignore unsupported content type",
 				"type", fmt.Sprintf("%T", content))
+		}
+	}
+	if usage != nil {
+		logger.Debug("prompt cache usage",
+			"input_tokens", usage.InputTokens,
+			"cached_input_tokens", usage.CachedInputTokens,
+			"cache_hit_rate", fmt.Sprintf("%.1f%%", usage.CacheHitRate()))
+		if jw, ok := writer.(*JSONLineStreamWriter); ok {
+			jw.SetUsage(usage)
 		}
 	}
 	if acc.Len() > 0 {

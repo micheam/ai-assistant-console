@@ -159,6 +159,20 @@ type ChatRequest struct {
 	// A unique identifier representing your end-user, which can help OpenAI to monitor and
 	// detect abuse. [Learn more](https://platform.com/docs/guides/safety-best-practices/end-user-ids).
 	User string `json:"user,omitempty"`
+
+	// stream_options object Optional Defaults to null
+	//
+	// Options for streaming response. Only set this when stream is true.
+	StreamOptions *StreamOptions `json:"stream_options,omitempty"`
+}
+
+// StreamOptions controls the behavior of streaming responses
+type StreamOptions struct {
+	// include_usage boolean Optional
+	//
+	// If set, an additional chunk with only a populated Usage field is sent
+	// before the final [DONE] message.
+	IncludeUsage bool `json:"include_usage"`
 }
 
 // ChatResponse is the response from the Chat API
@@ -233,9 +247,22 @@ func convertToContent(src assistant.MessageContent) (Content, error) {
 func ToGenerateContentResponse(src *ChatResponse) *assistant.GenerateContentResponse {
 	if len(src.Choices) > 0 {
 		text := src.Choices[0].Message.Content[0].(*TextContent).Text
-		return &assistant.GenerateContentResponse{Content: &assistant.TextContent{Text: text}}
+		return &assistant.GenerateContentResponse{Content: &assistant.TextContent{Text: text}, Usage: toUsage(src.Usage)}
 	}
-	return &assistant.GenerateContentResponse{Content: nil}
+	return &assistant.GenerateContentResponse{Content: nil, Usage: toUsage(src.Usage)}
+}
+
+// toUsage converts an OpenAI-compatible Usage into the provider-agnostic assistant.Usage
+func toUsage(src Usage) *assistant.Usage {
+	usage := &assistant.Usage{
+		InputTokens:  src.PromptTokens,
+		OutputTokens: src.CompletionTokens,
+	}
+	if details := src.PromptTokensDetails; details != nil {
+		usage.CachedInputTokens = details.CachedTokens
+		usage.CacheWriteTokens = details.CacheWriteTokens
+	}
+	return usage
 }
 
 // GenerateContent is a shared implementation for generating content with OpenAI-compatible APIs
@@ -258,6 +285,7 @@ func GenerateContentStream(ctx context.Context, client *APIClient, apiEndpoint s
 		return nil, fmt.Errorf("build chat request: %w", err)
 	}
 	req.Stream = true
+	req.StreamOptions = &StreamOptions{IncludeUsage: true}
 	iter, err := client.DoStream(ctx, apiEndpoint, req)
 	if err != nil {
 		return nil, err
@@ -269,6 +297,12 @@ func GenerateContentStream(ctx context.Context, client *APIClient, apiEndpoint s
 			if err != nil {
 				logging.LoggerFrom(ctx).Error(fmt.Sprintf("unmarshal error: %v", err))
 				if !yield(nil, fmt.Errorf("failed to unmarshal stream response: %w", err)) {
+					break
+				}
+				continue
+			}
+			if res.Usage.PromptTokensDetails != nil {
+				if !yield(&assistant.GenerateContentResponse{Usage: toUsage(res.Usage)}, nil) {
 					break
 				}
 				continue

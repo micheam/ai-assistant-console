@@ -71,6 +71,7 @@ func (m *ClaudeHaiku4_5) GenerateContent(
 	}
 	return &assistant.GenerateContentResponse{
 		Content: assistant.NewTextContent(res.Content[0].Text),
+		Usage:   toUsage(res.Usage),
 	}, nil
 }
 
@@ -106,6 +107,9 @@ func (m *ClaudeHaiku4_5) GenerateContentStream(ctx context.Context, msgs ...assi
 					}
 				}
 			}
+		}
+		if !yield(&assistant.GenerateContentResponse{Usage: toUsage(message.Usage)}, nil) {
+			return
 		}
 		if err := stream.Err(); err != nil {
 			logger.Error(fmt.Sprintf("stream error: %v", err))

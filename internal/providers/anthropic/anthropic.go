@@ -185,6 +185,19 @@ func messageParams(ctx context.Context, msgs ...assistant.Message) ([]anthropic.
 	return messages, nil
 }
 
+// toUsage converts an Anthropic Usage into the provider-agnostic assistant.Usage.
+//
+// Anthropic's input_tokens counts only the tokens after the last cache
+// breakpoint, so the total prompt size is the sum of all three fields.
+func toUsage(src anthropic.Usage) *assistant.Usage {
+	return &assistant.Usage{
+		InputTokens:       int(src.InputTokens + src.CacheCreationInputTokens + src.CacheReadInputTokens),
+		OutputTokens:      int(src.OutputTokens),
+		CachedInputTokens: int(src.CacheReadInputTokens),
+		CacheWriteTokens:  int(src.CacheCreationInputTokens),
+	}
+}
+
 func systemMessageParam(conts []*assistant.TextContent) []anthropic.TextBlockParam {
 	if conts == nil {
 		return []anthropic.TextBlockParam{}
