@@ -28,25 +28,13 @@ var CmdModels = &cli.Command{
 			Name:    "list",
 			Aliases: []string{"ls"},
 			Usage:   "list available models",
-			Flags: []cli.Flag{
-				&cli.BoolFlag{
-					Name:  "json",
-					Usage: "output in JSON format",
-				},
-			},
-			Action: runListModels,
+			Action:  runListModels,
 		},
 		{
 			Name:      "describe",
 			Aliases:   []string{"desc"},
 			Usage:     "show model information",
 			ArgsUsage: "MODEL",
-			Flags: []cli.Flag{
-				&cli.BoolFlag{
-					Name:  "json",
-					Usage: "output in JSON format",
-				},
-			},
 			ShellComplete: func(ctx context.Context, cmd *cli.Command) {
 				// Output both simple and qualified names as completion candidates
 				for _, model := range allAvailableModels() {
