@@ -10,6 +10,7 @@ import (
 	"slices"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/google/uuid"
 
@@ -285,15 +286,26 @@ func sessionPreview(path string) (string, int) {
 		}
 		for _, c := range msg.GetContents() {
 			tc, ok := c.(*TextContent)
-			if !ok || tc.Text == "" {
+			if !ok {
 				continue
 			}
-			text := tc.Text
+			// Collapse newlines/tabs/runs of whitespace into a single space so the
+			// preview always fits on one line (used both in the table and JSON output).
+			text := strings.Join(strings.Fields(tc.Text), " ")
+			if text == "" {
+				continue
+			}
 			if strings.HasPrefix(text, "<source") || strings.HasPrefix(text, "<context") {
 				continue
 			}
 			if len(text) > 80 {
-				text = text[:80] + "..."
+				// Keep the byte budget, but back off to a rune boundary so we never
+				// split a multibyte character.
+				cut := 80
+				for cut > 0 && !utf8.RuneStart(text[cut]) {
+					cut--
+				}
+				text = text[:cut] + "..."
 			}
 			return text, len(sess.Messages)
 		}

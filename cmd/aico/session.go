@@ -2,8 +2,12 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"io/fs"
 	"text/tabwriter"
+	"time"
 
 	"github.com/urfave/cli/v3"
 
@@ -46,6 +50,14 @@ var CmdSession = &cli.Command{
 	},
 }
 
+// sessionListItemView is the JSON representation of one row of `session list`.
+type sessionListItemView struct {
+	ID           string `json:"id"`
+	UpdatedAt    string `json:"updated_at"`
+	MessageCount int    `json:"message_count"`
+	Preview      string `json:"preview"`
+}
+
 func runSessionList(ctx context.Context, cmd *cli.Command) error {
 	conf, err := config.Load()
 	if err != nil {
@@ -54,20 +66,36 @@ func runSessionList(ctx context.Context, cmd *cli.Command) error {
 	dir := conf.GetSessionDir()
 
 	summaries, err := assistant.ListSessions(dir)
-	if err != nil {
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return fmt.Errorf("list sessions: %w", err)
 	}
 
+	limit := min(int(cmd.Int("limit")), len(summaries))
+	summaries = summaries[:limit]
+
+	if cmd.Bool(flagJSON.Name) {
+		items := make([]sessionListItemView, 0, len(summaries))
+		for _, s := range summaries {
+			items = append(items, sessionListItemView{
+				ID:           s.ID,
+				UpdatedAt:    s.ModTime.Format(time.RFC3339),
+				MessageCount: s.MsgCount,
+				Preview:      s.Preview,
+			})
+		}
+		encoder := json.NewEncoder(cmd.Root().Writer)
+		encoder.SetIndent("", "  ")
+		return encoder.Encode(items)
+	}
+
 	if len(summaries) == 0 {
-		fmt.Fprintln(cmd.Writer, "No sessions found.")
+		fmt.Fprintln(cmd.Root().Writer, "No sessions found.")
 		return nil
 	}
 
-	limit := min(int(cmd.Int("limit")), len(summaries))
-
-	w := tabwriter.NewWriter(cmd.Writer, 0, 0, 2, ' ', 0)
+	w := tabwriter.NewWriter(cmd.Root().Writer, 0, 0, 2, ' ', 0)
 	fmt.Fprintf(w, "ID\tUPDATED\tMSGS\tPREVIEW\n")
-	for _, s := range summaries[:limit] {
+	for _, s := range summaries {
 		fmt.Fprintf(w, "%s\t%s\t%d\t%s\n",
 			s.ID,
 			s.ModTime.Format("2006-01-02 15:04"),

@@ -1,7 +1,11 @@
 package assistant
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/stretchr/testify/require"
 )
@@ -41,4 +45,88 @@ func TestSession_MarshalJSON(t *testing.T) {
 	data, err := sess.MarshalJSON()
 	require.NoError(t, err)
 	require.JSONEq(t, sessionJSONStr, string(data))
+}
+
+// writeSessionFile writes a Session to <dir>/<id>.json and returns its path.
+func writeSessionFile(t *testing.T, dir string, sess *Session) string {
+	t.Helper()
+	data, err := sess.MarshalJSON()
+	require.NoError(t, err)
+	path := filepath.Join(dir, sess.ID+".json")
+	require.NoError(t, os.WriteFile(path, data, 0o600))
+	return path
+}
+
+func TestSessionPreview(t *testing.T) {
+	t.Run("collapses newlines/tabs/runs of whitespace into single spaces", func(t *testing.T) {
+		dir := t.TempDir()
+		sess := &Session{
+			ID: "collapse",
+			Messages: []Message{
+				NewUserMessage(NewTextContent("line1\n\n  line2\tend")),
+				NewAssistantMessage(NewTextContent("reply")),
+			},
+		}
+		path := writeSessionFile(t, dir, sess)
+
+		preview, msgCount := sessionPreview(path)
+		require.Equal(t, "line1 line2 end", preview)
+		require.Equal(t, 2, msgCount)
+	})
+
+	t.Run("truncates without splitting a multibyte rune", func(t *testing.T) {
+		dir := t.TempDir()
+		text := strings.Repeat("あ", 100)
+		sess := &Session{
+			ID: "multibyte",
+			Messages: []Message{
+				NewUserMessage(NewTextContent(text)),
+			},
+		}
+		path := writeSessionFile(t, dir, sess)
+
+		preview, msgCount := sessionPreview(path)
+		require.True(t, utf8.ValidString(preview))
+		require.LessOrEqual(t, len(preview), 83) // 80 bytes + "..."
+		require.Equal(t, 1, msgCount)
+	})
+
+	t.Run("skips <source> and <context> blocks", func(t *testing.T) {
+		dir := t.TempDir()
+		sess := &Session{
+			ID: "skip-source",
+			Messages: []Message{
+				NewUserMessage(
+					NewTextContent("<source>ignored</source>"),
+					NewTextContent("actual prompt"),
+				),
+			},
+		}
+		path := writeSessionFile(t, dir, sess)
+
+		preview, msgCount := sessionPreview(path)
+		require.Equal(t, "actual prompt", preview)
+		require.Equal(t, 1, msgCount)
+	})
+
+	t.Run("returns (empty) when there is no usable user text", func(t *testing.T) {
+		dir := t.TempDir()
+		sess := &Session{
+			ID: "no-text",
+			Messages: []Message{
+				NewAssistantMessage(NewTextContent("assistant only")),
+			},
+		}
+		path := writeSessionFile(t, dir, sess)
+
+		preview, msgCount := sessionPreview(path)
+		require.Equal(t, "(empty)", preview)
+		require.Equal(t, 1, msgCount)
+	})
+
+	t.Run("returns empty result for a nonexistent path", func(t *testing.T) {
+		preview, msgCount := sessionPreview(filepath.Join(t.TempDir(), "no-such-file.json"))
+		require.Equal(t, "", preview)
+		require.Equal(t, 0, msgCount)
+	})
 }
