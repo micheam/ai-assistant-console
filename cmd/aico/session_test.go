@@ -111,3 +111,75 @@ func TestSessionList_Table_NoSessionDir(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "No sessions found.\n", buf.String())
 }
+
+func TestSessionShow_JSON(t *testing.T) {
+	dir := setupSessionTestEnv(t)
+	sess := &assistant.Session{
+		ID:    "show-json",
+		Model: "m1",
+		Messages: []assistant.Message{
+			assistant.NewUserMessage(assistant.NewTextContent("Hello, how are you?")),
+			assistant.NewAssistantMessage(assistant.NewTextContent("I'm fine, thank you!")),
+		},
+	}
+	writeSessionFixture(t, dir, sess, time.Now())
+
+	var buf bytes.Buffer
+	err := runSessionApp(t, &buf, "--json", "session", "show", "show-json")
+	require.NoError(t, err)
+
+	// sessionShowView.Messages is []assistant.Message (an interface), which
+	// encoding/json cannot unmarshal directly, so decode into a generic
+	// shape instead.
+	var view struct {
+		ID        string `json:"id"`
+		Model     string `json:"model"`
+		UpdatedAt string `json:"updated_at"`
+		Messages  []struct {
+			Author string `json:"author"`
+		} `json:"messages"`
+	}
+	require.NoError(t, json.Unmarshal(buf.Bytes(), &view))
+	require.Equal(t, "show-json", view.ID)
+	require.Equal(t, "m1", view.Model)
+	require.NotEmpty(t, view.UpdatedAt)
+	require.Len(t, view.Messages, 2)
+	require.Equal(t, string(assistant.MessageAuthorUser), view.Messages[0].Author)
+	require.Equal(t, string(assistant.MessageAuthorAssistant), view.Messages[1].Author)
+}
+
+func TestSessionShow_Text(t *testing.T) {
+	dir := setupSessionTestEnv(t)
+	sess := &assistant.Session{
+		ID:    "show-text",
+		Model: "m1",
+		Messages: []assistant.Message{
+			assistant.NewUserMessage(assistant.NewTextContent("Hello, how are you?")),
+			assistant.NewAssistantMessage(assistant.NewTextContent("I'm fine, thank you!")),
+		},
+	}
+	writeSessionFixture(t, dir, sess, time.Now())
+
+	var buf bytes.Buffer
+	err := runSessionApp(t, &buf, "session", "show", "show-text")
+	require.NoError(t, err)
+	require.Equal(t,
+		"--- user ---\nHello, how are you?\n\n--- assistant ---\nI'm fine, thank you!\n",
+		buf.String())
+}
+
+func TestSessionShow_NoArgs(t *testing.T) {
+	setupSessionTestEnv(t)
+
+	var buf bytes.Buffer
+	err := runSessionApp(t, &buf, "session", "show")
+	require.Error(t, err)
+}
+
+func TestSessionShow_UnknownID(t *testing.T) {
+	setupSessionTestEnv(t)
+
+	var buf bytes.Buffer
+	err := runSessionApp(t, &buf, "session", "show", "no-such-id")
+	require.Error(t, err)
+}

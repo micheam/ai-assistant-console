@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"os"
 	"text/tabwriter"
 	"time"
 
@@ -32,6 +33,12 @@ var CmdSession = &cli.Command{
 					Value:   20,
 				},
 			},
+		},
+		{
+			Name:      "show",
+			Usage:     "Show messages of a session",
+			ArgsUsage: "<session-id>",
+			Action:    runSessionShow,
 		},
 		{
 			Name:      "resume",
@@ -104,6 +111,64 @@ func runSessionList(ctx context.Context, cmd *cli.Command) error {
 		)
 	}
 	return w.Flush()
+}
+
+// sessionShowView is the JSON representation of `session show`.
+type sessionShowView struct {
+	ID        string              `json:"id"`
+	Model     string              `json:"model"`
+	UpdatedAt string              `json:"updated_at"`
+	Messages  []assistant.Message `json:"messages"`
+}
+
+func runSessionShow(ctx context.Context, cmd *cli.Command) error {
+	id := cmd.Args().First()
+	if id == "" {
+		return fmt.Errorf("session ID is required: aico session show <session-id>")
+	}
+
+	conf, err := config.Load()
+	if err != nil {
+		conf = config.DefaultConfig()
+	}
+
+	sess, err := assistant.LoadSession(conf.GetSessionDir(), id)
+	if err != nil {
+		return err
+	}
+
+	if cmd.Bool(flagJSON.Name) {
+		info, err := os.Stat(sess.FilePath())
+		if err != nil {
+			return fmt.Errorf("stat session file: %w", err)
+		}
+		view := sessionShowView{
+			ID:        sess.ID,
+			Model:     sess.Model,
+			UpdatedAt: info.ModTime().Format(time.RFC3339),
+			Messages:  sess.Messages,
+		}
+		encoder := json.NewEncoder(cmd.Root().Writer)
+		encoder.SetIndent("", "  ")
+		return encoder.Encode(view)
+	}
+
+	w := cmd.Root().Writer
+	for i, msg := range sess.Messages {
+		if i > 0 {
+			fmt.Fprintln(w)
+		}
+		fmt.Fprintf(w, "--- %s ---\n", msg.GetAuthor())
+		for _, c := range msg.GetContents() {
+			switch c := c.(type) {
+			case *assistant.TextContent:
+				fmt.Fprintln(w, c.Text)
+			case *assistant.URLImageContent:
+				fmt.Fprintf(w, "[image] %s\n", c.URL.String())
+			}
+		}
+	}
+	return nil
 }
 
 func runSessionResume(ctx context.Context, cmd *cli.Command) error {
