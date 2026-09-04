@@ -15,6 +15,7 @@ const ProviderName = "cerebras"
 // AvailableModels returns a list of available models
 func AvailableModels() []assistant.ModelDescriptor {
 	return []assistant.ModelDescriptor{
+		&Qwen3_8_27B{},
 		&GptOss120B{},
 	}
 }
@@ -31,6 +32,8 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 	switch modelName {
 	default:
 		return nil, false
+	case "qwen-3.8-27b":
+		return &Qwen3_8_27B{}, true
 	case "gpt-oss-120b":
 		return &GptOss120B{}, true
 	}
@@ -39,6 +42,8 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 // NewGenerativeModel creates a new instance of a generative model
 func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, error) {
 	switch modelName {
+	case "qwen-3.8-27b":
+		return NewQwen3_8_27B(apiKey), nil
 	case "gpt-oss-120b":
 		return NewGptOss120B(apiKey), nil
 	}
