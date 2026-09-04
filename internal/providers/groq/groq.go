@@ -16,8 +16,6 @@ const ProviderName = "groq"
 func AvailableModels() []assistant.ModelDescriptor {
 	return []assistant.ModelDescriptor{
 		&Llama3_3_70B{},
-		&Llama3_1_8B{},
-		&Mixtral8x7B{},
 	}
 }
 
@@ -35,10 +33,6 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 		return nil, false
 	case "llama-3.3-70b-versatile":
 		return &Llama3_3_70B{}, true
-	case "llama-3.1-8b-instant":
-		return &Llama3_1_8B{}, true
-	case "mixtral-8x7b-32768":
-		return &Mixtral8x7B{}, true
 	}
 }
 
@@ -47,10 +41,6 @@ func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, er
 	switch modelName {
 	case "llama-3.3-70b-versatile":
 		return NewLlama3_3_70B(apiKey), nil
-	case "llama-3.1-8b-instant":
-		return NewLlama3_1_8B(apiKey), nil
-	case "mixtral-8x7b-32768":
-		return NewMixtral8x7B(apiKey), nil
 	}
 	return nil, fmt.Errorf("unsupported model name: %s", modelName)
 }
