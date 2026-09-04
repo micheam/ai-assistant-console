@@ -11,45 +11,43 @@ import (
 	"micheam.com/aico/internal/logging"
 )
 
-type GPT52 struct {
+type GPT56Luna struct {
 	systemInstruction []*assistant.TextContent
 	client            *APIClient
 }
 
-var _ assistant.GenerativeModel = (*GPT52)(nil)
+var _ assistant.GenerativeModel = (*GPT56Luna)(nil)
 
-func NewGPT52(apiKey string) *GPT52 {
-	return &GPT52{
+func NewGPT56Luna(apiKey string) *GPT56Luna {
+	return &GPT56Luna{
 		client: NewAPIClient(apiKey),
 	}
 }
 
-func (m *GPT52) Provider() string {
+func (m *GPT56Luna) Provider() string {
 	return ProviderName
 }
 
-func (m *GPT52) Name() string {
-	return "gpt-5.2"
+func (m *GPT56Luna) Name() string {
+	return "gpt-5.6-luna"
 }
 
-func (m *GPT52) Description() string {
-	return `[Deprecated] GPT-5.2 - superseded by GPT-5.6 Sol.
-GPT-5.2 is OpenAI's flagship model for coding and agentic tasks.
-It features a 400K context window and 128K max output tokens, with a knowledge cutoff of August 2025.
-It excels at complex reasoning, coding (SWE-Bench Pro: 55.6%), math (AIME 2025: 100%), and science (GPQA Diamond: ~93%).
-Pricing: $1.75 / $14.00 per MTok (input / output).
-Reference: https://platform.openai.com/docs/models#gpt-5.2`
+func (m *GPT56Luna) Description() string {
+	return `GPT-5.6 Luna is the fastest, most affordable model in the GPT-5.6 series.
+It features a 1.05M context window and 128K max output tokens.
+Pricing: $1.00 / $6.00 per MTok (input / output).
+Reference: https://openai.com/index/gpt-5-6/`
 }
 
-func (m *GPT52) SetSystemInstruction(contents ...*assistant.TextContent) {
+func (m *GPT56Luna) SetSystemInstruction(contents ...*assistant.TextContent) {
 	m.systemInstruction = contents
 }
 
-func (m *GPT52) SetHttpClient(c *http.Client) {
+func (m *GPT56Luna) SetHttpClient(c *http.Client) {
 	m.client.SetHTTPClient(c)
 }
 
-func (m *GPT52) GenerateContent(ctx context.Context, msgs ...assistant.Message) (*assistant.GenerateContentResponse, error) {
+func (m *GPT56Luna) GenerateContent(ctx context.Context, msgs ...assistant.Message) (*assistant.GenerateContentResponse, error) {
 	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)
@@ -62,7 +60,7 @@ func (m *GPT52) GenerateContent(ctx context.Context, msgs ...assistant.Message) 
 	return ToGenerateContentResponse(resp), nil
 }
 
-func (m *GPT52) GenerateContentStream(ctx context.Context, msgs ...assistant.Message) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
+func (m *GPT56Luna) GenerateContentStream(ctx context.Context, msgs ...assistant.Message) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
 	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)
