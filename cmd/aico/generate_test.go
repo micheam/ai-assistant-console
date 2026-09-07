@@ -109,6 +109,69 @@ func TestUserMessage_WithSource(t *testing.T) {
 	}
 }
 
+func TestBuildSystemInstruction_NoContexts(t *testing.T) {
+	personaMessage := "You are a helpful assistant."
+
+	instructions, err := buildSystemInstruction(personaMessage, nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(instructions) != 2 {
+		t.Fatalf("expected 2 instructions, got %d", len(instructions))
+	}
+	if instructions[0].Text != personaMessage {
+		t.Errorf("expected first instruction to be persona message, got %q", instructions[0].Text)
+	}
+	if instructions[1].Text != inputHandlingInstruction {
+		t.Errorf("expected second instruction to be inputHandlingInstruction, got %q", instructions[1].Text)
+	}
+}
+
+func TestBuildSystemInstruction_WithContexts(t *testing.T) {
+	tmpDir := t.TempDir()
+	tmpFile := filepath.Join(tmpDir, "notes.txt")
+	fileContent := "some background notes"
+	if err := os.WriteFile(tmpFile, []byte(fileContent), 0644); err != nil {
+		t.Fatalf("failed to create temp file: %v", err)
+	}
+
+	personaMessage := "You are a helpful assistant."
+	contexts := []string{"plain context string", "@" + tmpFile}
+
+	instructions, err := buildSystemInstruction(personaMessage, contexts)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(instructions) != 4 {
+		t.Fatalf("expected 4 instructions, got %d", len(instructions))
+	}
+	if instructions[0].Text != personaMessage {
+		t.Errorf("expected first instruction to be persona message, got %q", instructions[0].Text)
+	}
+	if instructions[1].Text != inputHandlingInstruction {
+		t.Errorf("expected second instruction to be inputHandlingInstruction, got %q", instructions[1].Text)
+	}
+	wantPlainContext := "<context>\nplain context string\n</context>"
+	if instructions[2].Text != wantPlainContext {
+		t.Errorf("expected third instruction %q, got %q", wantPlainContext, instructions[2].Text)
+	}
+	if !strings.Contains(instructions[3].Text, "<context file=") {
+		t.Errorf("expected fourth instruction to contain '<context file=', got %q", instructions[3].Text)
+	}
+	if !strings.Contains(instructions[3].Text, fileContent) {
+		t.Errorf("expected fourth instruction to contain file content, got %q", instructions[3].Text)
+	}
+}
+
+func TestBuildSystemInstruction_ContextFileNotFound(t *testing.T) {
+	_, err := buildSystemInstruction("persona message", []string{"@/nonexistent/file.txt"})
+	if err == nil {
+		t.Error("expected error for nonexistent context file")
+	}
+}
+
 func TestUserMessage_WithoutSource(t *testing.T) {
 	prompt := "hello"
 
