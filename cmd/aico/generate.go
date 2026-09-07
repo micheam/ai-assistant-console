@@ -194,10 +194,10 @@ func resolveSource(src string) (string, error) {
 // resolveContext resolves a context string supplied via the `--context` flag.
 // The `--context` flag can be used in two ways:
 //
-//  1. `--context='@path/to/filename.txt'` – the leading '@' indicates that the
+//  1. `--context='@path/to/filename.txt'` - the leading '@' indicates that the
 //     argument is a file path. The file's contents are read and wrapped in
 //     `<context>` tags, preserving the original file name as an attribute.
-//  2. `--context='inline text...'` – any argument that does not start with '@'
+//  2. `--context='inline text...'` - any argument that does not start with '@'
 //     is treated as inline text and is directly wrapped in `<context>` tags.
 //
 // The function returns the constructed `<context>` block or an error if the
@@ -222,19 +222,19 @@ func resolveContext(rawContext string) (string, error) {
 	return sb.String(), nil
 }
 
-// buildSystemInstruction creates the system‑instruction messages for a new session.
+// buildSystemInstruction creates the system-instruction messages for a new session.
 //
 // It concatenates:
-//  1. the persona’s own message,
-//  2. the app‑managed `inputHandlingInstruction`,
+//  1. the persona's own message,
+//  2. the app-managed `inputHandlingInstruction`,
 //  3. each `--context` argument after it has been resolved by `resolveContext`.
 func buildSystemInstruction(personaMessage string, rawContexts []string) ([]*assistant.TextContent, error) {
-	// Start with the fixed parts (persona and input‑handling text).
+	// Start with the fixed parts (persona and input-handling text).
 	instructions := []*assistant.TextContent{
 		assistant.NewTextContent(personaMessage),
 		assistant.NewTextContent(inputHandlingInstruction),
 	}
-	// Append the user‑provided contexts, after converting each raw argument
+	// Append the user-provided contexts, after converting each raw argument
 	// into a full `<context>` block via `resolveContext`.
 	for _, c := range rawContexts {
 		content, err := resolveContext(c)
