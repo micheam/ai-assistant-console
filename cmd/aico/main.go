@@ -26,10 +26,20 @@ func main() {
 
 func run(args []string) error {
 	app := &cli.Command{
-		Name:                  appname,
-		Usage:                 "AI Assistant Console",
-		Version:               fmt.Sprintf("%s (built at %s)", version, buildTime),
-		EnableShellCompletion: true,
+		Name:    appname,
+		Usage:   "AI Assistant Console",
+		Version: fmt.Sprintf("%s (built at %s)", version, buildTime),
+		// --context is a StringSliceFlag. urfave/cli v3 splits each value on
+		// ',' by default, which breaks inline context text that happens to
+		// contain a comma (e.g. `--context "$(go doc ./pkg)"`). Disable that
+		// splitting so a --context value is taken verbatim.
+		//
+		// Note: urfave/cli tracks this as process-wide mutable state that is
+		// reset by cmd.setupDefaults() every time a (sub)command in the
+		// dispatch chain runs, so this must also be set on every subcommand
+		// that accepts --context (see CmdSession and its "resume" child).
+		DisableSliceFlagSeparator: true,
+		EnableShellCompletion:     true,
 		Flags: []cli.Flag{
 			flagDebug,
 			flagJSON,

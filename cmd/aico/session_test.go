@@ -168,6 +168,55 @@ func TestSessionShow_Text(t *testing.T) {
 		buf.String())
 }
 
+// TestContextFlag_CommaNotSplit_ThroughSessionResume exercises the actual
+// production CmdSession command tree (root -> session -> resume) to confirm
+// --context values aren't split on ',' at any level of subcommand dispatch,
+// since urfave/cli v3 resets its (process-wide) slice separator setting
+// from each command's own DisableSliceFlagSeparator field as it descends
+// into subcommands. It stops short of invoking runSessionResume's real
+// generation logic by intercepting via the session ID: the id doesn't
+// resolve to a session file, but this test only cares that the flag
+// parsing runs and StringSlice("context") comes back unsplit before that
+// failure is reached.
+func TestContextFlag_CommaNotSplit_ThroughSessionResume(t *testing.T) {
+	setupSessionTestEnv(t)
+
+	app := &cli.Command{
+		Name:                      "aico",
+		DisableSliceFlagSeparator: true,
+		Flags:                     []cli.Flag{flagJSON, flagContext},
+		Commands:                  []*cli.Command{CmdSession},
+	}
+	err := app.Run(context.Background(), []string{
+		"aico", "session", "resume", "no-such-session", "prompt",
+		"--context", "go doc output, with a comma",
+	})
+	// The session doesn't exist, so generation fails downstream; that's
+	// expected and not what this test checks.
+	require.Error(t, err)
+
+	got := app.StringSlice(flagContext.Name)
+	require.Equal(t, []string{"go doc output, with a comma"}, got)
+}
+
+// TestCmdSession_DisableSliceFlagSeparator guards the Step-0 fix: it is a
+// regression test for the fact that urfave/cli v3 requires
+// DisableSliceFlagSeparator to be set on every command in the dispatch
+// chain that accepts --context, not just on the root command.
+func TestCmdSession_DisableSliceFlagSeparator(t *testing.T) {
+	require.True(t, CmdSession.DisableSliceFlagSeparator, "CmdSession must disable the slice flag separator")
+
+	var resume *cli.Command
+	for _, sub := range CmdSession.Commands {
+		if sub.Name == "resume" {
+			resume = sub
+			break
+		}
+	}
+	require.NotNil(t, resume, "expected a \"resume\" subcommand")
+	require.True(t, resume.DisableSliceFlagSeparator, "\"resume\" must disable the slice flag separator")
+}
+
 func TestSessionShow_NoArgs(t *testing.T) {
 	setupSessionTestEnv(t)
 

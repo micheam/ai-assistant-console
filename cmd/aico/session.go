@@ -19,6 +19,11 @@ import (
 var CmdSession = &cli.Command{
 	Name:  "session",
 	Usage: "Manage chat sessions",
+	// See the comment on the root command's DisableSliceFlagSeparator in
+	// main.go: this must be repeated here and on "resume" because
+	// urfave/cli resets the (process-wide) slice separator setting from
+	// each command's own field as it dispatches into subcommands.
+	DisableSliceFlagSeparator: true,
 	Commands: []*cli.Command{
 		{
 			Name:    "list",
@@ -41,10 +46,11 @@ var CmdSession = &cli.Command{
 			Action:    runSessionShow,
 		},
 		{
-			Name:      "resume",
-			Usage:     "Resume an existing session with a new prompt",
-			ArgsUsage: "<session-id> <prompt>",
-			Action:    runSessionResume,
+			Name:                      "resume",
+			Usage:                     "Resume an existing session with a new prompt",
+			ArgsUsage:                 "<session-id> <prompt>",
+			Action:                    runSessionResume,
+			DisableSliceFlagSeparator: true,
 			Flags: []cli.Flag{
 				flagSource,
 				flagContext,
