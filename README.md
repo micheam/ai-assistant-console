@@ -160,8 +160,8 @@ GLOBAL OPTIONS:
    --no-stream                                                  disable streaming output (default: false)
    --persona string, -p string                                  The persona to use (default: "default")
    --system string                                              system prompt
-   --source string, -s string                                   source string or @file path - the primary subject of the prompt (e.g., --source @code.go)
-   --context string, -c string [ --context string, -c string ]  context string or @file path (e.g., --context 'text' or --context @file.txt)
+   --source string, -s string                                   the ONE primary subject to act on (see --context)
+   --context string, -c string [ --context string, -c string ]  read-only reference material for the prompt; repeatable
    --anthropic-api-key string                                   Anthropic API Key [$AICO_ANTHROPIC_API_KEY]
    --openai-api-key string                                      OpenAI API Key [$AICO_OPENAI_API_KEY]
    --groq-api-key string                                        Groq API Key [$AICO_GROQ_API_KEY]
@@ -169,6 +169,8 @@ GLOBAL OPTIONS:
    --help, -h                                                   show help
    --version, -v                                                print the version
 ```
+
+See the [Source vs. Context](#source-vs-context) section below for what `--source`/`--context` accept beyond a plain string (`@file`, `@-`, `label:@...`).
 
 ### Basic Text Generation
 
@@ -179,21 +181,58 @@ $ aico "Translate into English: こんにちは、世界。"
 Hello, world.
 ```
 
-### Using Source and Context
+### Source vs. Context
 
-You can provide source content and additional context:
+`--source` (`-s`) and `--context` (`-c`) both feed input to the prompt, but they mean different things to the model:
+
+- **`--source`** is the *primary subject* — the thing your output is about, and the thing that might someday be written back to (a Vim buffer, a file under review). There is exactly one per prompt; passing it twice is an error.
+- **`--context`** is *read-only reference material* — supporting evidence used to judge or explain the source, never the thing being acted on. It can be repeated.
+
+Swapping which one you use for the same file changes the meaning of the request:
 
 ```bash
-$ aico "Explain this code" --source=@main.go --context=@README.md --context="$(go list ./...)"
+# The README is the subject; serve.go is evidence used to judge it.
+$ aico "Point out anything in the README that is now stale" \
+       --source=@README.md --context=@cmd/serve.go
+
+# serve.go is the subject; the README is evidence used to judge it.
+$ aico "Update this code to match the documented behavior" \
+       --source=@cmd/serve.go --context=@README.md
+```
+
+Both flags accept:
+
+| Form | Meaning |
+| --- | --- |
+| `text` | inline string, used as-is |
+| `@path/to/file` | file contents |
+| `@-` | stdin (see below) |
+| `label:@path` | file contents, labeled |
+| `label:@-` | stdin, labeled |
+
+- A `file="..."` and/or `name="..."` attribute is attached so the model can tell blocks apart (see below).
+- `label:` is only recognized in front of an `@`-prefixed value; plain inline text is never split on `:`, so URLs, `go doc` output, and similar text pass through untouched.
+
+```bash
+$ aico "Explain this code" --source=@main.go --context=@README.md --context="$(go doc ./cmd/aico)"
 ```
 
 ### Piping from Stdin
 
-When no `--source` is given, AICO reads the source from stdin, so it fits naturally into shell pipelines:
+`@-` reads from stdin, for either flag:
+
+```bash
+$ git diff --staged | aico "Write a commit message for this change" --source=@-
+$ echo "team style guide..." | aico "Review this PR" --source=@pr.diff --context="style:@-"
+```
+
+When neither `--source` nor `--context` claims stdin with `@-`, AICO falls back to reading piped input as an unlabeled source — this is what lets it drop into a plain shell pipeline without any flags, and is also how an editor integration like [vim-aico](https://github.com/micheam/vim-aico) sends buffer contents by default:
 
 ```bash
 $ git diff --staged | aico "Write a commit message for this change"
 ```
+
+Only one `@-` may be used per invocation (across `--source` and all `--context` values combined); a second one is an error, since stdin can only be read once.
 
 ### Chat Sessions
 
@@ -203,6 +242,15 @@ Conversation history is stored as sessions. Use `--last` to continue the most re
 $ aico "What are goroutines?"
 $ aico --last "Show me an example"
 ```
+
+`--context` is resolved fresh on every turn, so you can add or swap it freely when resuming a session:
+
+```bash
+$ aico --source=@main.go "Review this file"
+$ aico --last --context=@CHANGELOG.md "Given the changelog, is this still accurate?"
+```
+
+`--source`, on the other hand, identifies the session's ongoing subject: the file/label from the first turn that supplies one is recorded on the session (see `session show`) and isn't overwritten by later turns.
 
 Manage stored sessions with the `session` command:
 
