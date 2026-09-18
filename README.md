@@ -2,6 +2,13 @@
 [![Go](https://github.com/micheam/ai-assistant-console/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/micheam/ai-assistant-console/actions/workflows/go.yml)
 [![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/micheam/ai-assistant-console?include_prereleases)](https://github.com/micheam/ai-assistant-console/releases)
 
+```
+    ▄▄▄  ▄▄  ▄▄▄▄  ▄▄▄
+   ██▀██ ██ ██▀▀▀ ██▀██
+   ██▀██ ██ ▀████ ▀███▀
+   AI-Assistant-Console
+```
+
 AICO is a Unix-friendly CLI for LLM chat and text generation. It provides one interface for multiple AI providers — Anthropic Claude, OpenAI GPT, Groq, and Cerebras — with streaming responses, reusable personas, and file-based context. Pipe stdin, reference files with `@path`, and bring LLMs into your shell workflows. It can also be used from Vim via the [vim-aico](https://github.com/micheam/vim-aico) plugin.
 
 ## Install
