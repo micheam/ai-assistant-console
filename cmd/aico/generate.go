@@ -66,7 +66,7 @@ func doGenerate(ctx context.Context, cmd *cli.Command, prompt string) error {
 		if source != "" {
 			userContents = append(userContents, assistant.NewTextContent(source))
 		}
-		if prompt := cmd.Args().First(); prompt != "" {
+		if prompt != "" {
 			userContents = append(userContents, assistant.NewTextContent(prompt))
 		}
 		userMsg := assistant.NewUserMessage(userContents...)
