@@ -168,6 +168,51 @@ func TestSessionShow_Text(t *testing.T) {
 		buf.String())
 }
 
+func TestSessionShow_JSON_WithSource(t *testing.T) {
+	dir := setupSessionTestEnv(t)
+	sess := &assistant.Session{
+		ID:     "show-json-source",
+		Model:  "m1",
+		Source: &assistant.SourceInfo{File: "/tmp/main.go", Name: "buffer.go"},
+		Messages: []assistant.Message{
+			assistant.NewUserMessage(assistant.NewTextContent("hi")),
+		},
+	}
+	writeSessionFixture(t, dir, sess, time.Now())
+
+	var buf bytes.Buffer
+	err := runSessionApp(t, &buf, "--json", "session", "show", "show-json-source")
+	require.NoError(t, err)
+
+	var view struct {
+		Source *assistant.SourceInfo `json:"source"`
+	}
+	require.NoError(t, json.Unmarshal(buf.Bytes(), &view))
+	require.NotNil(t, view.Source)
+	require.Equal(t, "/tmp/main.go", view.Source.File)
+	require.Equal(t, "buffer.go", view.Source.Name)
+}
+
+func TestSessionShow_Text_WithSource(t *testing.T) {
+	dir := setupSessionTestEnv(t)
+	sess := &assistant.Session{
+		ID:     "show-text-source",
+		Model:  "m1",
+		Source: &assistant.SourceInfo{File: "/tmp/main.go", Name: "buffer.go"},
+		Messages: []assistant.Message{
+			assistant.NewUserMessage(assistant.NewTextContent("hi")),
+		},
+	}
+	writeSessionFixture(t, dir, sess, time.Now())
+
+	var buf bytes.Buffer
+	err := runSessionApp(t, &buf, "session", "show", "show-text-source")
+	require.NoError(t, err)
+	require.Equal(t,
+		"Source: buffer.go (/tmp/main.go)\n\n--- user ---\nhi\n",
+		buf.String())
+}
+
 // TestContextFlag_CommaNotSplit_ThroughSessionResume exercises the actual
 // production CmdSession command tree (root -> session -> resume) to confirm
 // --context values aren't split on ',' at any level of subcommand dispatch,

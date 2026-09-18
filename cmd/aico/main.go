@@ -76,12 +76,24 @@ var (
 	flagSource = &cli.StringFlag{
 		Name:    "source",
 		Aliases: []string{"s"},
-		Usage:   "source string or @file path - the primary subject of the prompt (e.g., --source @code.go)",
+		Usage: "the ONE primary subject to act on (what the output is about, " +
+			"and may someday be written back to) - a string, @file, @- for " +
+			"stdin, or 'label:@file'/'label:@-' to name an unlabeled source " +
+			"(e.g. --source @code.go, --source @-, --source 'buffer.go:@-'); " +
+			"for read-only reference material instead, see --context",
+		// There is exactly one source per prompt by design (see --context
+		// for multiple, read-only inputs), so reject a second --source
+		// instead of silently letting it win.
+		OnlyOnce: true,
 	}
 	flagContext = &cli.StringSliceFlag{
 		Name:    "context",
 		Aliases: []string{"c"},
-		Usage:   "context string or @file path (e.g., --context 'text' or --context @file.txt)",
+		Usage: "read-only background material for the prompt, never the " +
+			"subject acted on - a string, @file, @- for stdin, or " +
+			"'label:@file'/'label:@-' to name it; repeatable " +
+			"(e.g. --context 'text', --context @file.txt, " +
+			"--context \"$(go doc ./pkg)\")",
 	}
 	flagDebug = &cli.BoolFlag{
 		Name:  "debug",

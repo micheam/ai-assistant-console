@@ -121,10 +121,11 @@ func runSessionList(ctx context.Context, cmd *cli.Command) error {
 
 // sessionShowView is the JSON representation of `session show`.
 type sessionShowView struct {
-	ID        string              `json:"id"`
-	Model     string              `json:"model"`
-	UpdatedAt string              `json:"updated_at"`
-	Messages  []assistant.Message `json:"messages"`
+	ID        string                `json:"id"`
+	Model     string                `json:"model"`
+	UpdatedAt string                `json:"updated_at"`
+	Source    *assistant.SourceInfo `json:"source,omitempty"`
+	Messages  []assistant.Message   `json:"messages"`
 }
 
 func runSessionShow(ctx context.Context, cmd *cli.Command) error {
@@ -152,6 +153,7 @@ func runSessionShow(ctx context.Context, cmd *cli.Command) error {
 			ID:        sess.ID,
 			Model:     sess.Model,
 			UpdatedAt: info.ModTime().Format(time.RFC3339),
+			Source:    sess.Source,
 			Messages:  sess.Messages,
 		}
 		encoder := json.NewEncoder(cmd.Root().Writer)
@@ -160,6 +162,9 @@ func runSessionShow(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	w := cmd.Root().Writer
+	if s := sess.Source.String(); s != "" {
+		fmt.Fprintf(w, "Source: %s\n\n", s)
+	}
 	for i, msg := range sess.Messages {
 		if i > 0 {
 			fmt.Fprintln(w)

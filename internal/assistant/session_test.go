@@ -47,6 +47,52 @@ func TestSession_MarshalJSON(t *testing.T) {
 	require.JSONEq(t, sessionJSONStr, string(data))
 }
 
+func TestSession_UnmarshalJSON_WithoutSource_LeavesSourceNil(t *testing.T) {
+	// sessionJSONStr predates the "source" field: old session files must
+	// still decode cleanly, with Source left nil.
+	sess := new(Session)
+	require.NoError(t, sess.UnmarshalJSON([]byte(sessionJSONStr)))
+	require.Nil(t, sess.Source)
+}
+
+func TestSession_SourceRoundTrip(t *testing.T) {
+	sess := &Session{
+		ID:     "with-source",
+		Source: &SourceInfo{File: "/tmp/buffer.go", Name: "buffer.go"},
+		Messages: []Message{
+			NewUserMessage(NewTextContent("hello")),
+		},
+	}
+	data, err := sess.MarshalJSON()
+	require.NoError(t, err)
+	require.Contains(t, string(data), `"source"`)
+
+	got := new(Session)
+	require.NoError(t, got.UnmarshalJSON(data))
+	require.NotNil(t, got.Source)
+	require.Equal(t, "/tmp/buffer.go", got.Source.File)
+	require.Equal(t, "buffer.go", got.Source.Name)
+}
+
+func TestSourceInfo_String(t *testing.T) {
+	tests := []struct {
+		name string
+		src  *SourceInfo
+		want string
+	}{
+		{"nil", nil, ""},
+		{"empty", &SourceInfo{}, ""},
+		{"file only", &SourceInfo{File: "main.go"}, "main.go"},
+		{"name only", &SourceInfo{Name: "buffer.go"}, "buffer.go"},
+		{"file and name", &SourceInfo{File: "/tmp/buffer.go", Name: "buffer.go"}, "buffer.go (/tmp/buffer.go)"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			require.Equal(t, tt.want, tt.src.String())
+		})
+	}
+}
+
 // writeSessionFile writes a Session to <dir>/<id>.json and returns its path.
 func writeSessionFile(t *testing.T, dir string, sess *Session) string {
 	t.Helper()

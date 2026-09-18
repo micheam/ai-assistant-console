@@ -21,9 +21,48 @@ type Session struct {
 	ID                string         `json:"id"`
 	Model             string         `json:"model,omitempty"`
 	SystemInstruction []*TextContent `json:"system_instruction"`
-	Messages          []Message      `json:"messages"`
+
+	// Source records where this session's primary subject (--source) came
+	// from. It is set once, from the first turn that supplies a source with
+	// a file path and/or a label, and is not overwritten by later turns.
+	// It exists for display (`session show`) and for editor integrations
+	// (e.g. vim-aico) that want to identify, and eventually write output
+	// back to, the buffer or file a session is about.
+	Source *SourceInfo `json:"source,omitempty"`
+
+	Messages []Message `json:"messages"`
 
 	filePath string `json:"-"`
+}
+
+// SourceInfo identifies where a session's source content came from.
+type SourceInfo struct {
+	// File is the path the source was read from (the @path/@- argument),
+	// if any. Empty for an inline source string.
+	File string `json:"file,omitempty"`
+
+	// Name is a human-chosen label for the source, set via the
+	// `label:@...` syntax (see the --source flag). Empty if unlabeled.
+	Name string `json:"name,omitempty"`
+}
+
+// String returns a short human-readable identifier for the source,
+// suitable for `session show`. It returns "" if s is nil or carries
+// neither a File nor a Name.
+func (s *SourceInfo) String() string {
+	if s == nil {
+		return ""
+	}
+	switch {
+	case s.Name != "" && s.File != "":
+		return fmt.Sprintf("%s (%s)", s.Name, s.File)
+	case s.Name != "":
+		return s.Name
+	case s.File != "":
+		return s.File
+	default:
+		return ""
+	}
 }
 
 func (s Session) GetMessages() []Message {
@@ -155,6 +194,7 @@ func (s *Session) UnmarshalJSON(data []byte) error {
 		ID                string            `json:"id"`
 		Model             string            `json:"model,omitempty"`
 		SystemInstruction []json.RawMessage `json:"system_instruction"`
+		Source            *SourceInfo       `json:"source,omitempty"`
 		Messages          []json.RawMessage `json:"messages"`
 	}
 
@@ -164,6 +204,7 @@ func (s *Session) UnmarshalJSON(data []byte) error {
 
 	s.ID = temp.ID
 	s.Model = temp.Model
+	s.Source = temp.Source
 
 	// Unmarshal system instructions
 	s.SystemInstruction = make([]*TextContent, 0, len(temp.SystemInstruction))
