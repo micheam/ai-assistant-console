@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 
@@ -63,6 +64,14 @@ type Config struct {
 	// PersonaMap is the persona to use for text generation
 	PersonaMap map[string]Personality `toml:"persona"`
 
+	// Models holds per-model generation settings, keyed by model name.
+	//
+	// Keys accept the same two formats as Model: a simple name
+	// ("claude-opus-5-5") or a qualified name ("anthropic:claude-opus-5-5").
+	// A qualified key takes precedence over a simple one. Only models listed
+	// here get any settings; everything else runs on provider defaults.
+	Models map[string]ModelSettings `toml:"models,omitempty"`
+
 	// SessionDir is the directory to store session files
 	//
 	// If omitted, the default session directory will be used.
@@ -81,6 +90,71 @@ type Personality struct {
 
 	// Message is the system message to use for the personality
 	Message string `toml:"message"`
+}
+
+// ModelSettings are the per-model generation settings under [models."<name>"].
+type ModelSettings struct {
+	// Effort controls how much the model thinks before answering.
+	//
+	// The portable values are "low", "medium" and "high", which every
+	// provider accepts as-is. A provider-prefixed value such as
+	// "anthropic:xhigh" or "openai:minimal" is passed through verbatim
+	// (prefix stripped) after checking that the prefix matches the model's
+	// provider; its validity is left to the API. Anything else is rejected
+	// when the config is loaded. Empty means the provider default.
+	Effort string `toml:"effort"`
+
+	// MaxTokens is the maximum number of output tokens per generation.
+	// Zero means the provider default.
+	MaxTokens int `toml:"max_tokens"`
+}
+
+// portableEfforts are the effort values every provider accepts verbatim.
+var portableEfforts = map[string]bool{"low": true, "medium": true, "high": true}
+
+// ResolveEffort returns the effort value to send to the given provider.
+//
+// A provider-prefixed value must name the same provider as the model it
+// is configured for; the prefix is then stripped. An empty Effort resolves
+// to "" (send nothing).
+func (s ModelSettings) ResolveEffort(provider string) (string, error) {
+	if s.Effort == "" {
+		return "", nil
+	}
+	prefix, value, prefixed := strings.Cut(s.Effort, ":")
+	if !prefixed {
+		return s.Effort, nil
+	}
+	if prefix != provider {
+		return "", fmt.Errorf("effort %q is for provider %q, but the model belongs to %q", s.Effort, prefix, provider)
+	}
+	return value, nil
+}
+
+// validate checks the values that can be judged without knowing which
+// provider a model resolves to. Provider-prefixed efforts are checked later
+// by ResolveEffort.
+func (s ModelSettings) validate() error {
+	if s.Effort != "" && !strings.Contains(s.Effort, ":") && !portableEfforts[s.Effort] {
+		return fmt.Errorf("effort %q is not one of low, medium, high (prefix a provider-specific value with its provider, e.g. \"anthropic:xhigh\")", s.Effort)
+	}
+	if s.MaxTokens < 0 {
+		return fmt.Errorf("max_tokens must not be negative: %d", s.MaxTokens)
+	}
+	return nil
+}
+
+// ModelSettings returns the settings configured for the given model along
+// with the config key they were found under, so errors can point at the
+// user's own line. A qualified key ("provider:model") takes precedence over
+// a simple one.
+func (c *Config) ModelSettings(provider, modelName string) (key string, settings ModelSettings, ok bool) {
+	for _, key := range []string{provider + ":" + modelName, modelName} {
+		if s, ok := c.Models[key]; ok {
+			return key, s, true
+		}
+	}
+	return "", ModelSettings{}, false
 }
 
 var ErrConfigFileNotFound = errors.New("config file not found")
@@ -139,6 +213,11 @@ func loadFromReader(r io.Reader) (*Config, error) {
 	var config Config
 	if _, err := toml.NewDecoder(r).Decode(&config); err != nil {
 		return nil, fmt.Errorf("decode toml: %w", err)
+	}
+	for name, s := range config.Models {
+		if err := s.validate(); err != nil {
+			return nil, fmt.Errorf("models.%q: %w", name, err)
+		}
 	}
 	return &config, nil
 }

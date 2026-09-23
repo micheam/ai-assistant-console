@@ -14,9 +14,13 @@ import (
 type GPT6Astra struct {
 	systemInstruction []*assistant.TextContent
 	client            *APIClient
+	genOpts           assistant.GenerationOptions
 }
 
-var _ assistant.GenerativeModel = (*GPT6Astra)(nil)
+var (
+	_ assistant.GenerativeModel         = (*GPT6Astra)(nil)
+	_ assistant.GenerationOptionCapable = (*GPT6Astra)(nil)
+)
 
 func NewGPT6Astra(apiKey string) *GPT6Astra {
 	return &GPT6Astra{
@@ -44,12 +48,16 @@ func (m *GPT6Astra) SetSystemInstruction(contents ...*assistant.TextContent) {
 	m.systemInstruction = contents
 }
 
+func (m *GPT6Astra) SetGenerationOptions(opts assistant.GenerationOptions) {
+	m.genOpts = opts
+}
+
 func (m *GPT6Astra) SetHttpClient(c *http.Client) {
 	m.client.SetHTTPClient(c)
 }
 
 func (m *GPT6Astra) GenerateContent(ctx context.Context, msgs ...assistant.Message) (*assistant.GenerateContentResponse, error) {
-	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, msgs)
+	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, m.genOpts, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)
 	}
@@ -62,7 +70,7 @@ func (m *GPT6Astra) GenerateContent(ctx context.Context, msgs ...assistant.Messa
 }
 
 func (m *GPT6Astra) GenerateContentStream(ctx context.Context, msgs ...assistant.Message) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
-	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, msgs)
+	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, m.genOpts, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)
 	}

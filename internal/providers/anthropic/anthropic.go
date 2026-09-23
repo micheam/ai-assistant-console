@@ -177,14 +177,19 @@ func buildRequestBody(
 	model anthropic.Model,
 	systemInstruction []*assistant.TextContent,
 	tools []assistant.ToolDefinition,
+	genOpts assistant.GenerationOptions,
 	msgs []assistant.Message,
 ) (*anthropic.MessageNewParams, error) {
 	messages, err := messageParams(ctx, msgs...)
 	if err != nil {
 		return nil, fmt.Errorf("build message params: %w", err)
 	}
+	maxTokens := defaultMaxTokens
+	if genOpts.MaxTokens > 0 {
+		maxTokens = genOpts.MaxTokens
+	}
 	params := &anthropic.MessageNewParams{
-		MaxTokens: anthropic.F(int64(defaultMaxTokens)),
+		MaxTokens: anthropic.F(int64(maxTokens)),
 		Model:     anthropic.F(model),
 		Messages:  anthropic.F(messages),
 		System:    anthropic.F(systemMessageParam(systemInstruction)),
@@ -201,6 +206,19 @@ func buildRequestBody(
 		})
 	}
 	return params, nil
+}
+
+// requestOptions returns the per-request options that carry the parts of
+// GenerationOptions the SDK's MessageNewParams has no field for.
+//
+// output_config.effort is injected into the serialized body because this
+// SDK version predates the output_config parameter.
+func requestOptions(genOpts assistant.GenerationOptions) []option.RequestOption {
+	var opts []option.RequestOption
+	if genOpts.Effort != "" {
+		opts = append(opts, option.WithJSONSet("output_config.effort", genOpts.Effort))
+	}
+	return opts
 }
 
 func toolParams(defs []assistant.ToolDefinition) []anthropic.ToolUnionUnionParam {
@@ -301,14 +319,14 @@ func toUsage(src anthropic.Usage) *assistant.Usage {
 
 // generateContentStream is the shared GenerateContentStream implementation
 // for every Anthropic model. Each model file calls it with its own name,
-// system instruction, tools and request options.
+// system instruction, tools and generation options.
 func generateContentStream(
 	ctx context.Context,
 	client *anthropic.Client,
 	modelName string,
 	systemInstruction []*assistant.TextContent,
 	tools []assistant.ToolDefinition,
-	opts []option.RequestOption,
+	genOpts assistant.GenerationOptions,
 	msgs []assistant.Message,
 ) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
 	logger := logging.LoggerFrom(ctx).With("provider", "anthropic", "model", modelName)
@@ -316,11 +334,11 @@ func generateContentStream(
 	body, err := buildRequestBody(
 		logging.ContextWith(ctx, logger),
 		anthropic.Model(modelName),
-		systemInstruction, tools, msgs)
+		systemInstruction, tools, genOpts, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("anthropic request body: %w", err)
 	}
-	stream := client.Messages.NewStreaming(ctx, *body, opts...)
+	stream := client.Messages.NewStreaming(ctx, *body, requestOptions(genOpts)...)
 	return streamContent(logging.ContextWith(ctx, logger), stream), nil
 }
 
@@ -335,7 +353,7 @@ func generateContent(
 	modelName string,
 	systemInstruction []*assistant.TextContent,
 	tools []assistant.ToolDefinition,
-	opts []option.RequestOption,
+	genOpts assistant.GenerationOptions,
 	msgs []assistant.Message,
 ) (*assistant.GenerateContentResponse, error) {
 	logger := logging.LoggerFrom(ctx).With("provider", "anthropic", "model", modelName)
@@ -343,11 +361,11 @@ func generateContent(
 	body, err := buildRequestBody(
 		logging.ContextWith(ctx, logger),
 		anthropic.Model(modelName),
-		systemInstruction, tools, msgs)
+		systemInstruction, tools, genOpts, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("anthropic request body: %w", err)
 	}
-	res, err := client.Messages.New(ctx, *body, opts...)
+	res, err := client.Messages.New(ctx, *body, requestOptions(genOpts)...)
 	if err != nil {
 		return nil, fmt.Errorf("anthropic New Message: %w", err)
 	}

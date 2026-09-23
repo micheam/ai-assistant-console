@@ -14,9 +14,13 @@ import (
 type GPT41Mini struct {
 	systemInstruction []*assistant.TextContent
 	client            *APIClient
+	genOpts           assistant.GenerationOptions
 }
 
-var _ assistant.GenerativeModel = (*GPT41Mini)(nil)
+var (
+	_ assistant.GenerativeModel         = (*GPT41Mini)(nil)
+	_ assistant.GenerationOptionCapable = (*GPT41Mini)(nil)
+)
 
 func NewGPT41Mini(apiKey string) *GPT41Mini {
 	return &GPT41Mini{
@@ -43,12 +47,16 @@ func (m *GPT41Mini) SetSystemInstruction(contents ...*assistant.TextContent) {
 	m.systemInstruction = contents
 }
 
+func (m *GPT41Mini) SetGenerationOptions(opts assistant.GenerationOptions) {
+	m.genOpts = opts
+}
+
 func (m *GPT41Mini) SetHttpClient(c *http.Client) {
 	m.client.SetHTTPClient(c)
 }
 
 func (m *GPT41Mini) GenerateContent(ctx context.Context, msgs ...assistant.Message) (*assistant.GenerateContentResponse, error) {
-	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, msgs)
+	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, m.genOpts, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)
 	}
@@ -60,7 +68,7 @@ func (m *GPT41Mini) GenerateContent(ctx context.Context, msgs ...assistant.Messa
 }
 
 func (m *GPT41Mini) GenerateContentStream(ctx context.Context, msgs ...assistant.Message) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
-	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, msgs)
+	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, m.genOpts, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)
 	}

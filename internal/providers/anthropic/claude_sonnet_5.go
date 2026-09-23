@@ -5,7 +5,6 @@ import (
 	"iter"
 
 	anthropic "github.com/anthropics/anthropic-sdk-go"
-	anthropicopt "github.com/anthropics/anthropic-sdk-go/option"
 
 	"micheam.com/aico/internal/assistant"
 )
@@ -17,12 +16,13 @@ type ClaudeSonnet5 struct {
 	tools             []assistant.ToolDefinition
 	client            *anthropic.Client
 
-	opts []anthropicopt.RequestOption
+	genOpts assistant.GenerationOptions
 }
 
 var (
-	_ assistant.GenerativeModel = (*ClaudeSonnet5)(nil)
-	_ assistant.ToolCapable     = (*ClaudeSonnet5)(nil)
+	_ assistant.GenerativeModel         = (*ClaudeSonnet5)(nil)
+	_ assistant.ToolCapable             = (*ClaudeSonnet5)(nil)
+	_ assistant.GenerationOptionCapable = (*ClaudeSonnet5)(nil)
 )
 
 func NewClaudeSonnet5(client *anthropic.Client) *ClaudeSonnet5 { return &ClaudeSonnet5{client: client} }
@@ -43,16 +43,20 @@ func (m *ClaudeSonnet5) SetTools(tools ...assistant.ToolDefinition) {
 	m.tools = tools
 }
 
+func (m *ClaudeSonnet5) SetGenerationOptions(opts assistant.GenerationOptions) {
+	m.genOpts = opts
+}
+
 func (m *ClaudeSonnet5) GenerateContent(
 	ctx context.Context,
 	msgs ...assistant.Message,
 ) (*assistant.GenerateContentResponse, error) {
-	return generateContent(ctx, m.client, m.Name(), m.systemInstruction, m.tools, m.opts, msgs)
+	return generateContent(ctx, m.client, m.Name(), m.systemInstruction, m.tools, m.genOpts, msgs)
 }
 
 func (m *ClaudeSonnet5) GenerateContentStream(
 	ctx context.Context,
 	msgs ...assistant.Message,
 ) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
-	return generateContentStream(ctx, m.client, m.Name(), m.systemInstruction, m.tools, m.opts, msgs)
+	return generateContentStream(ctx, m.client, m.Name(), m.systemInstruction, m.tools, m.genOpts, msgs)
 }

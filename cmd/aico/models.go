@@ -187,8 +187,11 @@ func DefaultModel(cmd *cli.Command) (assistant.GenerativeModel, error) {
 //   - Qualified: "openai:gpt-4o" (explicit provider)
 func detectModel(cmd *cli.Command) (assistant.GenerativeModel, error) {
 	conf, err := config.Load()
-	if err != nil {
+	if errors.Is(err, config.ErrConfigFileNotFound) {
 		return DefaultModel(cmd)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("load config: %w", err)
 	}
 
 	modelSpec := cmd.String(flagModel.Name)
@@ -204,29 +207,66 @@ func detectModel(cmd *cli.Command) (assistant.GenerativeModel, error) {
 
 func modelByName(cmd *cli.Command, name string) (assistant.GenerativeModel, error) {
 	conf, err := config.Load()
-	if err != nil {
+	if errors.Is(err, config.ErrConfigFileNotFound) {
 		return DefaultModel(cmd)
+	}
+	if err != nil {
+		// A malformed config must not silently degrade to the default
+		// model: per-model settings would be dropped without notice.
+		return nil, fmt.Errorf("load config: %w", err)
 	}
 	provider, modelName, found := detectProviderByModelSpec(name, conf.DefaultProvider)
 	if !found {
 		return DefaultModel(cmd)
 	}
+	var model assistant.GenerativeModel
 	switch provider {
 	case anthropic.ProviderName:
 		apikey := cmd.String(flagAPIKeyAnthropic.Name)
-		return anthropic.NewGenerativeModel(modelName, apikey)
+		model, err = anthropic.NewGenerativeModel(modelName, apikey)
 	case openai.ProviderName:
 		apikey := cmd.String(flagAPIKeyOpenAI.Name)
-		return openai.NewGenerativeModel(modelName, apikey)
+		model, err = openai.NewGenerativeModel(modelName, apikey)
 	case groq.ProviderName:
 		apikey := cmd.String(flagAPIKeyGroq.Name)
-		return groq.NewGenerativeModel(modelName, apikey)
+		model, err = groq.NewGenerativeModel(modelName, apikey)
 	case cerebras.ProviderName:
 		apikey := cmd.String(flagAPIKeyCerebras.Name)
-		return cerebras.NewGenerativeModel(modelName, apikey)
+		model, err = cerebras.NewGenerativeModel(modelName, apikey)
 	default:
 		return DefaultModel(cmd)
 	}
+	if err != nil {
+		return nil, err
+	}
+	if err := applyModelSettings(conf, model); err != nil {
+		return nil, err
+	}
+	return model, nil
+}
+
+// applyModelSettings hands the [models."<name>"] settings from the config,
+// if any, to the model. Settings are read from the config on every call
+// rather than persisted in the session, so editing the config takes effect
+// on the next turn.
+func applyModelSettings(conf *config.Config, model assistant.GenerativeModel) error {
+	key, settings, ok := conf.ModelSettings(model.Provider(), model.Name())
+	if !ok {
+		return nil
+	}
+	effort, err := settings.ResolveEffort(model.Provider())
+	if err != nil {
+		return fmt.Errorf("models.%q: %w", key, err)
+	}
+	capable, ok := model.(assistant.GenerationOptionCapable)
+	if !ok {
+		return fmt.Errorf("model %s does not support per-model settings (models.%q)", QualifiedName(model.Provider(), model.Name()), key)
+	}
+	capable.SetGenerationOptions(assistant.GenerationOptions{
+		Effort:    effort,
+		MaxTokens: settings.MaxTokens,
+	})
+	return nil
 }
 
 // ModelSpec represents a parsed model specification.

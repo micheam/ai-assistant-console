@@ -279,6 +279,26 @@ To see all available models, use the `models` command:
 $ aico models
 ```
 
+#### Per-model settings
+
+You can tune `effort` and `max_tokens` per model in `config.toml`. Only models listed there get any settings; everything else runs on the provider's defaults.
+
+```toml
+[models."claude-opus-5-5"]
+effort = "high"
+
+[models."claude-opus-5"]
+effort = "anthropic:xhigh"
+max_tokens = 65536
+
+[models."gpt-5.6-sol"]
+effort = "high"
+```
+
+- Always quote the key: model names may contain `.` or `:`.
+- `effort` accepts `low`, `medium` and `high`, which every provider understands. Prefix a provider-specific value with its provider (`anthropic:xhigh`, `openai:minimal`) to pass it through as-is.
+- Configuring `effort` for a model that doesn't support it (for example a non-reasoning OpenAI model) results in an API error.
+
 ### Persona Management
 
 Manage personas with the `persona` command:

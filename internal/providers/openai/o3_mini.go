@@ -14,9 +14,13 @@ import (
 type O3Mini struct {
 	systemInstruction []*assistant.TextContent
 	client            *APIClient
+	genOpts           assistant.GenerationOptions
 }
 
-var _ assistant.GenerativeModel = (*O3Mini)(nil)
+var (
+	_ assistant.GenerativeModel         = (*O3Mini)(nil)
+	_ assistant.GenerationOptionCapable = (*O3Mini)(nil)
+)
 
 func NewO3Mini(apiKey string) *O3Mini {
 	return &O3Mini{
@@ -46,12 +50,16 @@ func (m *O3Mini) SetSystemInstruction(contents ...*assistant.TextContent) {
 	m.systemInstruction = contents
 }
 
+func (m *O3Mini) SetGenerationOptions(opts assistant.GenerationOptions) {
+	m.genOpts = opts
+}
+
 func (m *O3Mini) SetHttpClient(c *http.Client) {
 	m.client.SetHTTPClient(c)
 }
 
 func (m *O3Mini) GenerateContent(ctx context.Context, msgs ...assistant.Message) (*assistant.GenerateContentResponse, error) {
-	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, msgs)
+	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, m.genOpts, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)
 	}
@@ -64,7 +72,7 @@ func (m *O3Mini) GenerateContent(ctx context.Context, msgs ...assistant.Message)
 }
 
 func (m *O3Mini) GenerateContentStream(ctx context.Context, msgs ...assistant.Message) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
-	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, msgs)
+	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, m.genOpts, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)
 	}

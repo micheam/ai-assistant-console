@@ -14,9 +14,13 @@ import (
 type O4Mini struct {
 	systemInstruction []*assistant.TextContent
 	client            *APIClient
+	genOpts           assistant.GenerationOptions
 }
 
-var _ assistant.GenerativeModel = (*O4Mini)(nil)
+var (
+	_ assistant.GenerativeModel         = (*O4Mini)(nil)
+	_ assistant.GenerationOptionCapable = (*O4Mini)(nil)
+)
 
 func NewO4Mini(apiKey string) *O4Mini {
 	return &O4Mini{
@@ -44,12 +48,16 @@ func (m *O4Mini) SetSystemInstruction(contents ...*assistant.TextContent) {
 	m.systemInstruction = contents
 }
 
+func (m *O4Mini) SetGenerationOptions(opts assistant.GenerationOptions) {
+	m.genOpts = opts
+}
+
 func (m *O4Mini) SetHttpClient(c *http.Client) {
 	m.client.SetHTTPClient(c)
 }
 
 func (m *O4Mini) GenerateContent(ctx context.Context, msgs ...assistant.Message) (*assistant.GenerateContentResponse, error) {
-	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, msgs)
+	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, m.genOpts, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)
 	}
@@ -61,7 +69,7 @@ func (m *O4Mini) GenerateContent(ctx context.Context, msgs ...assistant.Message)
 }
 
 func (m *O4Mini) GenerateContentStream(ctx context.Context, msgs ...assistant.Message) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
-	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, msgs)
+	req, err := BuildChatRequest(ctx, m.Name(), m.systemInstruction, m.genOpts, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)
 	}

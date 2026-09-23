@@ -28,6 +28,29 @@ default_provider = ""
 # Default: "claude-haiku-4-5"
 model = "claude-haiku-4-5"
 
+# Per-model generation settings
+# Only models listed here get any settings; everything else runs on the
+# provider's defaults. Always quote the key (model names may contain "." or ":").
+# The key accepts the same two formats as `model`: a simple name or a
+# qualified "provider:model" name (the qualified key takes precedence).
+#
+#   effort     - "low", "medium" or "high" (understood by every provider).
+#                Prefix a provider-specific value with its provider to pass
+#                it through as-is, e.g. "anthropic:xhigh" or "openai:minimal".
+#                Configuring effort for a model that doesn't support it
+#                (e.g. a non-reasoning OpenAI model) results in an API error.
+#   max_tokens - maximum number of output tokens per generation.
+#
+# [models."claude-opus-5-5"]
+# effort = "high"
+#
+# [models."claude-opus-5"]
+# effort = "anthropic:xhigh"
+# max_tokens = 65536
+#
+# [models."gpt-5.6-sol"]
+# effort = "high"
+
 # Persona configurations
 # Each persona has a description and a system message that defines its behavior.
 # You can define multiple personas and switch between them during conversations.

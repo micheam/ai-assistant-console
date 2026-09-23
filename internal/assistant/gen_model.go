@@ -41,6 +41,27 @@ type GenerativeModel interface {
 	GenerateContentStream(context.Context, ...Message) (iter.Seq2[*GenerateContentResponse, error], error)
 }
 
+// GenerationOptions carries per-model request knobs that the user
+// configures per model. Zero values mean "don't send": an empty Effort
+// omits the effort parameter (the provider default applies) and a zero
+// MaxTokens keeps the provider's own default output limit.
+type GenerationOptions struct {
+	// Effort is passed to the provider verbatim (e.g. "low", "medium",
+	// "high", or a provider-specific value such as "xhigh").
+	Effort string
+
+	// MaxTokens is the maximum number of output tokens for a single
+	// generation.
+	MaxTokens int
+}
+
+// GenerationOptionCapable is implemented by GenerativeModel providers that
+// accept per-request generation options. It is optional in the same way
+// ToolCapable is, so callers must check for it before relying on it.
+type GenerationOptionCapable interface {
+	SetGenerationOptions(GenerationOptions)
+}
+
 type GenerateContentResponse struct {
 	Content MessageContent
 

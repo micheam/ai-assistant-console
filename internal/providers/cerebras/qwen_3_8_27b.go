@@ -11,9 +11,13 @@ import (
 type Qwen3_8_27B struct {
 	systemInstruction []*assistant.TextContent
 	client            *openai.APIClient
+	genOpts           assistant.GenerationOptions
 }
 
-var _ assistant.GenerativeModel = (*Qwen3_8_27B)(nil)
+var (
+	_ assistant.GenerativeModel         = (*Qwen3_8_27B)(nil)
+	_ assistant.GenerationOptionCapable = (*Qwen3_8_27B)(nil)
+)
 
 func NewQwen3_8_27B(apiKey string) *Qwen3_8_27B {
 	return &Qwen3_8_27B{
@@ -40,10 +44,14 @@ func (m *Qwen3_8_27B) SetSystemInstruction(contents ...*assistant.TextContent) {
 	m.systemInstruction = contents
 }
 
+func (m *Qwen3_8_27B) SetGenerationOptions(opts assistant.GenerationOptions) {
+	m.genOpts = opts
+}
+
 func (m *Qwen3_8_27B) GenerateContent(ctx context.Context, msgs ...assistant.Message) (*assistant.GenerateContentResponse, error) {
-	return openai.GenerateContent(ctx, m.client, Endpoint, m.Name(), m.systemInstruction, msgs)
+	return openai.GenerateContent(ctx, m.client, Endpoint, m.Name(), m.systemInstruction, m.genOpts, msgs)
 }
 
 func (m *Qwen3_8_27B) GenerateContentStream(ctx context.Context, msgs ...assistant.Message) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
-	return openai.GenerateContentStream(ctx, m.client, Endpoint, m.Name(), m.systemInstruction, msgs)
+	return openai.GenerateContentStream(ctx, m.client, Endpoint, m.Name(), m.systemInstruction, m.genOpts, msgs)
 }

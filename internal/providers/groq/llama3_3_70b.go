@@ -11,9 +11,13 @@ import (
 type Llama3_3_70B struct {
 	systemInstruction []*assistant.TextContent
 	client            *openai.APIClient
+	genOpts           assistant.GenerationOptions
 }
 
-var _ assistant.GenerativeModel = (*Llama3_3_70B)(nil)
+var (
+	_ assistant.GenerativeModel         = (*Llama3_3_70B)(nil)
+	_ assistant.GenerationOptionCapable = (*Llama3_3_70B)(nil)
+)
 
 func NewLlama3_3_70B(apiKey string) *Llama3_3_70B {
 	return &Llama3_3_70B{
@@ -40,10 +44,14 @@ func (m *Llama3_3_70B) SetSystemInstruction(contents ...*assistant.TextContent) 
 	m.systemInstruction = contents
 }
 
+func (m *Llama3_3_70B) SetGenerationOptions(opts assistant.GenerationOptions) {
+	m.genOpts = opts
+}
+
 func (m *Llama3_3_70B) GenerateContent(ctx context.Context, msgs ...assistant.Message) (*assistant.GenerateContentResponse, error) {
-	return openai.GenerateContent(ctx, m.client, Endpoint, m.Name(), m.systemInstruction, msgs)
+	return openai.GenerateContent(ctx, m.client, Endpoint, m.Name(), m.systemInstruction, m.genOpts, msgs)
 }
 
 func (m *Llama3_3_70B) GenerateContentStream(ctx context.Context, msgs ...assistant.Message) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
-	return openai.GenerateContentStream(ctx, m.client, Endpoint, m.Name(), m.systemInstruction, msgs)
+	return openai.GenerateContentStream(ctx, m.client, Endpoint, m.Name(), m.systemInstruction, m.genOpts, msgs)
 }

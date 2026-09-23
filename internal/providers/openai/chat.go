@@ -145,6 +145,20 @@ type ChatRequest struct {
 	// The total length of input tokens and generated tokens is limited by the model's context length.
 	MaxTokens int `json:"max_tokens,omitempty"`
 
+	// max_completion_tokens integer Optional
+	//
+	// An upper bound for the number of tokens that can be generated for a
+	// completion, including visible output tokens and reasoning tokens.
+	// This is the current replacement for max_tokens and the only form
+	// reasoning models accept.
+	MaxCompletionTokens int `json:"max_completion_tokens,omitempty"`
+
+	// reasoning_effort string Optional Defaults to medium
+	//
+	// Constrains effort on reasoning for reasoning models. Non-reasoning
+	// models reject it, so it is only set when configured for the model.
+	ReasoningEffort string `json:"reasoning_effort,omitempty"`
+
 	// presence_penalty number
 	// Optional
 	// Defaults to 0
@@ -206,13 +220,15 @@ type ChatResponse struct {
 }
 
 // BuildChatRequest builds a chat request for OpenAI-compatible APIs
-func BuildChatRequest(ctx context.Context, modelName string, systemInstruction []*assistant.TextContent, messages []assistant.Message) (*ChatRequest, error) {
+func BuildChatRequest(ctx context.Context, modelName string, systemInstruction []*assistant.TextContent, genOpts assistant.GenerationOptions, messages []assistant.Message) (*ChatRequest, error) {
 	if len(messages) == 0 {
 		return nil, fmt.Errorf("no messages provided")
 	}
 	req := &ChatRequest{
-		Model:    modelName,
-		Messages: make([]Message, 0, len(messages)),
+		Model:               modelName,
+		Messages:            make([]Message, 0, len(messages)),
+		ReasoningEffort:     genOpts.Effort,
+		MaxCompletionTokens: genOpts.MaxTokens,
 	}
 	// System instructions
 	if len(systemInstruction) > 0 {
@@ -286,8 +302,8 @@ func toUsage(src Usage) *assistant.Usage {
 }
 
 // GenerateContent is a shared implementation for generating content with OpenAI-compatible APIs
-func GenerateContent(ctx context.Context, client *APIClient, apiEndpoint string, modelName string, systemInstruction []*assistant.TextContent, msgs []assistant.Message) (*assistant.GenerateContentResponse, error) {
-	req, err := BuildChatRequest(ctx, modelName, systemInstruction, msgs)
+func GenerateContent(ctx context.Context, client *APIClient, apiEndpoint string, modelName string, systemInstruction []*assistant.TextContent, genOpts assistant.GenerationOptions, msgs []assistant.Message) (*assistant.GenerateContentResponse, error) {
+	req, err := BuildChatRequest(ctx, modelName, systemInstruction, genOpts, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)
 	}
@@ -299,8 +315,8 @@ func GenerateContent(ctx context.Context, client *APIClient, apiEndpoint string,
 }
 
 // GenerateContentStream is a shared implementation for streaming content with OpenAI-compatible APIs
-func GenerateContentStream(ctx context.Context, client *APIClient, apiEndpoint string, modelName string, systemInstruction []*assistant.TextContent, msgs []assistant.Message) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
-	req, err := BuildChatRequest(ctx, modelName, systemInstruction, msgs)
+func GenerateContentStream(ctx context.Context, client *APIClient, apiEndpoint string, modelName string, systemInstruction []*assistant.TextContent, genOpts assistant.GenerationOptions, msgs []assistant.Message) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
+	req, err := BuildChatRequest(ctx, modelName, systemInstruction, genOpts, msgs)
 	if err != nil {
 		return nil, fmt.Errorf("build chat request: %w", err)
 	}

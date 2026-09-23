@@ -56,7 +56,7 @@ Create a new file at `internal/providers/<provider>/<model_file_name>.go`.
 - `llama-3.3-70b-versatile` → `llama3_3_70b.go`
 
 **All models must:**
-- Add the interface compliance check: `var _ assistant.GenerativeModel = (*TypeName)(nil)`
+- Add the interface compliance checks: `var _ assistant.GenerativeModel = (*TypeName)(nil)` and `var _ assistant.GenerationOptionCapable = (*TypeName)(nil)`
 - Implement all methods of `assistant.GenerativeModel`:
   - `Provider() string`
   - `Name() string`
@@ -64,29 +64,32 @@ Create a new file at `internal/providers/<provider>/<model_file_name>.go`.
   - `SetSystemInstruction(...*assistant.TextContent)`
   - `GenerateContent(ctx, ...Message) (*GenerateContentResponse, error)`
   - `GenerateContentStream(ctx, ...Message) (iter.Seq2[*GenerateContentResponse, error], error)`
+- Implement `assistant.GenerationOptionCapable` (`SetGenerationOptions(assistant.GenerationOptions)`), storing the value in a `genOpts` field and passing it to the request builder. This is what `[models."<name>"]` in the config file feeds; a model without it fails at runtime when settings are configured for it.
 
 **Provider-specific patterns:**
 
 #### Anthropic (`internal/providers/anthropic/`)
 
 ```
-- Import: anthropic "github.com/anthropics/anthropic-sdk-go", anthropicopt "github.com/anthropics/anthropic-sdk-go/option"
+- Import: anthropic "github.com/anthropics/anthropic-sdk-go"
 - Define: const ModelNameXxx = "model-id"
-- Struct fields: client *anthropic.Client, opts []anthropicopt.RequestOption
+- Struct fields: systemInstruction, tools []assistant.ToolDefinition, client *anthropic.Client, genOpts assistant.GenerationOptions
+- Compliance checks: GenerativeModel, ToolCapable, GenerationOptionCapable
 - Constructor: takes *anthropic.Client (NOT apiKey)
-- GenerateContent: buildRequestBody() → m.client.Messages.New()
-- GenerateContentStream: buildRequestBody() → m.client.Messages.NewStreaming()
+- SetTools(tools ...assistant.ToolDefinition) stores m.tools
+- GenerateContent: delegates to generateContent(ctx, m.client, m.Name(), m.systemInstruction, m.tools, m.genOpts, msgs)
+- GenerateContentStream: delegates to generateContentStream(...) with the same arguments
 ```
 
-Template: `claude_opus_4_6.go`
+Template: `claude_opus_5_5.go`
 
 #### OpenAI (`internal/providers/openai/`)
 
 ```
-- Struct fields: systemInstruction []*assistant.TextContent, client *APIClient
+- Struct fields: systemInstruction []*assistant.TextContent, client *APIClient, genOpts assistant.GenerationOptions
 - Constructor: takes apiKey string → NewAPIClient(apiKey)
-- GenerateContent: BuildChatRequest() → m.client.DoPost(ctx, endpoint, req, resp)
-- GenerateContentStream: BuildChatRequest() → m.client.DoStream(ctx, endpoint, req)
+- GenerateContent: BuildChatRequest(ctx, m.Name(), m.systemInstruction, m.genOpts, msgs) → m.client.DoPost(ctx, endpoint, req, resp)
+- GenerateContentStream: BuildChatRequest(...) → m.client.DoStream(ctx, endpoint, req)
 - Also implements SetHttpClient(c *http.Client) (not part of interface, but required for this provider)
 ```
 
@@ -96,10 +99,10 @@ Template: `gpt4_1.go`
 
 ```
 - Import: "micheam.com/aico/internal/providers/openai"
-- Struct fields: systemInstruction []*assistant.TextContent, client *openai.APIClient
+- Struct fields: systemInstruction []*assistant.TextContent, client *openai.APIClient, genOpts assistant.GenerationOptions
 - Constructor: takes apiKey string → openai.NewAPIClient(apiKey)
-- GenerateContent: delegates to openai.GenerateContent(ctx, m.client, Endpoint, m.Name(), ...)
-- GenerateContentStream: delegates to openai.GenerateContentStream(ctx, m.client, Endpoint, m.Name(), ...)
+- GenerateContent: delegates to openai.GenerateContent(ctx, m.client, Endpoint, m.Name(), m.systemInstruction, m.genOpts, msgs)
+- GenerateContentStream: delegates to openai.GenerateContentStream(...) with the same arguments
 - Uses the provider's Endpoint constant (defined in the provider main file)
 ```
 

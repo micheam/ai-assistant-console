@@ -11,9 +11,13 @@ import (
 type GptOss120B struct {
 	systemInstruction []*assistant.TextContent
 	client            *openai.APIClient
+	genOpts           assistant.GenerationOptions
 }
 
-var _ assistant.GenerativeModel = (*GptOss120B)(nil)
+var (
+	_ assistant.GenerativeModel         = (*GptOss120B)(nil)
+	_ assistant.GenerationOptionCapable = (*GptOss120B)(nil)
+)
 
 func NewGptOss120B(apiKey string) *GptOss120B {
 	return &GptOss120B{
@@ -39,10 +43,14 @@ func (m *GptOss120B) SetSystemInstruction(contents ...*assistant.TextContent) {
 	m.systemInstruction = contents
 }
 
+func (m *GptOss120B) SetGenerationOptions(opts assistant.GenerationOptions) {
+	m.genOpts = opts
+}
+
 func (m *GptOss120B) GenerateContent(ctx context.Context, msgs ...assistant.Message) (*assistant.GenerateContentResponse, error) {
-	return openai.GenerateContent(ctx, m.client, Endpoint, m.Name(), m.systemInstruction, msgs)
+	return openai.GenerateContent(ctx, m.client, Endpoint, m.Name(), m.systemInstruction, m.genOpts, msgs)
 }
 
 func (m *GptOss120B) GenerateContentStream(ctx context.Context, msgs ...assistant.Message) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
-	return openai.GenerateContentStream(ctx, m.client, Endpoint, m.Name(), m.systemInstruction, msgs)
+	return openai.GenerateContentStream(ctx, m.client, Endpoint, m.Name(), m.systemInstruction, m.genOpts, msgs)
 }
