@@ -37,7 +37,8 @@ func (m *GPT56Sol) Name() string {
 }
 
 func (m *GPT56Sol) Description() string {
-	return `GPT-5.6 Sol is the flagship model of the GPT-5.6 series, built for frontier
+	return `[Deprecated] GPT-5.6 Sol - superseded by GPT-6 Sol.
+GPT-5.6 Sol is the flagship model of the GPT-5.6 series, built for frontier
 reasoning and long-horizon agentic work.
 It features a 1.05M context window and 128K max output tokens.
 Pricing: $5.00 / $30.00 per MTok (input / output).

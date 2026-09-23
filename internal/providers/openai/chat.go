@@ -17,6 +17,8 @@ const ProviderName = "openai"
 func AvailableModels() []assistant.ModelDescriptor {
 	return []assistant.ModelDescriptor{
 		&GPT6Astra{},
+		&GPT6Sol{},
+		&GPT6Luna{},
 		&GPT56Sol{},
 		&GPT56Terra{},
 		&GPT56Luna{},
@@ -43,6 +45,10 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 		return nil, false
 	case "gpt-6-astra":
 		return &GPT6Astra{}, true
+	case "gpt-6-sol":
+		return &GPT6Sol{}, true
+	case "gpt-6-luna":
+		return &GPT6Luna{}, true
 	case "gpt-5.6-sol":
 		return &GPT56Sol{}, true
 	case "gpt-5.6-terra":
@@ -69,6 +75,10 @@ func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, er
 	switch modelName {
 	case "gpt-6-astra":
 		return NewGPT6Astra(apiKey), nil
+	case "gpt-6-sol":
+		return NewGPT6Sol(apiKey), nil
+	case "gpt-6-luna":
+		return NewGPT6Luna(apiKey), nil
 	case "gpt-5.6-sol":
 		return NewGPT56Sol(apiKey), nil
 	case "gpt-5.6-terra":
