@@ -401,6 +401,57 @@ func TestSourceFlag_OnlyOnce_RejectsDuplicate(t *testing.T) {
 	require.Error(t, err)
 }
 
+func TestPendingToolResults(t *testing.T) {
+	t.Run("empty session", func(t *testing.T) {
+		sess := &assistant.Session{}
+		require.Nil(t, pendingToolResults(sess))
+	})
+
+	t.Run("last message is from the user", func(t *testing.T) {
+		sess := &assistant.Session{
+			Messages: []assistant.Message{
+				assistant.NewUserMessage(assistant.NewTextContent("hi")),
+			},
+		}
+		require.Nil(t, pendingToolResults(sess))
+	})
+
+	t.Run("last assistant message has no tool_use", func(t *testing.T) {
+		sess := &assistant.Session{
+			Messages: []assistant.Message{
+				assistant.NewUserMessage(assistant.NewTextContent("hi")),
+				assistant.NewAssistantMessage(assistant.NewTextContent("hello")),
+			},
+		}
+		require.Nil(t, pendingToolResults(sess))
+	})
+
+	t.Run("last assistant message has two tool_use blocks", func(t *testing.T) {
+		sess := &assistant.Session{
+			Messages: []assistant.Message{
+				assistant.NewUserMessage(assistant.NewTextContent("hi")),
+				assistant.NewAssistantMessage(
+					assistant.NewTextContent("here are two fixes"),
+					&assistant.ToolUseContent{ID: "toolu_01", Name: "propose_edit"},
+					&assistant.ToolUseContent{ID: "toolu_02", Name: "propose_edit"},
+				),
+			},
+		}
+		got := pendingToolResults(sess)
+		require.Len(t, got, 2)
+
+		first, ok := got[0].(*assistant.ToolResultContent)
+		require.True(t, ok)
+		require.Equal(t, "toolu_01", first.ToolUseID)
+		require.Equal(t, pendingToolResultText, first.Content)
+		require.False(t, first.IsError)
+
+		second, ok := got[1].(*assistant.ToolResultContent)
+		require.True(t, ok)
+		require.Equal(t, "toolu_02", second.ToolUseID)
+	})
+}
+
 func TestUserMessage_WithoutSource(t *testing.T) {
 	prompt := "hello"
 

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -86,8 +87,23 @@ func doGenerate(ctx context.Context, cmd *cli.Command, prompt string) error {
 	logger = logger.With(slog.String("session_id", sess.ID))
 	ctx = logging.ContextWith(ctx, logger)
 
+	// Resolve the client-side tools enabled for this turn: the union of
+	// what the session already had (from an earlier turn) and what --tool
+	// asks for now. Resolved (and thus validated) before anything is
+	// appended to the session, so an unknown tool name fails without
+	// touching the session file.
+	toolNames := unionToolNames(sess.Tools, cmd.StringSlice(flagTool.Name))
+	toolDefs, err := resolveTools(toolNames)
+	if err != nil {
+		return err
+	}
+
 	{
-		userContents := []assistant.MessageContent{}
+		// A tool_use block always requires a matching tool_result in the
+		// next user message. Round 1 has no real feedback loop from the
+		// editor, so synthesize a placeholder for any tool_use left
+		// pending by the previous turn (see pendingToolResults).
+		userContents := pendingToolResults(sess)
 		var totalInputBytes int
 
 		// --context is resolved fresh every turn (not persisted in the
@@ -135,6 +151,14 @@ func doGenerate(ctx context.Context, cmd *cli.Command, prompt string) error {
 	if err != nil {
 		return fmt.Errorf("model by name: %w", err)
 	}
+	if len(toolDefs) > 0 {
+		tc, ok := model.(assistant.ToolCapable)
+		if !ok {
+			return fmt.Errorf("model %s does not support client-side tools (--tool)", sess.Model)
+		}
+		tc.SetTools(toolDefs...)
+		sess.Tools = toolNames
+	}
 	model.SetSystemInstruction(sess.SystemInstruction...)
 	defer sess.Save(ctx, model)
 
@@ -143,16 +167,36 @@ func doGenerate(ctx context.Context, cmd *cli.Command, prompt string) error {
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
 
-	// Stream content and accumulate text for session history
+	// Stream content and accumulate the assistant message for session
+	// history: text runs are flushed into their own TextContent so they
+	// interleave in order with any tool_use/thinking blocks.
 	var (
-		acc    = new(strings.Builder)
-		writer = detectWriter(cmd, *sess)
+		contents []assistant.MessageContent
+		text     strings.Builder
+		hasBody  bool
+		writer   = detectWriter(cmd, *sess)
 	)
 	defer writer.Close()
+	flushText := func() {
+		if text.Len() > 0 {
+			contents = append(contents, assistant.NewTextContent(text.String()))
+			text.Reset()
+		}
+	}
 	var usage *assistant.Usage
 	for resp, err := range iter {
 		if err != nil {
-			fmt.Fprintf(cmd.ErrWriter, "\nError: %v\n", err)
+			switch {
+			case errors.Is(err, assistant.ErrMaxTokens), errors.Is(err, assistant.ErrTruncatedToolUse):
+				fmt.Fprintf(cmd.ErrWriter, "\nError: response was cut off (%v); this turn was not saved to the session\n", err)
+			case errors.Is(err, assistant.ErrRefusal):
+				fmt.Fprintf(cmd.ErrWriter, "\nError: %v; this turn was not saved to the session\n", err)
+			default:
+				fmt.Fprintf(cmd.ErrWriter, "\nError: %v\n", err)
+			}
+			// The assistant message is intentionally not added to sess:
+			// only the user message appended above is saved, matching the
+			// existing failure behavior for a mid-stream error.
 			return fmt.Errorf("stream error: %w", err)
 		}
 		if resp.Usage != nil {
@@ -161,17 +205,34 @@ func doGenerate(ctx context.Context, cmd *cli.Command, prompt string) error {
 		}
 		switch content := resp.Content.(type) {
 		case *assistant.TextContent:
-			_, err := writer.Write([]byte(content.Text))
-			if err != nil {
+			if _, err := writer.Write([]byte(content.Text)); err != nil {
 				return fmt.Errorf("failed to write content: %w", err)
 			}
-			acc.WriteString(content.Text)
+			text.WriteString(content.Text)
+			hasBody = true
+		case *assistant.ToolUseContent:
+			if err := validateToolUse(content); err != nil {
+				fmt.Fprintf(cmd.ErrWriter, "\nError: %v; this turn was not saved to the session\n", err)
+				return fmt.Errorf("invalid tool_use from model: %w", err)
+			}
+			flushText()
+			contents = append(contents, content)
+			hasBody = true
+			if err := writer.EmitToolUse(content); err != nil {
+				return fmt.Errorf("failed to write tool_use: %w", err)
+			}
+		case *assistant.ThinkingContent, *assistant.RedactedThinkingContent:
+			// Not shown to the user, but must be persisted and replayed
+			// unchanged: a following tool_result turn is rejected without
+			// its preceding thinking block intact.
+			flushText()
+			contents = append(contents, content)
 		default:
-			// Ignore other content types for now
 			logger.Warn("ignore unsupported content type",
 				"type", fmt.Sprintf("%T", content))
 		}
 	}
+	flushText()
 	if usage != nil {
 		logger.Debug("prompt cache usage",
 			"input_tokens", usage.InputTokens,
@@ -181,11 +242,41 @@ func doGenerate(ctx context.Context, cmd *cli.Command, prompt string) error {
 			jw.SetUsage(usage)
 		}
 	}
-	if acc.Len() > 0 {
-		sess.AddMessage(assistant.NewAssistantMessage(assistant.NewTextContent(acc.String())))
+	if hasBody {
+		sess.AddMessage(assistant.NewAssistantMessage(contents...))
 	}
 	return nil
 }
+
+// pendingToolResults synthesizes a placeholder tool_result for every
+// tool_use content in the session's last message, so the request is valid
+// when a session is resumed after a turn that ended in a tool_use the
+// editor has not (yet, or ever) reported a decision on. It returns nil if
+// the last message isn't an assistant message, or has no tool_use content.
+func pendingToolResults(sess *assistant.Session) []assistant.MessageContent {
+	if len(sess.Messages) == 0 {
+		return nil
+	}
+	last, ok := sess.Messages[len(sess.Messages)-1].(*assistant.AssistantMessage)
+	if !ok {
+		return nil
+	}
+	var out []assistant.MessageContent
+	for _, c := range last.Contents {
+		if tu, ok := c.(*assistant.ToolUseContent); ok {
+			out = append(out, &assistant.ToolResultContent{
+				ToolUseID: tu.ID,
+				Content:   pendingToolResultText,
+			})
+		}
+	}
+	return out
+}
+
+// pendingToolResultText is the placeholder tool_result content sent for a
+// tool_use the editor has not reported a decision on (see
+// pendingToolResults). Round 1 has no real feedback loop from vim-aico.
+const pendingToolResultText = "The user has not recorded a decision on this proposal; it may or may not have been applied in their editor. Continue based on the user's next message."
 
 // generateView is the JSON output shape for the generate action when --json is set.
 type generateView struct {
@@ -440,7 +531,7 @@ func loadSession(cmd *cli.Command) (*assistant.Session, error) {
 	}
 }
 
-func detectWriter(cmd *cli.Command, sess assistant.Session) io.WriteCloser {
+func detectWriter(cmd *cli.Command, sess assistant.Session) streamWriter {
 	if cmd.Bool(flagJSON.Name) {
 		return &JSONLineStreamWriter{
 			enc: json.NewEncoder(cmd.Writer),

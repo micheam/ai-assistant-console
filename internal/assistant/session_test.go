@@ -74,6 +74,31 @@ func TestSession_SourceRoundTrip(t *testing.T) {
 	require.Equal(t, "buffer.go", got.Source.Name)
 }
 
+func TestSession_ToolsRoundTrip(t *testing.T) {
+	sess := &Session{
+		ID:    "with-tools",
+		Tools: []string{"propose_edit"},
+		Messages: []Message{
+			NewUserMessage(NewTextContent("hello")),
+		},
+	}
+	data, err := sess.MarshalJSON()
+	require.NoError(t, err)
+	require.Contains(t, string(data), `"tools"`)
+
+	got := new(Session)
+	require.NoError(t, got.UnmarshalJSON(data))
+	require.Equal(t, []string{"propose_edit"}, got.Tools)
+}
+
+func TestSession_UnmarshalJSON_WithoutTools_LeavesNil(t *testing.T) {
+	// sessionJSONStr predates the "tools" field: old session files must
+	// still decode cleanly, with Tools left nil.
+	sess := new(Session)
+	require.NoError(t, sess.UnmarshalJSON([]byte(sessionJSONStr)))
+	require.Nil(t, sess.Tools)
+}
+
 func TestSourceInfo_String(t *testing.T) {
 	tests := []struct {
 		name string

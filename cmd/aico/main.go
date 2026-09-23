@@ -52,6 +52,7 @@ func run(args []string) error {
 			flagSystemPrompt,
 			flagSource,
 			flagContext,
+			flagTool,
 
 			flagAPIKeyAnthropic,
 			flagAPIKeyOpenAI,
@@ -119,6 +120,10 @@ var (
 	flagSessionID = &cli.StringFlag{
 		Name:  "session",
 		Usage: "session `ID` for conversation history",
+	}
+	flagTool = &cli.StringSliceFlag{
+		Name:  "tool",
+		Usage: "enable a client-side tool by name (available: propose_edit); repeatable",
 	}
 	flagLast = &cli.BoolFlag{
 		Name:  "last",

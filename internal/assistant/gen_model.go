@@ -2,7 +2,29 @@ package assistant
 
 import (
 	"context"
+	"errors"
 	"iter"
+)
+
+// Sentinel errors a GenerativeModel's GenerateContentStream may report
+// instead of a normal terminal Usage item, when the turn ended in a state
+// unsafe to treat as a complete response (e.g. a tool_use proposal that was
+// cut off mid-input). Callers must not persist the assistant message for a
+// turn that failed with one of these.
+var (
+	// ErrMaxTokens indicates the response was cut off by the max_tokens
+	// limit before the model finished its turn.
+	ErrMaxTokens = errors.New("generation stopped at max_tokens")
+
+	// ErrRefusal indicates the model declined to continue the turn
+	// (stop_reason "refusal"). Content produced before the refusal, if any,
+	// must not be treated as a complete response.
+	ErrRefusal = errors.New("generation stopped: refusal")
+
+	// ErrTruncatedToolUse indicates a tool_use content block's input was
+	// not valid JSON when its block completed, which can happen when the
+	// turn is cut off mid-parameter.
+	ErrTruncatedToolUse = errors.New("tool_use input is not complete JSON")
 )
 
 type ModelDescriptor interface {

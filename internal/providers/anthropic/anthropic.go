@@ -2,18 +2,26 @@ package anthropic
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"iter"
 
 	anthropic "github.com/anthropics/anthropic-sdk-go"
 	"github.com/anthropics/anthropic-sdk-go/option"
+	"github.com/anthropics/anthropic-sdk-go/packages/ssestream"
 
 	"micheam.com/aico/internal/assistant"
 	"micheam.com/aico/internal/logging"
 )
 
 const (
-	ProviderName     = "anthropic"
-	defaultMaxTokens = 1_024 * 8
+	ProviderName = "anthropic"
+
+	// defaultMaxTokens must be large enough that a propose_edit tool_use
+	// input (which can carry a sizeable old_string/new_string pair) isn't
+	// routinely cut off by the max_tokens limit; a truncated tool_use input
+	// fails the turn (see streamContent).
+	defaultMaxTokens = 1_024 * 32
 )
 
 // Anthropic available models and their descriptions from Anthropic Documentation:
@@ -138,17 +146,47 @@ func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, er
 	return nil, fmt.Errorf("unsupported model name: %s", modelName)
 }
 
-func buildRequestBody(ctx context.Context, model anthropic.Model, systemInstruction []*assistant.TextContent, msgs []assistant.Message) (*anthropic.MessageNewParams, error) {
+func buildRequestBody(
+	ctx context.Context,
+	model anthropic.Model,
+	systemInstruction []*assistant.TextContent,
+	tools []assistant.ToolDefinition,
+	msgs []assistant.Message,
+) (*anthropic.MessageNewParams, error) {
 	messages, err := messageParams(ctx, msgs...)
 	if err != nil {
 		return nil, fmt.Errorf("build message params: %w", err)
 	}
-	return &anthropic.MessageNewParams{
+	params := &anthropic.MessageNewParams{
 		MaxTokens: anthropic.F(int64(defaultMaxTokens)),
 		Model:     anthropic.F(model),
 		Messages:  anthropic.F(messages),
 		System:    anthropic.F(systemMessageParam(systemInstruction)),
-	}, nil
+	}
+	if len(tools) > 0 {
+		params.Tools = anthropic.F(toolParams(tools))
+		// auto is the only tool_choice this codebase sends: forced tool use
+		// ({type: "any"} / {type: "tool", name: ...}) returns 400 on
+		// Claude Fable 5.1 and other current-generation models. Whether a
+		// tool should be called is instead stated in the tool's own
+		// Description.
+		params.ToolChoice = anthropic.F[anthropic.ToolChoiceUnionParam](anthropic.ToolChoiceAutoParam{
+			Type: anthropic.F(anthropic.ToolChoiceAutoTypeAuto),
+		})
+	}
+	return params, nil
+}
+
+func toolParams(defs []assistant.ToolDefinition) []anthropic.ToolUnionUnionParam {
+	out := make([]anthropic.ToolUnionUnionParam, 0, len(defs))
+	for _, d := range defs {
+		out = append(out, anthropic.ToolParam{
+			Name:        anthropic.F(d.Name),
+			Description: anthropic.F(d.Description),
+			InputSchema: anthropic.F[interface{}](d.InputSchema),
+		})
+	}
+	return out
 }
 
 func messageParamFrom(ctx context.Context, src assistant.Message) (*anthropic.MessageParam, error) {
@@ -181,6 +219,30 @@ func convertContentBlockParamUnion(src assistant.MessageContent) (anthropic.Cont
 		return anthropic.NewTextBlock(m.Text), nil
 	case *assistant.AttachmentContent:
 		return anthropic.NewTextBlock(m.ToText()), nil
+	case *assistant.ToolUseContent:
+		// Decode into a map rather than passing the json.RawMessage bytes
+		// through directly: the SDK's interface{} field would otherwise
+		// marshal a []byte as a base64 string instead of a JSON object.
+		var input map[string]any
+		if len(m.Input) > 0 {
+			if err := json.Unmarshal(m.Input, &input); err != nil {
+				return nil, fmt.Errorf("tool_use input: %w", err)
+			}
+		}
+		return anthropic.NewToolUseBlockParam(m.ID, m.Name, input), nil
+	case *assistant.ToolResultContent:
+		return anthropic.NewToolResultBlock(m.ToolUseID, m.Content, m.IsError), nil
+	case *assistant.ThinkingContent:
+		return anthropic.ThinkingBlockParam{
+			Type:      anthropic.F(anthropic.ThinkingBlockParamTypeThinking),
+			Thinking:  anthropic.F(m.Thinking),
+			Signature: anthropic.F(m.Signature),
+		}, nil
+	case *assistant.RedactedThinkingContent:
+		return anthropic.RedactedThinkingBlockParam{
+			Type: anthropic.F(anthropic.RedactedThinkingBlockParamTypeRedactedThinking),
+			Data: anthropic.F(m.Data),
+		}, nil
 	default:
 		return nil, fmt.Errorf("unsupported content type: %T", src)
 	}
@@ -208,6 +270,162 @@ func toUsage(src anthropic.Usage) *assistant.Usage {
 		OutputTokens:      int(src.OutputTokens),
 		CachedInputTokens: int(src.CacheReadInputTokens),
 		CacheWriteTokens:  int(src.CacheCreationInputTokens),
+	}
+}
+
+// generateContentStream is the shared GenerateContentStream implementation
+// for every Anthropic model. Each model file calls it with its own name,
+// system instruction, tools and request options.
+func generateContentStream(
+	ctx context.Context,
+	client *anthropic.Client,
+	modelName string,
+	systemInstruction []*assistant.TextContent,
+	tools []assistant.ToolDefinition,
+	opts []option.RequestOption,
+	msgs []assistant.Message,
+) (iter.Seq2[*assistant.GenerateContentResponse, error], error) {
+	logger := logging.LoggerFrom(ctx).With("provider", "anthropic", "model", modelName)
+
+	body, err := buildRequestBody(
+		logging.ContextWith(ctx, logger),
+		anthropic.Model(modelName),
+		systemInstruction, tools, msgs)
+	if err != nil {
+		return nil, fmt.Errorf("anthropic request body: %w", err)
+	}
+	stream := client.Messages.NewStreaming(ctx, *body, opts...)
+	return streamContent(logging.ContextWith(ctx, logger), stream), nil
+}
+
+// generateContent is the shared, non-streaming GenerateContent
+// implementation. It is not exercised by the CLI today (the --no-stream
+// flag is unwired), so it only covers the minimal, previously-existing
+// text-only behavior: tool_use content in a non-streaming response is
+// warned about and dropped rather than surfaced to the caller.
+func generateContent(
+	ctx context.Context,
+	client *anthropic.Client,
+	modelName string,
+	systemInstruction []*assistant.TextContent,
+	tools []assistant.ToolDefinition,
+	opts []option.RequestOption,
+	msgs []assistant.Message,
+) (*assistant.GenerateContentResponse, error) {
+	logger := logging.LoggerFrom(ctx).With("provider", "anthropic", "model", modelName)
+
+	body, err := buildRequestBody(
+		logging.ContextWith(ctx, logger),
+		anthropic.Model(modelName),
+		systemInstruction, tools, msgs)
+	if err != nil {
+		return nil, fmt.Errorf("anthropic request body: %w", err)
+	}
+	res, err := client.Messages.New(ctx, *body, opts...)
+	if err != nil {
+		return nil, fmt.Errorf("anthropic New Message: %w", err)
+	}
+
+	logger = logger.With("request-id", res.ID)
+	if res.StopReason != anthropic.MessageStopReasonEndTurn && res.StopReason != anthropic.MessageStopReasonToolUse {
+		logger.Warn(fmt.Sprintf("anthropic response stop with reason: %s", res.StopReason))
+	}
+	if len(res.Content) == 0 {
+		return nil, fmt.Errorf("anthropic response has no content")
+	}
+
+	var text string
+	for _, c := range res.Content {
+		switch c.Type {
+		case anthropic.ContentBlockTypeText:
+			text += c.Text
+		case anthropic.ContentBlockTypeToolUse:
+			logger.Warn("ignoring tool_use content in non-streaming response", "tool", c.Name)
+		}
+	}
+	return &assistant.GenerateContentResponse{
+		Content: assistant.NewTextContent(text),
+		Usage:   toUsage(res.Usage),
+	}, nil
+}
+
+// streamContent converts an Anthropic SSE stream into
+// assistant.GenerateContentResponse items: text deltas as they arrive, one
+// ToolUseContent/ThinkingContent/RedactedThinkingContent item per completed
+// content block, and a terminal Usage item.
+//
+// The stream fails (yields an error and stops) if a tool_use block's input
+// is not complete, valid JSON when the block finishes (assistant.
+// ErrTruncatedToolUse — this can happen when the turn is cut off), or if the
+// turn ends with stop_reason "max_tokens" (assistant.ErrMaxTokens) or
+// "refusal" (assistant.ErrRefusal). In all three cases the caller must not
+// treat the turn as a complete response.
+func streamContent(
+	ctx context.Context,
+	stream *ssestream.Stream[anthropic.MessageStreamEvent],
+) iter.Seq2[*assistant.GenerateContentResponse, error] {
+	logger := logging.LoggerFrom(ctx)
+
+	return func(yield func(*assistant.GenerateContentResponse, error) bool) {
+		message := anthropic.Message{}
+		for stream.Next() {
+			event := stream.Current()
+			if err := message.Accumulate(event); err != nil {
+				yield(nil, fmt.Errorf("anthropic accumulate: %w", err))
+				return
+			}
+
+			switch event.Type {
+			case anthropic.MessageStreamEventTypeContentBlockDelta:
+				if delta, ok := event.Delta.(anthropic.ContentBlockDeltaEventDelta); ok && delta.Text != "" {
+					resp := &assistant.GenerateContentResponse{Content: assistant.NewTextContent(delta.Text)}
+					if !yield(resp, nil) {
+						return
+					}
+				}
+
+			case anthropic.MessageStreamEventTypeContentBlockStop:
+				idx := int(event.Index)
+				if idx < 0 || idx >= len(message.Content) {
+					continue
+				}
+				cb := message.Content[idx]
+
+				var out assistant.MessageContent
+				switch cb.Type {
+				case anthropic.ContentBlockTypeToolUse:
+					if !json.Valid(cb.Input) {
+						yield(nil, fmt.Errorf("%w (tool %q)", assistant.ErrTruncatedToolUse, cb.Name))
+						return
+					}
+					out = &assistant.ToolUseContent{ID: cb.ID, Name: cb.Name, Input: cb.Input}
+				case anthropic.ContentBlockTypeThinking:
+					out = &assistant.ThinkingContent{Thinking: cb.Thinking, Signature: cb.Signature}
+				case anthropic.ContentBlockTypeRedactedThinking:
+					out = &assistant.RedactedThinkingContent{Data: cb.Data}
+				}
+				if out != nil {
+					if !yield(&assistant.GenerateContentResponse{Content: out}, nil) {
+						return
+					}
+				}
+			}
+		}
+
+		if err := stream.Err(); err != nil {
+			logger.Error(fmt.Sprintf("stream error: %v", err))
+			yield(nil, fmt.Errorf("anthropic stream error: %w", err))
+			return
+		}
+		switch string(message.StopReason) {
+		case "max_tokens":
+			yield(nil, assistant.ErrMaxTokens)
+			return
+		case "refusal":
+			yield(nil, assistant.ErrRefusal)
+			return
+		}
+		yield(&assistant.GenerateContentResponse{Usage: toUsage(message.Usage)}, nil)
 	}
 }
 

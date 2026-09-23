@@ -162,6 +162,7 @@ GLOBAL OPTIONS:
    --system string                                              system prompt
    --source string, -s string                                   the ONE primary subject to act on (see --context)
    --context string, -c string [ --context string, -c string ]  read-only reference material for the prompt; repeatable
+   --tool string [ --tool string ]                               enable a client-side tool by name (available: propose_edit); repeatable
    --anthropic-api-key string                                   Anthropic API Key [$AICO_ANTHROPIC_API_KEY]
    --openai-api-key string                                      OpenAI API Key [$AICO_OPENAI_API_KEY]
    --groq-api-key string                                        Groq API Key [$AICO_GROQ_API_KEY]
@@ -257,6 +258,18 @@ Manage stored sessions with the `session` command:
 ```bash
 $ aico session list
 ```
+
+### Client-side tools (`--tool propose_edit`)
+
+`--tool propose_edit` lets the model return concrete edits to the `--source` text as structured proposals instead of prose or diff code blocks:
+
+```bash
+$ echo 'x = 1' | aico --tool propose_edit "rename x to y"
+```
+
+A proposal is never applied automatically — it is only shown to you (or to the calling editor integration; see [vim-aico](https://github.com/micheam/vim-aico), which applies a chosen proposal on explicit confirmation). Enabling a tool is recorded on the session (`session show` includes a `tools` field) so it's sent again on every later turn that resumes the same session — the API requires the same tool definitions whenever a session's history contains a tool call. Because of this, treat `--tool` as something you set at the start of a session; adding it to an existing session mid-conversation is unsupported.
+
+`session show` renders a proposal as `[propose_edit] <description>` followed by `-`/`+` lines for the replaced and replacement text; `session show --json` includes the underlying `tool_use`/`tool_result` content blocks.
 
 ### Available Models
 

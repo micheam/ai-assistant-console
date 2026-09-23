@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
+	"strings"
 	"text/tabwriter"
 	"time"
 
@@ -58,6 +60,7 @@ var CmdSession = &cli.Command{
 				flagNoStream,
 				flagDebug,
 				flagPersona,
+				flagTool,
 			},
 		},
 	},
@@ -176,10 +179,37 @@ func runSessionShow(ctx context.Context, cmd *cli.Command) error {
 				fmt.Fprintln(w, c.Text)
 			case *assistant.URLImageContent:
 				fmt.Fprintf(w, "[image] %s\n", c.URL.String())
+			case *assistant.ToolUseContent:
+				printToolUse(w, c)
+			case *assistant.ToolResultContent:
+				fmt.Fprintf(w, "[tool_result] %s\n", c.Content)
 			}
 		}
 	}
 	return nil
+}
+
+// printToolUse renders a tool_use content block for the plain-text `session
+// show` output. propose_edit is rendered the same way as
+// ConsoleLineStreamWriter.EmitToolUse; any other tool name falls back to
+// its raw input.
+func printToolUse(w io.Writer, c *assistant.ToolUseContent) {
+	if c.Name != toolNameProposeEdit {
+		fmt.Fprintf(w, "[tool_use %s] %s\n", c.Name, string(c.Input))
+		return
+	}
+	description, oldString, newString, ok := proposeEditFields(c.Input)
+	if !ok {
+		fmt.Fprintf(w, "[propose_edit] %s\n", string(c.Input))
+		return
+	}
+	fmt.Fprintf(w, "[propose_edit] %s\n", description)
+	for _, l := range strings.Split(oldString, "\n") {
+		fmt.Fprintf(w, "-%s\n", l)
+	}
+	for _, l := range strings.Split(newString, "\n") {
+		fmt.Fprintf(w, "+%s\n", l)
+	}
 }
 
 func runSessionResume(ctx context.Context, cmd *cli.Command) error {

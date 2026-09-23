@@ -30,6 +30,15 @@ type Session struct {
 	// back to, the buffer or file a session is about.
 	Source *SourceInfo `json:"source,omitempty"`
 
+	// Tools lists the client-side tool names enabled for this session (see
+	// the --tool flag). It is persisted so every later request that
+	// continues this session's history sends the exact same tool
+	// definitions the earlier turns were generated with; the Anthropic API
+	// requires the tools array whenever the history contains tool_use /
+	// tool_result content, and preserved-thinking accounts additionally
+	// require it to stay byte-identical across the conversation.
+	Tools []string `json:"tools,omitempty"`
+
 	Messages []Message `json:"messages"`
 
 	filePath string `json:"-"`
@@ -195,6 +204,7 @@ func (s *Session) UnmarshalJSON(data []byte) error {
 		Model             string            `json:"model,omitempty"`
 		SystemInstruction []json.RawMessage `json:"system_instruction"`
 		Source            *SourceInfo       `json:"source,omitempty"`
+		Tools             []string          `json:"tools,omitempty"`
 		Messages          []json.RawMessage `json:"messages"`
 	}
 
@@ -205,6 +215,7 @@ func (s *Session) UnmarshalJSON(data []byte) error {
 	s.ID = temp.ID
 	s.Model = temp.Model
 	s.Source = temp.Source
+	s.Tools = temp.Tools
 
 	// Unmarshal system instructions
 	s.SystemInstruction = make([]*TextContent, 0, len(temp.SystemInstruction))
