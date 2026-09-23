@@ -42,6 +42,22 @@ const (
 //     * Pricing: $10/MTok input, $50/MTok output
 //     * Supports 1M context window and 128K max output
 //
+// Claude Opus 5.5:
+//
+//     * The latest Opus model for long-running agentic coding and knowledge work
+//     * Successor to Claude Opus 5
+//     * Supports adaptive thinking (always on) and effort control
+//     * Pricing: $4/MTok input, $20/MTok output
+//     * Supports 1M context window and 128K max output
+//
+// Claude Opus 5:
+//
+//     * The Opus model for long-running agentic coding and knowledge work
+//     * Successor to Claude Opus 4.8
+//     * Supports adaptive thinking (on by default) and effort control
+//     * Pricing: $5/MTok input, $25/MTok output
+//     * Supports 1M context window and 128K max output
+//
 // Claude Opus 4.8:
 //
 //     * The latest Opus model for building agents and coding
@@ -87,6 +103,8 @@ func AvailableModels() []assistant.ModelDescriptor {
 	return []assistant.ModelDescriptor{
 		&ClaudeFable5_1{},
 		&ClaudeFable5{},
+		&ClaudeOpus5_5{},
+		&ClaudeOpus5{},
 		&ClaudeOpus4_8{},
 		&ClaudeOpus4_6{},
 		&ClaudeSonnet5{},
@@ -111,6 +129,10 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 		return &ClaudeFable5_1{}, true
 	case "claude-fable-5":
 		return &ClaudeFable5{}, true
+	case "claude-opus-5-5":
+		return &ClaudeOpus5_5{}, true
+	case "claude-opus-5":
+		return &ClaudeOpus5{}, true
 	case "claude-opus-4-8":
 		return &ClaudeOpus4_8{}, true
 	case "claude-opus-4-6":
@@ -132,6 +154,10 @@ func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, er
 		return NewClaudeFable5_1(client), nil
 	case "claude-fable-5":
 		return NewClaudeFable5(client), nil
+	case "claude-opus-5-5":
+		return NewClaudeOpus5_5(client), nil
+	case "claude-opus-5":
+		return NewClaudeOpus5(client), nil
 	case "claude-opus-4-8":
 		return NewClaudeOpus4_8(client), nil
 	case "claude-opus-4-6":
