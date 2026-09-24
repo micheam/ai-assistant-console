@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
+	"strings"
 
 	"github.com/urfave/cli/v3"
 
@@ -36,10 +38,14 @@ var CmdModels = &cli.Command{
 			Usage:     "show model information",
 			ArgsUsage: "MODEL",
 			ShellComplete: func(ctx context.Context, cmd *cli.Command) {
-				// Output both simple and qualified names as completion candidates
+				// Output both simple and qualified names, including aliases, as completion candidates
 				for _, model := range allAvailableModels() {
 					fmt.Fprintln(cmd.Root().Writer, model.Name())
 					fmt.Fprintln(cmd.Root().Writer, QualifiedName(model.Provider(), model.Name()))
+					for _, alias := range aliasesOf(model.Provider(), model.Name()) {
+						fmt.Fprintln(cmd.Root().Writer, alias)
+						fmt.Fprintln(cmd.Root().Writer, QualifiedName(model.Provider(), alias))
+					}
 				}
 			},
 			Action: runDescribeModel,
@@ -71,6 +77,7 @@ func runListModels(ctx context.Context, cmd *cli.Command) error {
 			Name:          model.Name(),
 			QualifiedName: qualifiedName,
 			Provider:      model.Provider(),
+			Aliases:       aliasesOf(model.Provider(), model.Name()),
 			Description:   model.Description(),
 			Selected:      isSelected,
 		})
@@ -96,18 +103,40 @@ func allAvailableModels() []assistant.ModelDescriptor {
 }
 
 type listItemView struct {
-	Name          string `json:"name"`
-	QualifiedName string `json:"qualified_name"`
-	Provider      string `json:"provider"`
-	Description   string `json:"description"`
-	Selected      bool   `json:"selected"`
+	Name          string   `json:"name"`
+	QualifiedName string   `json:"qualified_name"`
+	Provider      string   `json:"provider"`
+	Aliases       []string `json:"aliases"`
+	Description   string   `json:"description"`
+	Selected      bool     `json:"selected"`
 }
 
 func (m *listItemView) String() string {
-	if m.Selected {
-		return fmt.Sprintf("%s *", m.QualifiedName)
+	s := m.QualifiedName
+	if len(m.Aliases) > 0 {
+		s += " (" + strings.Join(m.Aliases, ", ") + ")"
 	}
-	return m.QualifiedName
+	if m.Selected {
+		s += " *"
+	}
+	return s
+}
+
+// aliasesOf returns the aliases of the given provider that resolve to
+// modelName, sorted.
+func aliasesOf(provider, modelName string) []string {
+	p, ok := providerByName(provider)
+	if !ok {
+		return []string{}
+	}
+	aliases := []string{}
+	for alias, target := range p.aliases() {
+		if target == modelName {
+			aliases = append(aliases, alias)
+		}
+	}
+	slices.Sort(aliases)
+	return aliases
 }
 
 func runDescribeModel(ctx context.Context, cmd *cli.Command) error {

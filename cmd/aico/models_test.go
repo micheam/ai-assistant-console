@@ -187,3 +187,27 @@ func TestDetectProviderByModelSpec(t *testing.T) {
 		})
 	}
 }
+
+func TestListItemView_String(t *testing.T) {
+	tests := []struct {
+		name string
+		view listItemView
+		want string
+	}{
+		{"plain", listItemView{QualifiedName: "groq:llama"}, "groq:llama"},
+		{"aliases", listItemView{QualifiedName: "openai:gpt-6-sol", Aliases: []string{"sol"}}, "openai:gpt-6-sol (sol)"},
+		{"selected with aliases", listItemView{QualifiedName: "anthropic:claude-fable-5-1", Aliases: []string{"fable"}, Selected: true}, "anthropic:claude-fable-5-1 (fable) *"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, tt.view.String())
+		})
+	}
+}
+
+func TestAliasesOf(t *testing.T) {
+	assert.Equal(t, []string{"fable"}, aliasesOf("anthropic", "claude-fable-5-1"))
+	assert.Equal(t, []string{}, aliasesOf("anthropic", "claude-fable-5"))
+	assert.Equal(t, []string{}, aliasesOf("groq", "llama-3.3-70b-versatile"))
+	assert.Equal(t, []string{}, aliasesOf("unknown", "x"))
+}
