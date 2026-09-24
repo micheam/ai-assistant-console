@@ -119,6 +119,8 @@ Update **all three** registration points:
 
 Place the new model at the top of each list/switch (latest model first).
 
+If the new model is the latest of its family, also update the provider's `aliases` map (e.g. `"fable"` → the new model ID) so the family alias resolves to it.
+
 > **Note:** `cmd/aico/models.go` does NOT need changes. It aggregates models from all providers automatically via each provider's `AvailableModels()` function.
 
 ### 4. Update the doc comment
@@ -131,7 +133,8 @@ If the user requests deprecating an older model:
 
 1. Prefix its `Description()` return with `[Deprecated] <Model Name> - superseded by <New Model>.`
 2. Move its entry in the doc comment to the bottom with `(Deprecated)` suffix
-3. Keep all code functional — do NOT remove the model
+3. If an alias in the provider's `aliases` map still points at it, move the alias to the successor (the alias test fails for a deprecated target)
+4. Keep all code functional — do NOT remove the model
 
 ### 6. Build and test
 

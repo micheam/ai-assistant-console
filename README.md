@@ -279,6 +279,25 @@ To see all available models, use the `models` command:
 $ aico models
 ```
 
+#### Model aliases
+
+Instead of a versioned model name you can use a short family alias, which resolves to the latest supported model of that family at run time. `aico models` lists each alias next to the model it currently resolves to.
+
+```toml
+model = "anthropic:fable"
+```
+
+```bash
+$ aico models
+anthropic:claude-fable-5-1 (fable)
+openai:gpt-6-luna (luna)
+...
+```
+
+- Aliases work anywhere a model name is accepted (`--model`, `model` in `config.toml`), with or without the provider prefix (`fable`, `anthropic:fable`).
+- Sessions store the resolved model name, so an existing session keeps its model even after an alias moves on.
+- `[models."..."]` settings are looked up by the resolved model name, not by alias.
+
 #### Per-model settings
 
 You can tune `effort` and `max_tokens` per model in `config.toml`. Only models listed there get any settings; everything else runs on the provider's defaults.

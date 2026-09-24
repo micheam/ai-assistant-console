@@ -25,6 +25,9 @@ default_provider = ""
 # Supports two formats:
 #   - Simple name: "claude-haiku-4-5" (uses default_provider if ambiguous)
 #   - Qualified name: "anthropic:claude-haiku-4-5" (explicit provider)
+# A short family alias ("fable", "opus", "sonnet", "haiku", "sol", "luna", ...)
+# is also accepted and resolves to the latest supported model of that family.
+# Run `aico models` to see the aliases.
 # Default: "claude-haiku-4-5"
 model = "claude-haiku-4-5"
 
