@@ -211,23 +211,11 @@ func modelByName(cmd *cli.Command, name string) (assistant.GenerativeModel, erro
 	if !found {
 		return DefaultModel(cmd)
 	}
-	var model assistant.GenerativeModel
-	switch provider {
-	case anthropic.ProviderName:
-		apikey := cmd.String(flagAPIKeyAnthropic.Name)
-		model, err = anthropic.NewGenerativeModel(modelName, apikey)
-	case openai.ProviderName:
-		apikey := cmd.String(flagAPIKeyOpenAI.Name)
-		model, err = openai.NewGenerativeModel(modelName, apikey)
-	case groq.ProviderName:
-		apikey := cmd.String(flagAPIKeyGroq.Name)
-		model, err = groq.NewGenerativeModel(modelName, apikey)
-	case cerebras.ProviderName:
-		apikey := cmd.String(flagAPIKeyCerebras.Name)
-		model, err = cerebras.NewGenerativeModel(modelName, apikey)
-	default:
+	entry, ok := providerByName(provider)
+	if !ok {
 		return DefaultModel(cmd)
 	}
+	model, err := entry.newModel(modelName, cmd.String(entry.apiKeyFlag))
 	if err != nil {
 		return nil, err
 	}
@@ -262,7 +250,7 @@ func applyModelSettings(conf *config.Config, model assistant.GenerativeModel) er
 }
 
 // ModelSpec represents a parsed model specification.
-// It supports both simple names ("gpt-4o") and qualified names ("openai:gpt-4o").
+// It supports both simple names ("gpt-4.1") and qualified names ("openai:gpt-4.1").
 type ModelSpec struct {
 	Provider  string // Provider name (empty if not specified)
 	ModelName string // Model name
@@ -304,8 +292,8 @@ func detectProviderByModelSpec(spec string, defaultProvider string) (provider st
 
 	// Case 1: Explicit provider in spec (e.g., "groq:llama-3.3-70b")
 	if parsed.Provider != "" {
-		if validateProviderModel(parsed.Provider, parsed.ModelName) {
-			return parsed.Provider, parsed.ModelName, true
+		if canonical, ok := lookupProviderModel(parsed.Provider, parsed.ModelName); ok {
+			return parsed.Provider, canonical, true
 		}
 		return "", "", false
 	}
@@ -314,43 +302,55 @@ func detectProviderByModelSpec(spec string, defaultProvider string) (provider st
 
 	// Case 2: Check default provider first if set
 	if defaultProvider != "" {
-		if validateProviderModel(defaultProvider, modelName) {
-			return defaultProvider, modelName, true
+		if canonical, ok := lookupProviderModel(defaultProvider, modelName); ok {
+			return defaultProvider, canonical, true
 		}
 	}
 
 	// Case 3: Search all providers in order
-	providers := []string{
-		anthropic.ProviderName,
-		openai.ProviderName,
-		groq.ProviderName,
-		cerebras.ProviderName,
-	}
 	for _, p := range providers {
-		if validateProviderModel(p, modelName) {
-			return p, modelName, true
+		if canonical, ok := lookupProviderModel(p.name, modelName); ok {
+			return p.name, canonical, true
 		}
 	}
 
 	return "", "", false
 }
 
-// validateProviderModel checks if a provider supports the given model name.
-func validateProviderModel(provider, modelName string) bool {
-	switch provider {
-	case anthropic.ProviderName:
-		_, found := anthropic.DescribeModel(modelName)
-		return found
-	case openai.ProviderName:
-		_, found := openai.DescribeModel(modelName)
-		return found
-	case groq.ProviderName:
-		_, found := groq.DescribeModel(modelName)
-		return found
-	case cerebras.ProviderName:
-		_, found := cerebras.DescribeModel(modelName)
-		return found
-	default:
-		return false
+// providerEntry describes how to look up and construct models of one provider.
+type providerEntry struct {
+	name       string
+	apiKeyFlag string
+	describe   func(modelName string) (desc string, found bool)
+	newModel   func(modelName, apiKey string) (assistant.GenerativeModel, error)
+}
+
+// providers lists the supported providers in search order.
+var providers = []providerEntry{
+	{anthropic.ProviderName, flagAPIKeyAnthropic.Name, anthropic.DescribeModel, anthropic.NewGenerativeModel},
+	{openai.ProviderName, flagAPIKeyOpenAI.Name, openai.DescribeModel, openai.NewGenerativeModel},
+	{groq.ProviderName, flagAPIKeyGroq.Name, groq.DescribeModel, groq.NewGenerativeModel},
+	{cerebras.ProviderName, flagAPIKeyCerebras.Name, cerebras.DescribeModel, cerebras.NewGenerativeModel},
+}
+
+func providerByName(name string) (providerEntry, bool) {
+	for _, p := range providers {
+		if p.name == name {
+			return p, true
+		}
 	}
+	return providerEntry{}, false
+}
+
+// lookupProviderModel checks if a provider supports the given model name,
+// and returns the canonical model name.
+func lookupProviderModel(provider, modelName string) (canonical string, found bool) {
+	p, ok := providerByName(provider)
+	if !ok {
+		return "", false
+	}
+	if _, found := p.describe(modelName); !found {
+		return "", false
+	}
+	return modelName, true
 }
