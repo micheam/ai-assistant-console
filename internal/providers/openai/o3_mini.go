@@ -37,7 +37,8 @@ func (m *O3Mini) Name() string {
 }
 
 func (m *O3Mini) Description() string {
-	return `The o3 series of models are trained with reinforcement learning for complex reasoning tasks.
+	return `[Deprecated] o3-mini - superseded by GPT-6 Sol.
+The o3 series of models are trained with reinforcement learning for complex reasoning tasks.
 These models generate a long internal chain of thought before responding.
 o3-mini is the most recent small reasoning model, providing high intelligence at the same cost and latency as o1-mini.
 It supports key developer features, including structured outputs, function calling, and the Batch API.

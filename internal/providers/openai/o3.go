@@ -37,7 +37,8 @@ func (m *O3) Name() string {
 }
 
 func (m *O3) Description() string {
-	return `o3 is a powerful reasoning model that sets a new standard for math, science, coding, and visual reasoning tasks.
+	return `[Deprecated] o3 - superseded by GPT-6 Sol.
+o3 is a powerful reasoning model that sets a new standard for math, science, coding, and visual reasoning tasks.
 It features a 200K context window and 100K max output tokens, with a knowledge cutoff of June 2024.
 It supports text and image inputs, structured outputs, and function calling.
 Pricing: $0.40 / $1.60 per MTok (input / output).

@@ -37,7 +37,8 @@ func (m *O4Mini) Name() string {
 }
 
 func (m *O4Mini) Description() string {
-	return `o4-mini is optimized for fast, effective reasoning with efficient performance in coding and visual tasks.
+	return `[Deprecated] o4-mini - superseded by GPT-5.6 Terra.
+o4-mini is optimized for fast, effective reasoning with efficient performance in coding and visual tasks.
 It features a 200K context window and 100K max output tokens, with a knowledge cutoff of May 2024.
 It is faster and more affordable than o3, supporting text and image inputs.
 Pricing: $1.10 / $4.40 per MTok (input / output).
