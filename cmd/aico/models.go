@@ -115,35 +115,33 @@ func runDescribeModel(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("model name is required")
 	}
 	modelSpec := cmd.Args().Get(0)
-	parsed := ParseModelSpec(modelSpec)
+	provider, modelName, found := detectProviderByModelSpec(modelSpec, "")
+	if !found {
+		return fmt.Errorf("model not found: %s", modelSpec)
+	}
 
 	for _, model := range allAvailableModels() {
-		// Match by qualified name or simple name
-		matchesQualified := parsed.Provider != "" &&
-			model.Provider() == parsed.Provider &&
-			model.Name() == parsed.ModelName
-		matchesSimple := parsed.Provider == "" && model.Name() == parsed.ModelName
-
-		if matchesQualified || matchesSimple {
-			qualifiedName := QualifiedName(model.Provider(), model.Name())
-			if cmd.Bool(flagJSON.Name) {
-				info := map[string]string{
-					"name":           model.Name(),
-					"qualified_name": qualifiedName,
-					"provider":       model.Provider(),
-					"description":    model.Description(),
-				}
-				encoder := json.NewEncoder(cmd.Root().Writer)
-				encoder.SetIndent("", "  ")
-				return encoder.Encode(info)
-			}
-
-			fmt.Fprintf(cmd.Root().Writer, "%s %s\n", theme.Bold("Model:"), model.Name())
-			fmt.Fprintf(cmd.Root().Writer, "%s %s\n", theme.Bold("Qualified Name:"), qualifiedName)
-			fmt.Fprintf(cmd.Root().Writer, "%s %s\n", theme.Bold("Provider:"), model.Provider())
-			fmt.Fprintf(cmd.Root().Writer, "%s %s\n", theme.Bold("Description:"), model.Description())
-			return nil
+		if model.Provider() != provider || model.Name() != modelName {
+			continue
 		}
+		qualifiedName := QualifiedName(model.Provider(), model.Name())
+		if cmd.Bool(flagJSON.Name) {
+			info := map[string]string{
+				"name":           model.Name(),
+				"qualified_name": qualifiedName,
+				"provider":       model.Provider(),
+				"description":    model.Description(),
+			}
+			encoder := json.NewEncoder(cmd.Root().Writer)
+			encoder.SetIndent("", "  ")
+			return encoder.Encode(info)
+		}
+
+		fmt.Fprintf(cmd.Root().Writer, "%s %s\n", theme.Bold("Model:"), model.Name())
+		fmt.Fprintf(cmd.Root().Writer, "%s %s\n", theme.Bold("Qualified Name:"), qualifiedName)
+		fmt.Fprintf(cmd.Root().Writer, "%s %s\n", theme.Bold("Provider:"), model.Provider())
+		fmt.Fprintf(cmd.Root().Writer, "%s %s\n", theme.Bold("Description:"), model.Description())
+		return nil
 	}
 	return fmt.Errorf("model not found: %s", modelSpec)
 }
@@ -151,12 +149,6 @@ func runDescribeModel(ctx context.Context, cmd *cli.Command) error {
 // -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
-
-type model struct {
-	Name        string
-	provider    string
-	Description string
-}
 
 // DefaultModel returns the default model descriptor.
 //
@@ -183,8 +175,8 @@ func DefaultModel(cmd *cli.Command) (assistant.GenerativeModel, error) {
 //  3. If no model is specified in any place, return a default model.
 //
 // Model specification formats:
-//   - Simple: "gpt-4o" (provider auto-detected, default_provider preferred if ambiguous)
-//   - Qualified: "openai:gpt-4o" (explicit provider)
+//   - Simple: "gpt-4.1" (provider auto-detected, default_provider preferred if ambiguous)
+//   - Qualified: "openai:gpt-4.1" (explicit provider)
 func detectModel(cmd *cli.Command) (assistant.GenerativeModel, error) {
 	conf, err := config.Load()
 	if errors.Is(err, config.ErrConfigFileNotFound) {
@@ -361,11 +353,4 @@ func validateProviderModel(provider, modelName string) bool {
 	default:
 		return false
 	}
-}
-
-// detectProvierByModelName is kept for backward compatibility.
-// Deprecated: Use detectProviderByModelSpec instead.
-func detectProvierByModelName(modelName string) (string, bool) {
-	provider, _, found := detectProviderByModelSpec(modelName, "")
-	return provider, found
 }
