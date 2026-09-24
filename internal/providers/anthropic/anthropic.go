@@ -121,6 +121,18 @@ func DescribeModel(modelName string) (desc string, found bool) {
 	return m.Description(), true
 }
 
+// aliases maps a short family name to the latest supported model of that
+// family. Every target must be a non-deprecated entry of AvailableModels.
+var aliases = map[string]string{
+	"fable":  ModelNameClaudeFable5_1,
+	"opus":   ModelNameClaudeOpus5_5,
+	"sonnet": ModelNameClaudeSonnet5,
+	"haiku":  ModelNameClaudeHaiku4_5,
+}
+
+// Aliases returns the alias-to-model-name table.
+func Aliases() map[string]string { return aliases }
+
 func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 	switch modelName {
 	default:

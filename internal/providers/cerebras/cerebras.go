@@ -28,6 +28,9 @@ func DescribeModel(modelName string) (desc string, found bool) {
 	return m.Description(), true
 }
 
+// Aliases returns the alias-to-model-name table. This provider has none.
+func Aliases() map[string]string { return nil }
+
 func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 	switch modelName {
 	default:

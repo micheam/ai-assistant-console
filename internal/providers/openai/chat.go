@@ -39,6 +39,18 @@ func DescribeModel(modelName string) (desc string, found bool) {
 	return m.Description(), true
 }
 
+// aliases maps a short family name to the latest supported model of that
+// family. Every target must be a non-deprecated entry of AvailableModels.
+var aliases = map[string]string{
+	"astra": "gpt-6-astra",
+	"sol":   "gpt-6-sol",
+	"luna":  "gpt-6-luna",
+	"terra": "gpt-5.6-terra",
+}
+
+// Aliases returns the alias-to-model-name table.
+func Aliases() map[string]string { return aliases }
+
 func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 	switch modelName {
 	default:

@@ -3,6 +3,7 @@ package openai
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -34,4 +35,15 @@ func TestBuildChatRequest_GenerationOptions(t *testing.T) {
 		require.Contains(t, string(data), `"max_completion_tokens":4096`)
 		require.NotContains(t, string(data), `"max_tokens"`)
 	})
+}
+
+func TestAliases_PointToSupportedModels(t *testing.T) {
+	for alias, target := range Aliases() {
+		t.Run(alias, func(t *testing.T) {
+			m, ok := selectModel(target)
+			require.True(t, ok, "alias %q points to unknown model %q", alias, target)
+			require.False(t, strings.HasPrefix(m.Description(), "[Deprecated]"),
+				"alias %q points to deprecated model %q", alias, target)
+		})
+	}
 }

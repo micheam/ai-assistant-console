@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	anthropicsdk "github.com/anthropics/anthropic-sdk-go"
@@ -286,4 +287,15 @@ func TestStreamContent_Refusal_ReturnsErrRefusal(t *testing.T) {
 	}
 	require.Error(t, streamErr)
 	require.True(t, errors.Is(streamErr, assistant.ErrRefusal))
+}
+
+func TestAliases_PointToSupportedModels(t *testing.T) {
+	for alias, target := range Aliases() {
+		t.Run(alias, func(t *testing.T) {
+			m, ok := selectModel(target)
+			require.True(t, ok, "alias %q points to unknown model %q", alias, target)
+			require.False(t, strings.HasPrefix(m.Description(), "[Deprecated]"),
+				"alias %q points to deprecated model %q", alias, target)
+		})
+	}
 }
