@@ -64,11 +64,9 @@ func TestBuildRequestBody_MaxTokens(t *testing.T) {
 	})
 }
 
-// TestGenerateContentStream_Effort goes through a real HTTP round trip
-// because output_config.effort is injected into the serialized body at send
-// time (option.WithJSONSet), so it is invisible to
-// MessageNewParams.MarshalJSON. It uses the streaming path, which is the
-// one the CLI exercises.
+// TestGenerateContentStream_Effort goes through a real HTTP round trip to
+// check the body actually sent on the wire. It uses the streaming path,
+// which is the one the CLI exercises.
 func TestGenerateContentStream_Effort(t *testing.T) {
 	const reply = "event: message_start\n" +
 		`data: {"type":"message_start","message":{"id":"msg_01","type":"message","role":"assistant","model":"claude-opus-5-5","content":[],"stop_reason":null,"usage":{"input_tokens":1,"output_tokens":0}}}` + "\n\n" +
@@ -97,7 +95,7 @@ func TestGenerateContentStream_Effort(t *testing.T) {
 
 		client := anthropicsdk.NewClient(option.WithAPIKey("test"), option.WithBaseURL(srv.URL))
 		msgs := []assistant.Message{assistant.NewUserMessage(assistant.NewTextContent("hi"))}
-		it, err := generateContentStream(context.Background(), client, "claude-opus-5-5", nil, nil, genOpts, msgs)
+		it, err := generateContentStream(context.Background(), &client, "claude-opus-5-5", nil, nil, genOpts, msgs)
 		require.NoError(t, err)
 		for _, err := range it {
 			require.NoError(t, err)
@@ -187,8 +185,8 @@ func sseEvent(typ, data string) ssestream.Event {
 	return ssestream.Event{Type: typ, Data: []byte(data)}
 }
 
-func newTestStream(events []ssestream.Event) *ssestream.Stream[anthropicsdk.MessageStreamEvent] {
-	return ssestream.NewStream[anthropicsdk.MessageStreamEvent](&fakeDecoder{events: events}, nil)
+func newTestStream(events []ssestream.Event) *ssestream.Stream[anthropicsdk.MessageStreamEventUnion] {
+	return ssestream.NewStream[anthropicsdk.MessageStreamEventUnion](&fakeDecoder{events: events}, nil)
 }
 
 func TestStreamContent_TextThenToolUseThenUsage(t *testing.T) {

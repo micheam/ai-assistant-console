@@ -163,23 +163,23 @@ func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, er
 	client := anthropic.NewClient(option.WithAPIKey(apiKey))
 	switch modelName {
 	case "claude-fable-5-1":
-		return NewClaudeFable5_1(client), nil
+		return NewClaudeFable5_1(&client), nil
 	case "claude-fable-5":
-		return NewClaudeFable5(client), nil
+		return NewClaudeFable5(&client), nil
 	case "claude-opus-5-5":
-		return NewClaudeOpus5_5(client), nil
+		return NewClaudeOpus5_5(&client), nil
 	case "claude-opus-5":
-		return NewClaudeOpus5(client), nil
+		return NewClaudeOpus5(&client), nil
 	case "claude-opus-4-8":
-		return NewClaudeOpus4_8(client), nil
+		return NewClaudeOpus4_8(&client), nil
 	case "claude-opus-4-6":
-		return NewClaudeOpus4_6(client), nil
+		return NewClaudeOpus4_6(&client), nil
 	case "claude-sonnet-5":
-		return NewClaudeSonnet5(client), nil
+		return NewClaudeSonnet5(&client), nil
 	case "claude-sonnet-4-6":
-		return NewClaudeSonnet4_6(client), nil
+		return NewClaudeSonnet4_6(&client), nil
 	case "claude-haiku-4-5":
-		return NewClaudeHaiku4_5(client), nil
+		return NewClaudeHaiku4_5(&client), nil
 	}
 	return nil, fmt.Errorf("unsupported model name: %s", modelName)
 }
@@ -201,48 +201,70 @@ func buildRequestBody(
 		maxTokens = genOpts.MaxTokens
 	}
 	params := &anthropic.MessageNewParams{
-		MaxTokens: anthropic.F(int64(maxTokens)),
-		Model:     anthropic.F(model),
-		Messages:  anthropic.F(messages),
-		System:    anthropic.F(systemMessageParam(systemInstruction)),
+		MaxTokens: int64(maxTokens),
+		Model:     model,
+		Messages:  messages,
+		System:    systemMessageParam(systemInstruction),
+	}
+	if genOpts.Effort != "" {
+		params.OutputConfig = anthropic.OutputConfigParam{
+			Effort: anthropic.OutputConfigEffort(genOpts.Effort),
+		}
 	}
 	if len(tools) > 0 {
-		params.Tools = anthropic.F(toolParams(tools))
+		params.Tools = toolParams(tools)
 		// auto is the only tool_choice this codebase sends: forced tool use
 		// ({type: "any"} / {type: "tool", name: ...}) returns 400 on
 		// Claude Fable 5.1 and other current-generation models. Whether a
 		// tool should be called is instead stated in the tool's own
 		// Description.
-		params.ToolChoice = anthropic.F[anthropic.ToolChoiceUnionParam](anthropic.ToolChoiceAutoParam{
-			Type: anthropic.F(anthropic.ToolChoiceAutoTypeAuto),
-		})
+		params.ToolChoice = anthropic.ToolChoiceUnionParam{
+			OfAuto: &anthropic.ToolChoiceAutoParam{},
+		}
 	}
 	return params, nil
 }
 
-// requestOptions returns the per-request options that carry the parts of
-// GenerationOptions the SDK's MessageNewParams has no field for.
-//
-// output_config.effort is injected into the serialized body because this
-// SDK version predates the output_config parameter.
-func requestOptions(genOpts assistant.GenerationOptions) []option.RequestOption {
-	var opts []option.RequestOption
-	if genOpts.Effort != "" {
-		opts = append(opts, option.WithJSONSet("output_config.effort", genOpts.Effort))
-	}
-	return opts
-}
-
-func toolParams(defs []assistant.ToolDefinition) []anthropic.ToolUnionUnionParam {
-	out := make([]anthropic.ToolUnionUnionParam, 0, len(defs))
+func toolParams(defs []assistant.ToolDefinition) []anthropic.ToolUnionParam {
+	out := make([]anthropic.ToolUnionParam, 0, len(defs))
 	for _, d := range defs {
-		out = append(out, anthropic.ToolParam{
-			Name:        anthropic.F(d.Name),
-			Description: anthropic.F(d.Description),
-			InputSchema: anthropic.F[interface{}](d.InputSchema),
-		})
+		tool := anthropic.ToolUnionParamOfTool(inputSchemaParam(d.InputSchema), d.Name)
+		tool.OfTool.Description = anthropic.String(d.Description)
+		out = append(out, tool)
 	}
 	return out
+}
+
+// inputSchemaParam maps a raw JSON Schema object onto the SDK's typed
+// input_schema. "type" is always "object" for tool input, so it is left to
+// the SDK default; any keyword other than properties/required is carried
+// through as an extra field so it still reaches the API.
+func inputSchemaParam(schema map[string]any) anthropic.ToolInputSchemaParam {
+	var p anthropic.ToolInputSchemaParam
+	for k, v := range schema {
+		switch k {
+		case "type":
+		case "properties":
+			p.Properties = v
+		case "required":
+			switch req := v.(type) {
+			case []string:
+				p.Required = req
+			case []any:
+				for _, r := range req {
+					if s, ok := r.(string); ok {
+						p.Required = append(p.Required, s)
+					}
+				}
+			}
+		default:
+			if p.ExtraFields == nil {
+				p.ExtraFields = map[string]any{}
+			}
+			p.ExtraFields[k] = v
+		}
+	}
+	return p
 }
 
 func messageParamFrom(ctx context.Context, src assistant.Message) (*anthropic.MessageParam, error) {
@@ -282,25 +304,18 @@ func convertContentBlockParamUnion(src assistant.MessageContent) (anthropic.Cont
 		var input map[string]any
 		if len(m.Input) > 0 {
 			if err := json.Unmarshal(m.Input, &input); err != nil {
-				return nil, fmt.Errorf("tool_use input: %w", err)
+				return anthropic.ContentBlockParamUnion{}, fmt.Errorf("tool_use input: %w", err)
 			}
 		}
-		return anthropic.NewToolUseBlockParam(m.ID, m.Name, input), nil
+		return anthropic.NewToolUseBlock(m.ID, input, m.Name), nil
 	case *assistant.ToolResultContent:
 		return anthropic.NewToolResultBlock(m.ToolUseID, m.Content, m.IsError), nil
 	case *assistant.ThinkingContent:
-		return anthropic.ThinkingBlockParam{
-			Type:      anthropic.F(anthropic.ThinkingBlockParamTypeThinking),
-			Thinking:  anthropic.F(m.Thinking),
-			Signature: anthropic.F(m.Signature),
-		}, nil
+		return anthropic.NewThinkingBlock(m.Signature, m.Thinking), nil
 	case *assistant.RedactedThinkingContent:
-		return anthropic.RedactedThinkingBlockParam{
-			Type: anthropic.F(anthropic.RedactedThinkingBlockParamTypeRedactedThinking),
-			Data: anthropic.F(m.Data),
-		}, nil
+		return anthropic.NewRedactedThinkingBlock(m.Data), nil
 	default:
-		return nil, fmt.Errorf("unsupported content type: %T", src)
+		return anthropic.ContentBlockParamUnion{}, fmt.Errorf("unsupported content type: %T", src)
 	}
 }
 
@@ -350,7 +365,7 @@ func generateContentStream(
 	if err != nil {
 		return nil, fmt.Errorf("anthropic request body: %w", err)
 	}
-	stream := client.Messages.NewStreaming(ctx, *body, requestOptions(genOpts)...)
+	stream := client.Messages.NewStreaming(ctx, *body)
 	return streamContent(logging.ContextWith(ctx, logger), stream), nil
 }
 
@@ -377,13 +392,13 @@ func generateContent(
 	if err != nil {
 		return nil, fmt.Errorf("anthropic request body: %w", err)
 	}
-	res, err := client.Messages.New(ctx, *body, requestOptions(genOpts)...)
+	res, err := client.Messages.New(ctx, *body)
 	if err != nil {
 		return nil, fmt.Errorf("anthropic New Message: %w", err)
 	}
 
 	logger = logger.With("request-id", res.ID)
-	if res.StopReason != anthropic.MessageStopReasonEndTurn && res.StopReason != anthropic.MessageStopReasonToolUse {
+	if res.StopReason != anthropic.StopReasonEndTurn && res.StopReason != anthropic.StopReasonToolUse {
 		logger.Warn(fmt.Sprintf("anthropic response stop with reason: %s", res.StopReason))
 	}
 	if len(res.Content) == 0 {
@@ -393,9 +408,9 @@ func generateContent(
 	var text string
 	for _, c := range res.Content {
 		switch c.Type {
-		case anthropic.ContentBlockTypeText:
+		case "text":
 			text += c.Text
-		case anthropic.ContentBlockTypeToolUse:
+		case "tool_use":
 			logger.Warn("ignoring tool_use content in non-streaming response", "tool", c.Name)
 		}
 	}
@@ -418,7 +433,7 @@ func generateContent(
 // treat the turn as a complete response.
 func streamContent(
 	ctx context.Context,
-	stream *ssestream.Stream[anthropic.MessageStreamEvent],
+	stream *ssestream.Stream[anthropic.MessageStreamEventUnion],
 ) iter.Seq2[*assistant.GenerateContentResponse, error] {
 	logger := logging.LoggerFrom(ctx)
 
@@ -426,21 +441,32 @@ func streamContent(
 		message := anthropic.Message{}
 		for stream.Next() {
 			event := stream.Current()
+			// Check tool_use input before Accumulate: on content_block_stop
+			// the SDK silently replaces non-JSON (cut-off) input with {}.
+			if event.Type == "content_block_stop" {
+				idx := int(event.Index)
+				if idx >= 0 && idx < len(message.Content) {
+					if cb := message.Content[idx]; cb.Type == "tool_use" && !json.Valid(cb.Input) {
+						yield(nil, fmt.Errorf("%w (tool %q)", assistant.ErrTruncatedToolUse, cb.Name))
+						return
+					}
+				}
+			}
 			if err := message.Accumulate(event); err != nil {
 				yield(nil, fmt.Errorf("anthropic accumulate: %w", err))
 				return
 			}
 
 			switch event.Type {
-			case anthropic.MessageStreamEventTypeContentBlockDelta:
-				if delta, ok := event.Delta.(anthropic.ContentBlockDeltaEventDelta); ok && delta.Text != "" {
-					resp := &assistant.GenerateContentResponse{Content: assistant.NewTextContent(delta.Text)}
+			case "content_block_delta":
+				if event.Delta.Type == "text_delta" && event.Delta.Text != "" {
+					resp := &assistant.GenerateContentResponse{Content: assistant.NewTextContent(event.Delta.Text)}
 					if !yield(resp, nil) {
 						return
 					}
 				}
 
-			case anthropic.MessageStreamEventTypeContentBlockStop:
+			case "content_block_stop":
 				idx := int(event.Index)
 				if idx < 0 || idx >= len(message.Content) {
 					continue
@@ -449,15 +475,11 @@ func streamContent(
 
 				var out assistant.MessageContent
 				switch cb.Type {
-				case anthropic.ContentBlockTypeToolUse:
-					if !json.Valid(cb.Input) {
-						yield(nil, fmt.Errorf("%w (tool %q)", assistant.ErrTruncatedToolUse, cb.Name))
-						return
-					}
+				case "tool_use":
 					out = &assistant.ToolUseContent{ID: cb.ID, Name: cb.Name, Input: cb.Input}
-				case anthropic.ContentBlockTypeThinking:
+				case "thinking":
 					out = &assistant.ThinkingContent{Thinking: cb.Thinking, Signature: cb.Signature}
-				case anthropic.ContentBlockTypeRedactedThinking:
+				case "redacted_thinking":
 					out = &assistant.RedactedThinkingContent{Data: cb.Data}
 				}
 				if out != nil {
@@ -491,7 +513,7 @@ func systemMessageParam(conts []*assistant.TextContent) []anthropic.TextBlockPar
 	}
 	param := make([]anthropic.TextBlockParam, 0, len(conts))
 	for _, conts := range conts {
-		param = append(param, anthropic.NewTextBlock(conts.Text))
+		param = append(param, anthropic.TextBlockParam{Text: conts.Text})
 	}
 	return param
 }
