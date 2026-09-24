@@ -142,6 +142,33 @@ func TestDetectProviderByModelSpec(t *testing.T) {
 			wantFound:       true,
 		},
 		{
+			name:          "alias with explicit provider",
+			spec:          "anthropic:fable",
+			wantProvider:  "anthropic",
+			wantModelName: "claude-fable-5-1",
+			wantFound:     true,
+		},
+		{
+			name:          "alias auto-detect anthropic",
+			spec:          "fable",
+			wantProvider:  "anthropic",
+			wantModelName: "claude-fable-5-1",
+			wantFound:     true,
+		},
+		{
+			name:      "alias is scoped to its provider",
+			spec:      "openai:fable",
+			wantFound: false,
+		},
+		{
+			name:            "alias resolves in provider other than default",
+			spec:            "luna",
+			defaultProvider: "anthropic",
+			wantProvider:    "openai",
+			wantModelName:   "gpt-6-luna",
+			wantFound:       true,
+		},
+		{
 			name:            "default provider ignored when model not supported",
 			spec:            "gpt-4.1",
 			defaultProvider: "anthropic",

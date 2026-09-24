@@ -281,6 +281,9 @@ func QualifiedName(provider, modelName string) string {
 
 // detectProviderByModelSpec detects the provider for a given model specification.
 //
+// The model part may be an alias (e.g. "fable"), which resolves to the
+// canonical model name of the provider it belongs to.
+//
 // Detection priority:
 //  1. If the spec contains an explicit provider (e.g., "groq:llama-3.3-70b"), use that.
 //  2. If defaultProvider is set and supports the model, use that.
@@ -323,14 +326,15 @@ type providerEntry struct {
 	apiKeyFlag string
 	describe   func(modelName string) (desc string, found bool)
 	newModel   func(modelName, apiKey string) (assistant.GenerativeModel, error)
+	aliases    func() map[string]string
 }
 
 // providers lists the supported providers in search order.
 var providers = []providerEntry{
-	{anthropic.ProviderName, flagAPIKeyAnthropic.Name, anthropic.DescribeModel, anthropic.NewGenerativeModel},
-	{openai.ProviderName, flagAPIKeyOpenAI.Name, openai.DescribeModel, openai.NewGenerativeModel},
-	{groq.ProviderName, flagAPIKeyGroq.Name, groq.DescribeModel, groq.NewGenerativeModel},
-	{cerebras.ProviderName, flagAPIKeyCerebras.Name, cerebras.DescribeModel, cerebras.NewGenerativeModel},
+	{anthropic.ProviderName, flagAPIKeyAnthropic.Name, anthropic.DescribeModel, anthropic.NewGenerativeModel, anthropic.Aliases},
+	{openai.ProviderName, flagAPIKeyOpenAI.Name, openai.DescribeModel, openai.NewGenerativeModel, openai.Aliases},
+	{groq.ProviderName, flagAPIKeyGroq.Name, groq.DescribeModel, groq.NewGenerativeModel, groq.Aliases},
+	{cerebras.ProviderName, flagAPIKeyCerebras.Name, cerebras.DescribeModel, cerebras.NewGenerativeModel, cerebras.Aliases},
 }
 
 func providerByName(name string) (providerEntry, bool) {
@@ -342,12 +346,15 @@ func providerByName(name string) (providerEntry, bool) {
 	return providerEntry{}, false
 }
 
-// lookupProviderModel checks if a provider supports the given model name,
-// and returns the canonical model name.
+// lookupProviderModel checks if a provider supports the given model name or
+// alias, and returns the canonical model name.
 func lookupProviderModel(provider, modelName string) (canonical string, found bool) {
 	p, ok := providerByName(provider)
 	if !ok {
 		return "", false
+	}
+	if target, ok := p.aliases()[modelName]; ok {
+		modelName = target
 	}
 	if _, found := p.describe(modelName); !found {
 		return "", false
