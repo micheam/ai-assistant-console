@@ -66,6 +66,14 @@ const (
 //     * Pricing: $5/MTok input, $25/MTok output
 //     * Supports 1M context window and 128K max output
 //
+// Claude Sonnet 5.5:
+//
+//     * The best combination of speed and intelligence
+//     * Successor to Claude Sonnet 5
+//     * Supports adaptive thinking and effort control
+//     * Pricing: $2/MTok input, $10/MTok output
+//     * Supports 1M context window and 128K max output
+//
 // Claude Sonnet 5:
 //
 //     * The best combination of speed and intelligence
@@ -81,6 +89,15 @@ const (
 //     * Fast comparative latency
 //     * Pricing: $3/MTok input, $15/MTok output
 //     * Supports 200K context window (1M with beta header) and 64K max output
+//
+// Claude Haiku 5.5:
+//
+//     * For high-volume, latency-sensitive tasks such as classification, extraction, and routing
+//     * Successor to Claude Haiku 4.5
+//     * Supports adaptive thinking (on by default) and effort control
+//     * Pricing: $0.10/MTok input, $0.50/MTok output for prompts up to 100K tokens
+//       ($0.50/MTok input, $2.50/MTok output above that)
+//     * Supports 1M context window and 128K max output
 //
 // Claude Haiku 4.5:
 //
@@ -107,8 +124,10 @@ func AvailableModels() []assistant.ModelDescriptor {
 		&ClaudeOpus5{},
 		&ClaudeOpus4_8{},
 		&ClaudeOpus4_6{},
+		&ClaudeSonnet5_5{},
 		&ClaudeSonnet5{},
 		&ClaudeSonnet4_6{},
+		&ClaudeHaiku5_5{},
 		&ClaudeHaiku4_5{},
 	}
 }
@@ -126,8 +145,8 @@ func DescribeModel(modelName string) (desc string, found bool) {
 var aliases = map[string]string{
 	"fable":  ModelNameClaudeFable5_1,
 	"opus":   ModelNameClaudeOpus5_5,
-	"sonnet": ModelNameClaudeSonnet5,
-	"haiku":  ModelNameClaudeHaiku4_5,
+	"sonnet": ModelNameClaudeSonnet5_5,
+	"haiku":  ModelNameClaudeHaiku5_5,
 }
 
 // Aliases returns the alias-to-model-name table.
@@ -149,10 +168,14 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 		return &ClaudeOpus4_8{}, true
 	case "claude-opus-4-6":
 		return &ClaudeOpus4_6{}, true
+	case "claude-sonnet-5-5":
+		return &ClaudeSonnet5_5{}, true
 	case "claude-sonnet-5":
 		return &ClaudeSonnet5{}, true
 	case "claude-sonnet-4-6":
 		return &ClaudeSonnet4_6{}, true
+	case "claude-haiku-5-5":
+		return &ClaudeHaiku5_5{}, true
 	case "claude-haiku-4-5":
 		return &ClaudeHaiku4_5{}, true
 	}
@@ -174,10 +197,14 @@ func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, er
 		return NewClaudeOpus4_8(&client), nil
 	case "claude-opus-4-6":
 		return NewClaudeOpus4_6(&client), nil
+	case "claude-sonnet-5-5":
+		return NewClaudeSonnet5_5(&client), nil
 	case "claude-sonnet-5":
 		return NewClaudeSonnet5(&client), nil
 	case "claude-sonnet-4-6":
 		return NewClaudeSonnet4_6(&client), nil
+	case "claude-haiku-5-5":
+		return NewClaudeHaiku5_5(&client), nil
 	case "claude-haiku-4-5":
 		return NewClaudeHaiku4_5(&client), nil
 	}
