@@ -31,7 +31,7 @@ func (m *ClaudeSonnet5) Name() string                          { return ModelNam
 func (m *ClaudeSonnet5) Description() string {
 	return `Claude Sonnet 5 is the best combination of speed and intelligence,
 the successor to Claude Sonnet 4.6. Supports adaptive thinking and effort control.
-Pricing: $3/MTok input, $15/MTok output.
+Pricing: $2/MTok input, $10/MTok output.
 Supports 1M context window and 128K max output.`
 }
 

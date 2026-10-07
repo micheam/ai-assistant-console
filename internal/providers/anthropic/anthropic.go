@@ -79,7 +79,7 @@ const (
 //     * The best combination of speed and intelligence
 //     * Successor to Claude Sonnet 4.6
 //     * Supports adaptive thinking and effort control
-//     * Pricing: $3/MTok input, $15/MTok output
+//     * Pricing: $2/MTok input, $10/MTok output
 //     * Supports 1M context window and 128K max output
 //
 // Claude Sonnet 4.6:
