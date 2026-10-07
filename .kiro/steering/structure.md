@@ -33,8 +33,8 @@ type GenerativeModel interface {
 ```
 providers/anthropic/
 ├── anthropic.go          # AvailableModels(), NewGenerativeModel(), DescribeModel()
-├── claude_opus_4_6.go    # 個別モデル実装
-└── claude_sonnet_4_5.go
+├── claude_opus_5_5.go    # 個別モデル実装
+└── claude_sonnet_5_5.go
 ```
 **Registry Pattern**: 各プロバイダーは3つのファクトリ関数をエクスポート:
 - `AvailableModels() []assistant.ModelDescriptor`
@@ -55,9 +55,9 @@ providers/anthropic/
 
 ## Naming Conventions
 
-- **Files**: `snake_case.go`（Go 標準）。モデルファイルは `{model_name}.go`（例: `claude_opus_4_6.go`）
+- **Files**: `snake_case.go`（Go 標準）。モデルファイルは `{model_name}.go`（例: `claude_opus_5_5.go`）
 - **Packages**: 小文字、アンダースコアなし（`assistant`, `config`, `openai`）
-- **Types**: PascalCase。インターフェースは概念名（`GenerativeModel`）、実装は `{Provider}{Model}`（`ClaudeOpus4_6`）
+- **Types**: PascalCase。インターフェースは概念名（`GenerativeModel`）、実装は `{Provider}{Model}`（`ClaudeOpus5_5`）
 - **Functions**: `New{Type}` コンストラクタ、`{Verb}{Noun}` アクション（`GenerateContent`, `LoadConfig`）
 
 ## Import Organization
