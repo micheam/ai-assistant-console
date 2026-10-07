@@ -74,14 +74,6 @@ const (
 //     * Pricing: $2/MTok input, $10/MTok output
 //     * Supports 1M context window and 128K max output
 //
-// Claude Sonnet 5:
-//
-//     * The best combination of speed and intelligence
-//     * Successor to Claude Sonnet 4.6
-//     * Supports adaptive thinking and effort control
-//     * Pricing: $2/MTok input, $10/MTok output
-//     * Supports 1M context window and 128K max output
-//
 // Claude Sonnet 4.6:
 //
 //     * The best combination of speed and intelligence
@@ -99,14 +91,6 @@ const (
 //       ($0.50/MTok input, $2.50/MTok output above that)
 //     * Supports 1M context window and 128K max output
 //
-// Claude Haiku 4.5:
-//
-//     * Our fastest model with near-frontier intelligence
-//     * Most economical price point with lightning-fast speed
-//     * Best for real-time applications, high-volume intelligent processing, sub-agent tasks
-//     * Pricing: $1/MTok input, $5/MTok output
-//     * Supports 200K context window and 64K max output
-//
 // Claude Opus 4.6 (Deprecated):
 //
 //     * Superseded by Claude Opus 4.8
@@ -114,6 +98,24 @@ const (
 //     * Supports extended thinking and adaptive thinking
 //     * Pricing: $5/MTok input, $25/MTok output
 //     * Supports 200K context window (1M with beta header) and 128K max output
+//
+// Claude Sonnet 5 (Deprecated):
+//
+//     * Superseded by Claude Sonnet 5.5
+//     * The best combination of speed and intelligence
+//     * Successor to Claude Sonnet 4.6
+//     * Supports adaptive thinking and effort control
+//     * Pricing: $2/MTok input, $10/MTok output
+//     * Supports 1M context window and 128K max output
+//
+// Claude Haiku 4.5 (Deprecated):
+//
+//     * Superseded by Claude Haiku 5.5
+//     * Our fastest model with near-frontier intelligence
+//     * Most economical price point with lightning-fast speed
+//     * Best for real-time applications, high-volume intelligent processing, sub-agent tasks
+//     * Pricing: $1/MTok input, $5/MTok output
+//     * Supports 200K context window and 64K max output
 
 // AvailableModels returns a list of available models
 func AvailableModels() []assistant.ModelDescriptor {

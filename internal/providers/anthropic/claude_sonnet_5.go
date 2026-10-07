@@ -29,7 +29,8 @@ func NewClaudeSonnet5(client *anthropic.Client) *ClaudeSonnet5 { return &ClaudeS
 func (m *ClaudeSonnet5) Provider() string                      { return ProviderName }
 func (m *ClaudeSonnet5) Name() string                          { return ModelNameClaudeSonnet5 }
 func (m *ClaudeSonnet5) Description() string {
-	return `Claude Sonnet 5 is the best combination of speed and intelligence,
+	return `[Deprecated] Claude Sonnet 5 - superseded by Claude Sonnet 5.5.
+Claude Sonnet 5 is the best combination of speed and intelligence,
 the successor to Claude Sonnet 4.6. Supports adaptive thinking and effort control.
 Pricing: $2/MTok input, $10/MTok output.
 Supports 1M context window and 128K max output.`

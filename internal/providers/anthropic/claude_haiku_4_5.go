@@ -32,7 +32,8 @@ func NewClaudeHaiku4_5(client *anthropic.Client) *ClaudeHaiku4_5 {
 func (m *ClaudeHaiku4_5) Provider() string { return ProviderName }
 func (m *ClaudeHaiku4_5) Name() string     { return ModelNameClaudeHaiku4_5 }
 func (m *ClaudeHaiku4_5) Description() string {
-	return `Claude Haiku 4.5 is the fastest model with near-frontier performance.
+	return `[Deprecated] Claude Haiku 4.5 - superseded by Claude Haiku 5.5.
+Claude Haiku 4.5 is the fastest model with near-frontier performance.
 Engineered for lightning-fast speed at the most economical price point.
 Best for real-time applications, high-volume intelligent processing,
 cost-sensitive deployments needing strong reasoning, and sub-agent tasks.
