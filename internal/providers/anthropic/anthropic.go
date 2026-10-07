@@ -74,14 +74,6 @@ const (
 //     * Pricing: $2/MTok input, $10/MTok output
 //     * Supports 1M context window and 128K max output
 //
-// Claude Sonnet 4.6:
-//
-//     * The best combination of speed and intelligence
-//     * Supports extended thinking and adaptive thinking
-//     * Fast comparative latency
-//     * Pricing: $3/MTok input, $15/MTok output
-//     * Supports 200K context window (1M with beta header) and 64K max output
-//
 // Claude Haiku 5.5:
 //
 //     * For high-volume, latency-sensitive tasks such as classification, extraction, and routing
@@ -90,14 +82,6 @@ const (
 //     * Pricing: $0.10/MTok input, $0.50/MTok output for prompts up to 100K tokens
 //       ($0.50/MTok input, $2.50/MTok output above that)
 //     * Supports 1M context window and 128K max output
-//
-// Claude Opus 4.6 (Deprecated):
-//
-//     * Superseded by Claude Opus 4.8
-//     * Top-tier results in reasoning, coding, multilingual tasks, and long-context handling
-//     * Supports extended thinking and adaptive thinking
-//     * Pricing: $5/MTok input, $25/MTok output
-//     * Supports 200K context window (1M with beta header) and 128K max output
 //
 // Claude Sonnet 5 (Deprecated):
 //
@@ -125,10 +109,8 @@ func AvailableModels() []assistant.ModelDescriptor {
 		&ClaudeOpus5_5{},
 		&ClaudeOpus5{},
 		&ClaudeOpus4_8{},
-		&ClaudeOpus4_6{},
 		&ClaudeSonnet5_5{},
 		&ClaudeSonnet5{},
-		&ClaudeSonnet4_6{},
 		&ClaudeHaiku5_5{},
 		&ClaudeHaiku4_5{},
 	}
@@ -168,14 +150,10 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 		return &ClaudeOpus5{}, true
 	case "claude-opus-4-8":
 		return &ClaudeOpus4_8{}, true
-	case "claude-opus-4-6":
-		return &ClaudeOpus4_6{}, true
 	case "claude-sonnet-5-5":
 		return &ClaudeSonnet5_5{}, true
 	case "claude-sonnet-5":
 		return &ClaudeSonnet5{}, true
-	case "claude-sonnet-4-6":
-		return &ClaudeSonnet4_6{}, true
 	case "claude-haiku-5-5":
 		return &ClaudeHaiku5_5{}, true
 	case "claude-haiku-4-5":
@@ -197,14 +175,10 @@ func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, er
 		return NewClaudeOpus5(&client), nil
 	case "claude-opus-4-8":
 		return NewClaudeOpus4_8(&client), nil
-	case "claude-opus-4-6":
-		return NewClaudeOpus4_6(&client), nil
 	case "claude-sonnet-5-5":
 		return NewClaudeSonnet5_5(&client), nil
 	case "claude-sonnet-5":
 		return NewClaudeSonnet5(&client), nil
-	case "claude-sonnet-4-6":
-		return NewClaudeSonnet4_6(&client), nil
 	case "claude-haiku-5-5":
 		return NewClaudeHaiku5_5(&client), nil
 	case "claude-haiku-4-5":
