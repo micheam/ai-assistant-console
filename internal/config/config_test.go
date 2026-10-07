@@ -12,7 +12,7 @@ import (
 func TestLoadFromReader_Models(t *testing.T) {
 	t.Run("parses [models] alongside the top-level model key", func(t *testing.T) {
 		src := `
-model = "claude-haiku-4-5"
+model = "claude-haiku-5-5"
 
 [models."claude-opus-5-5"]
 effort = "high"
@@ -26,14 +26,14 @@ effort = "high"
 `
 		conf, err := loadFromReader(strings.NewReader(src))
 		require.NoError(t, err)
-		require.Equal(t, "claude-haiku-4-5", conf.Model)
+		require.Equal(t, "claude-haiku-5-5", conf.Model)
 		require.Equal(t, ModelSettings{Effort: "high"}, conf.Models["claude-opus-5-5"])
 		require.Equal(t, ModelSettings{Effort: "anthropic:xhigh", MaxTokens: 65536}, conf.Models["anthropic:claude-opus-5"])
 		require.Equal(t, ModelSettings{Effort: "high"}, conf.Models["gpt-5.6-sol"])
 	})
 
 	t.Run("no [models]: leaves the map nil", func(t *testing.T) {
-		conf, err := loadFromReader(strings.NewReader(`model = "claude-haiku-4-5"`))
+		conf, err := loadFromReader(strings.NewReader(`model = "claude-haiku-5-5"`))
 		require.NoError(t, err)
 		require.Nil(t, conf.Models)
 	})
@@ -100,7 +100,7 @@ func TestConfig_ModelSettings(t *testing.T) {
 	})
 
 	t.Run("missing model", func(t *testing.T) {
-		_, _, ok := conf.ModelSettings("anthropic", "claude-haiku-4-5")
+		_, _, ok := conf.ModelSettings("anthropic", "claude-haiku-5-5")
 		require.False(t, ok)
 	})
 

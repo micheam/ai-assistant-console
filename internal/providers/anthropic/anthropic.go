@@ -91,15 +91,6 @@ const (
 //     * Supports adaptive thinking and effort control
 //     * Pricing: $2/MTok input, $10/MTok output
 //     * Supports 1M context window and 128K max output
-//
-// Claude Haiku 4.5 (Deprecated):
-//
-//     * Superseded by Claude Haiku 5.5
-//     * Our fastest model with near-frontier intelligence
-//     * Most economical price point with lightning-fast speed
-//     * Best for real-time applications, high-volume intelligent processing, sub-agent tasks
-//     * Pricing: $1/MTok input, $5/MTok output
-//     * Supports 200K context window and 64K max output
 
 // AvailableModels returns a list of available models
 func AvailableModels() []assistant.ModelDescriptor {
@@ -112,7 +103,6 @@ func AvailableModels() []assistant.ModelDescriptor {
 		&ClaudeSonnet5_5{},
 		&ClaudeSonnet5{},
 		&ClaudeHaiku5_5{},
-		&ClaudeHaiku4_5{},
 	}
 }
 
@@ -156,8 +146,6 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 		return &ClaudeSonnet5{}, true
 	case "claude-haiku-5-5":
 		return &ClaudeHaiku5_5{}, true
-	case "claude-haiku-4-5":
-		return &ClaudeHaiku4_5{}, true
 	}
 }
 
@@ -181,8 +169,6 @@ func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, er
 		return NewClaudeSonnet5(&client), nil
 	case "claude-haiku-5-5":
 		return NewClaudeHaiku5_5(&client), nil
-	case "claude-haiku-4-5":
-		return NewClaudeHaiku4_5(&client), nil
 	}
 	return nil, fmt.Errorf("unsupported model name: %s", modelName)
 }

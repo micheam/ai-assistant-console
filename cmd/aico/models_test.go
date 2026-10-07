@@ -24,8 +24,8 @@ func TestParseModelSpec(t *testing.T) {
 		},
 		{
 			name:     "anthropic provider",
-			input:    "anthropic:claude-haiku-4-5",
-			expected: ModelSpec{Provider: "anthropic", ModelName: "claude-haiku-4-5"},
+			input:    "anthropic:claude-haiku-5-5",
+			expected: ModelSpec{Provider: "anthropic", ModelName: "claude-haiku-5-5"},
 		},
 		{
 			name:     "groq provider",
@@ -64,7 +64,7 @@ func TestQualifiedName(t *testing.T) {
 		expected  string
 	}{
 		{"openai", "gpt-4.1", "openai:gpt-4.1"},
-		{"anthropic", "claude-haiku-4-5", "anthropic:claude-haiku-4-5"},
+		{"anthropic", "claude-haiku-5-5", "anthropic:claude-haiku-5-5"},
 		{"groq", "llama-3.3-70b-versatile", "groq:llama-3.3-70b-versatile"},
 	}
 
@@ -95,18 +95,18 @@ func TestDetectProviderByModelSpec(t *testing.T) {
 		},
 		{
 			name:            "explicit provider anthropic",
-			spec:            "anthropic:claude-haiku-4-5",
+			spec:            "anthropic:claude-haiku-5-5",
 			defaultProvider: "",
 			wantProvider:    "anthropic",
-			wantModelName:   "claude-haiku-4-5",
+			wantModelName:   "claude-haiku-5-5",
 			wantFound:       true,
 		},
 		{
 			name:            "simple name auto-detect anthropic",
-			spec:            "claude-haiku-4-5",
+			spec:            "claude-haiku-5-5",
 			defaultProvider: "",
 			wantProvider:    "anthropic",
-			wantModelName:   "claude-haiku-4-5",
+			wantModelName:   "claude-haiku-5-5",
 			wantFound:       true,
 		},
 		{
@@ -135,10 +135,10 @@ func TestDetectProviderByModelSpec(t *testing.T) {
 		},
 		{
 			name:            "default provider used when model found",
-			spec:            "claude-haiku-4-5",
+			spec:            "claude-haiku-5-5",
 			defaultProvider: "anthropic",
 			wantProvider:    "anthropic",
-			wantModelName:   "claude-haiku-4-5",
+			wantModelName:   "claude-haiku-5-5",
 			wantFound:       true,
 		},
 		{
