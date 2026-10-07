@@ -55,8 +55,8 @@ type Config struct {
 	// Model is the model to use for text generation
 	//
 	// Supports two formats:
-	//   - Simple name: "claude-haiku-4-5" (uses DefaultProvider if ambiguous)
-	//   - Qualified name: "anthropic:claude-haiku-4-5" (explicit provider)
+	//   - Simple name: "claude-haiku-5-5" (uses DefaultProvider if ambiguous)
+	//   - Qualified name: "anthropic:claude-haiku-5-5" (explicit provider)
 	//
 	// If omitted, the default model for the application will be used.
 	Model string `toml:"model"`
@@ -267,7 +267,7 @@ func defaultLogfilePath() string {
 
 const (
 	// DefaultModel is the default model to use
-	DefaultModel = anthropic.ModelNameClaudeHaiku4_5
+	DefaultModel = anthropic.ModelNameClaudeHaiku5_5
 
 	// ApplicationFQN is the fully qualified name of the application
 	ApplicationFQN = "com.micheam.aico"
