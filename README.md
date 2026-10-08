@@ -159,7 +159,7 @@ GLOBAL OPTIONS:
    --last                                                       resume the most recent session (default: false)
    --no-stream                                                  disable streaming output (default: false)
    --persona string, -p string                                  The persona to use (default: "default")
-   --system string                                              system prompt
+   --system string                                              system prompt for a new session; replaces the persona message
    --source string, -s string                                   the ONE primary subject to act on (see --context)
    --context string, -c string [ --context string, -c string ]  read-only reference material for the prompt; repeatable
    --tool string [ --tool string ]                               enable a client-side tool by name (available: propose_edit); repeatable

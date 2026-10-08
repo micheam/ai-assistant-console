@@ -434,9 +434,23 @@ func resolveContext(raw, stdinContent string, stdinConsumed *bool) (string, erro
 	return wrapTag("context", file, label, content), nil
 }
 
+// sessionSystemMessage returns the message a new session's system
+// instruction starts with: the --system value if given, otherwise the
+// message of the selected persona.
+func sessionSystemMessage(conf *config.Config, system, personaName string) (string, error) {
+	if system != "" {
+		return system, nil
+	}
+	persona, ok := conf.PersonaMap[personaName]
+	if !ok {
+		return "", fmt.Errorf("persona %q not found", personaName)
+	}
+	return persona.Message, nil
+}
+
 // buildSystemInstruction creates the persistent system-instruction messages
-// for a new session: the persona's own message followed by the app-managed
-// inputHandlingInstruction.
+// for a new session: the persona's own message (or the --system value that
+// replaces it) followed by the app-managed inputHandlingInstruction.
 //
 // --context is intentionally NOT resolved here. Unlike the persona message,
 // it is not part of the session's fixed system instruction; it is resolved
@@ -494,8 +508,8 @@ func detectSessionMode(cmd *cli.Command) (SessionMode, error) {
 // loadSession resolves --session/--last/(neither) into the Session to
 // append this turn's message to.
 //
-// Only a brand-new session sets up the persona and model: --persona and
-// --model apply once, at session creation, same as before. --context does
+// Only a brand-new session sets up the persona and model: --persona, --system
+// and --model apply once, at session creation, same as before. --context does
 // NOT need to be threaded through here — it is resolved per turn in
 // doGenerate regardless of session mode, so it works the same way whether
 // starting a new session or resuming an existing one.
@@ -525,12 +539,11 @@ func loadSession(ctx context.Context, cmd *cli.Command) (*assistant.Session, err
 			}
 			sess.Model = QualifiedName(model.Provider(), model.Name())
 		}
-		personaName := cmd.String(flagPersona.Name)
-		persona, ok := conf.PersonaMap[personaName]
-		if !ok {
-			return nil, fmt.Errorf("persona %q not found", cmd.String(flagPersona.Name))
+		message, err := sessionSystemMessage(conf, cmd.String(flagSystemPrompt.Name), cmd.String(flagPersona.Name))
+		if err != nil {
+			return nil, err
 		}
-		sess.SystemInstruction = append(sess.SystemInstruction, buildSystemInstruction(persona.Message)...)
+		sess.SystemInstruction = append(sess.SystemInstruction, buildSystemInstruction(message)...)
 		return sess, nil
 	default:
 		return nil, fmt.Errorf("unsupported session_mode(%v)", sessMode)

@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v3"
 	"micheam.com/aico/internal/assistant"
+	"micheam.com/aico/internal/config"
 )
 
 func TestReadSource_WithContent(t *testing.T) {
@@ -270,6 +271,57 @@ func TestBuildSystemInstruction(t *testing.T) {
 	}
 	if instructions[1].Text != inputHandlingInstruction {
 		t.Errorf("expected second instruction to be inputHandlingInstruction, got %q", instructions[1].Text)
+	}
+}
+
+func TestSessionSystemMessage(t *testing.T) {
+	conf := &config.Config{
+		PersonaMap: map[string]config.Personality{
+			"default": {Message: "default persona"},
+		},
+	}
+
+	tests := []struct {
+		name        string
+		system      string
+		personaName string
+		want        string
+		wantErr     bool
+	}{
+		{
+			name:        "persona message without --system",
+			personaName: "default",
+			want:        "default persona",
+		},
+		{
+			name:        "--system replaces the persona message",
+			system:      "custom system prompt",
+			personaName: "default",
+			want:        "custom system prompt",
+		},
+		{
+			name:        "--system does not require the persona to exist",
+			system:      "custom system prompt",
+			personaName: "missing",
+			want:        "custom system prompt",
+		},
+		{
+			name:        "unknown persona without --system",
+			personaName: "missing",
+			wantErr:     true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := sessionSystemMessage(conf, tt.system, tt.personaName)
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+			require.Equal(t, tt.want, got)
+		})
 	}
 }
 

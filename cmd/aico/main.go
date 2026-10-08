@@ -115,7 +115,7 @@ var (
 	}
 	flagSystemPrompt = &cli.StringFlag{
 		Name:  "system",
-		Usage: "system prompt",
+		Usage: "system prompt for a new session; replaces the persona message",
 	}
 	flagSessionID = &cli.StringFlag{
 		Name:  "session",
