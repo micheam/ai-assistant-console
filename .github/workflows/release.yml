@@ -62,7 +62,9 @@ jobs:
             "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://api.anthropic.com" \
             | jq -r .value > "$ANTHROPIC_IDENTITY_TOKEN_FILE" || true
           summary=$(echo "$commits" | timeout 120 ./aico-linux-amd64 --no-stream -m anthropic:claude-haiku-5-5 --system "$system" "$prompt") || summary=""
-          if [ "$(echo "$summary" | wc -l)" -ne 1 ]; then
+          if [ -z "$summary" ] || [ "$(echo "$summary" | wc -l)" -ne 1 ]; then
+            echo "::warning::No one-line summary was generated; publishing the commit list alone"
+            printf '%s\n' "$summary" | sed 's/^/> /'
             summary=""
           fi
         fi
