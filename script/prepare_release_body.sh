@@ -43,7 +43,7 @@ _main() {
   git log --pretty=format:"${format}" "${range}" |\
     jq -c 'select(.message | startswith("docs") | not)' |\
     jq -c 'select(.message | startswith("test") | not)' |\
-    jq -r '"* [\(.hash)]: \(.message)"'
+    jq -r '"* \(.hash) \(.message)"'
 
 
   # for commit in $(echo "${commits}" | jq -c '.[]'); do
