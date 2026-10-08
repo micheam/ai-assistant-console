@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"slices"
 	"strings"
@@ -186,13 +185,10 @@ func runDescribeModel(ctx context.Context, cmd *cli.Command) error {
 // Important:
 //
 //	Currently, only **Anthropic models** are supported as default model.
-//	So, if an API key for Anthropic is not provided, it returns an error.
+//	Without an Anthropic API key, authentication is left to the SDK's
+//	default credential chain (such as workload identity federation).
 func DefaultModel(cmd *cli.Command) (assistant.GenerativeModel, error) {
-	apikey := cmd.String(flagAPIKeyAnthropic.Name)
-	if apikey == "" {
-		return nil, errors.New(flagAPIKeyAnthropic.Name + " is required for default model, but not provided")
-	}
-	return anthropic.NewGenerativeModel(anthropic.DefaultModelName, apikey)
+	return anthropic.NewGenerativeModel(anthropic.DefaultModelName, cmd.String(flagAPIKeyAnthropic.Name))
 }
 
 // detectModel attempts to detect the model from the app configuration and command flags.

@@ -153,9 +153,20 @@ func selectModel(modelName string) (assistant.GenerativeModel, bool) {
 	}
 }
 
+// clientOptions returns the request options for a new client. An empty
+// apiKey leaves authentication to the SDK's default credential chain (such
+// as workload identity federation) instead of sending an empty X-Api-Key
+// header.
+func clientOptions(apiKey string) []option.RequestOption {
+	if apiKey == "" {
+		return nil
+	}
+	return []option.RequestOption{option.WithAPIKey(apiKey)}
+}
+
 // NewGenerativeModel creates a new instance of a generative model
 func NewGenerativeModel(modelName, apiKey string) (assistant.GenerativeModel, error) {
-	client := anthropic.NewClient(option.WithAPIKey(apiKey))
+	client := anthropic.NewClient(clientOptions(apiKey)...)
 	switch modelName {
 	case "claude-fable-5-1":
 		return NewClaudeFable5_1(&client), nil

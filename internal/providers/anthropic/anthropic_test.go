@@ -115,6 +115,47 @@ func TestGenerateContentStream_Effort(t *testing.T) {
 	})
 }
 
+func TestClientOptions_APIKeyHeader(t *testing.T) {
+	// ANTHROPIC_AUTH_TOKEN stands in for a credential that the SDK resolves
+	// on its own, such as workload identity federation.
+	t.Setenv("ANTHROPIC_API_KEY", "")
+	t.Setenv("ANTHROPIC_AUTH_TOKEN", "env-token")
+
+	const reply = `{"id":"msg_01","type":"message","role":"assistant","model":"claude-haiku-5-5","content":[],"stop_reason":"end_turn","usage":{"input_tokens":1,"output_tokens":1}}`
+
+	run := func(t *testing.T, apiKey string) http.Header {
+		t.Helper()
+		var got http.Header
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			got = r.Header.Clone()
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(reply))
+		}))
+		t.Cleanup(srv.Close)
+
+		client := anthropicsdk.NewClient(append(clientOptions(apiKey), option.WithBaseURL(srv.URL))...)
+		_, err := client.Messages.New(context.Background(), anthropicsdk.MessageNewParams{
+			Model:     "claude-haiku-5-5",
+			MaxTokens: 1,
+			Messages:  []anthropicsdk.MessageParam{anthropicsdk.NewUserMessage(anthropicsdk.NewTextBlock("hi"))},
+		})
+		require.NoError(t, err)
+		return got
+	}
+
+	t.Run("empty: leaves authentication to the SDK", func(t *testing.T) {
+		header := run(t, "")
+		_, ok := header["X-Api-Key"]
+		require.False(t, ok, "X-Api-Key must not be sent")
+		require.Equal(t, "Bearer env-token", header.Get("Authorization"))
+	})
+
+	t.Run("set: sends X-Api-Key", func(t *testing.T) {
+		header := run(t, "test-key")
+		require.Equal(t, "test-key", header.Get("X-Api-Key"))
+	})
+}
+
 func TestConvertContentBlockParamUnion(t *testing.T) {
 	t.Run("ToolUseContent", func(t *testing.T) {
 		c := &assistant.ToolUseContent{
