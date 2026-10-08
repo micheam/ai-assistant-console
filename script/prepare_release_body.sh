@@ -29,7 +29,7 @@ usage() {
     exit 1
 }
 
-FROM="$(git describe --tags --abbrev=0 2>/dev/null || echo "HEAD")"
+FROM=""
 TO="HEAD"
 
 _main() {
@@ -61,5 +61,8 @@ while getopts "hf:t:" opt; do
 done
 
 shift $((OPTIND -1))
+
+# Search from the parent of TO so that a tag placed on TO itself is skipped.
+FROM="${FROM:-$(git describe --tags --abbrev=0 "${TO}^" 2>/dev/null || echo "HEAD")}"
 
 _main $@
