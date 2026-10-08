@@ -79,7 +79,10 @@ func doGenerate(ctx context.Context, cmd *cli.Command, prompt string) error {
 	}
 	stdinConsumed := false
 
-	sess, err := loadSession(cmd)
+	// Attach the logger before loadSession: resolving the model of a new
+	// session can log a model fallback warning.
+	ctx = logging.ContextWith(ctx, logger)
+	sess, err := loadSession(ctx, cmd)
 	if err != nil {
 		return fmt.Errorf("failed to load session: %w", err)
 	}
@@ -147,10 +150,13 @@ func doGenerate(ctx context.Context, cmd *cli.Command, prompt string) error {
 		sess.AddMessage(userMsg)
 	}
 
-	model, err := modelByName(cmd, sess.Model)
+	model, err := modelByName(ctx, cmd, sess.Model)
 	if err != nil {
 		return fmt.Errorf("model by name: %w", err)
 	}
+	// Record the model that actually answers, which differs from the
+	// stored one when the stored model is no longer available.
+	sess.Model = QualifiedName(model.Provider(), model.Name())
 	if len(toolDefs) > 0 {
 		tc, ok := model.(assistant.ToolCapable)
 		if !ok {
@@ -493,7 +499,7 @@ func detectSessionMode(cmd *cli.Command) (SessionMode, error) {
 // NOT need to be threaded through here — it is resolved per turn in
 // doGenerate regardless of session mode, so it works the same way whether
 // starting a new session or resuming an existing one.
-func loadSession(cmd *cli.Command) (*assistant.Session, error) {
+func loadSession(ctx context.Context, cmd *cli.Command) (*assistant.Session, error) {
 	conf, err := config.Load()
 	if err != nil {
 		return nil, fmt.Errorf("can't load config: %w", err)
@@ -513,7 +519,7 @@ func loadSession(cmd *cli.Command) (*assistant.Session, error) {
 	case SessionModeNew:
 		sess := assistant.NewSession(conf.GetSessionDir())
 		{ // Model
-			model, err := detectModel(cmd)
+			model, err := detectModel(ctx, cmd)
 			if err != nil {
 				return nil, fmt.Errorf("detect model: %w", err)
 			}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -184,6 +185,91 @@ func TestDetectProviderByModelSpec(t *testing.T) {
 			assert.Equal(t, tt.wantProvider, provider, "provider mismatch")
 			assert.Equal(t, tt.wantModelName, modelName, "modelName mismatch")
 			assert.Equal(t, tt.wantFound, found, "found mismatch")
+		})
+	}
+}
+
+func TestResolveModelSpec(t *testing.T) {
+	tests := []struct {
+		name            string
+		spec            string
+		defaultProvider string
+		wantProvider    string
+		wantModelName   string
+		wantFellBack    bool
+		wantErr         bool
+	}{
+		{
+			name:          "available model: no fallback",
+			spec:          "anthropic:claude-opus-5-5",
+			wantProvider:  "anthropic",
+			wantModelName: "claude-opus-5-5",
+		},
+		{
+			name:          "unavailable model with explicit provider",
+			spec:          "anthropic:claude-opus-4-6",
+			wantProvider:  "anthropic",
+			wantModelName: "claude-haiku-5-5",
+			wantFellBack:  true,
+		},
+		{
+			name:            "explicit provider wins over default provider",
+			spec:            "cerebras:llama3.1-8b",
+			defaultProvider: "openai",
+			wantProvider:    "cerebras",
+			wantModelName:   "gpt-oss-120b",
+			wantFellBack:    true,
+		},
+		{
+			name:            "unavailable simple name uses default provider",
+			spec:            "gpt-4o",
+			defaultProvider: "openai",
+			wantProvider:    "openai",
+			wantModelName:   "gpt-6-luna",
+			wantFellBack:    true,
+		},
+		{
+			name:          "unavailable simple name without default provider",
+			spec:          "claude-sonnet-4-6",
+			wantProvider:  "anthropic",
+			wantModelName: "claude-haiku-5-5",
+			wantFellBack:  true,
+		},
+		{
+			name:    "unknown provider in spec",
+			spec:    "antropic:claude-haiku-5-5",
+			wantErr: true,
+		},
+		{
+			name:            "unknown default provider",
+			spec:            "unknown-model",
+			defaultProvider: "unknown",
+			wantErr:         true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			provider, modelName, fellBack, err := resolveModelSpec(tt.spec, tt.defaultProvider)
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Equal(t, tt.wantProvider, provider, "provider mismatch")
+			assert.Equal(t, tt.wantModelName, modelName, "modelName mismatch")
+			assert.Equal(t, tt.wantFellBack, fellBack, "fellBack mismatch")
+		})
+	}
+}
+
+func TestProviders_DefaultModelIsSupported(t *testing.T) {
+	for _, p := range providers {
+		t.Run(p.name, func(t *testing.T) {
+			desc, found := p.describe(p.defaultModel)
+			assert.True(t, found, "default model %q of %s is unknown", p.defaultModel, p.name)
+			assert.False(t, strings.HasPrefix(desc, "[Deprecated]"),
+				"default model %q of %s is deprecated", p.defaultModel, p.name)
 		})
 	}
 }

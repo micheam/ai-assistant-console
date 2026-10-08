@@ -17,6 +17,10 @@ import (
 const (
 	ProviderName = "anthropic"
 
+	// DefaultModelName is the model used when a requested model of this
+	// provider is not available.
+	DefaultModelName = ModelNameClaudeHaiku5_5
+
 	// defaultMaxTokens must be large enough that a propose_edit tool_use
 	// input (which can carry a sizeable old_string/new_string pair) isn't
 	// routinely cut off by the max_tokens limit; a truncated tool_use input

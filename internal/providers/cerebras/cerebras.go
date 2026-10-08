@@ -12,6 +12,10 @@ const Endpoint = "https://api.cerebras.ai/v1/chat/completions"
 // ProviderName is the name of this provider
 const ProviderName = "cerebras"
 
+// DefaultModelName is the model used when a requested model of this
+// provider is not available.
+const DefaultModelName = "gpt-oss-120b"
+
 // AvailableModels returns a list of available models
 func AvailableModels() []assistant.ModelDescriptor {
 	return []assistant.ModelDescriptor{

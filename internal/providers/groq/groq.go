@@ -12,6 +12,10 @@ const Endpoint = "https://api.groq.com/openai/v1/chat/completions"
 // ProviderName is the name of this provider
 const ProviderName = "groq"
 
+// DefaultModelName is the model used when a requested model of this
+// provider is not available.
+const DefaultModelName = "llama-3.3-70b-versatile"
+
 // AvailableModels returns a list of available models
 func AvailableModels() []assistant.ModelDescriptor {
 	return []assistant.ModelDescriptor{

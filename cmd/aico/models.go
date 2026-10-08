@@ -12,6 +12,7 @@ import (
 
 	"micheam.com/aico/internal/assistant"
 	"micheam.com/aico/internal/config"
+	"micheam.com/aico/internal/logging"
 	"micheam.com/aico/internal/providers/anthropic"
 	"micheam.com/aico/internal/providers/cerebras"
 	"micheam.com/aico/internal/providers/groq"
@@ -179,7 +180,8 @@ func runDescribeModel(ctx context.Context, cmd *cli.Command) error {
 // Helpers
 // -----------------------------------------------------------------------------
 
-// DefaultModel returns the default model descriptor.
+// DefaultModel returns the default model, which is the Anthropic provider's
+// default model.
 //
 // Important:
 //
@@ -190,10 +192,7 @@ func DefaultModel(cmd *cli.Command) (assistant.GenerativeModel, error) {
 	if apikey == "" {
 		return nil, errors.New(flagAPIKeyAnthropic.Name + " is required for default model, but not provided")
 	}
-	return anthropic.NewGenerativeModel(
-		anthropic.AvailableModels()[0].Name(),
-		apikey,
-	)
+	return anthropic.NewGenerativeModel(anthropic.DefaultModelName, apikey)
 }
 
 // detectModel attempts to detect the model from the app configuration and command flags.
@@ -206,7 +205,10 @@ func DefaultModel(cmd *cli.Command) (assistant.GenerativeModel, error) {
 // Model specification formats:
 //   - Simple: "gpt-4.1" (provider auto-detected, default_provider preferred if ambiguous)
 //   - Qualified: "openai:gpt-4.1" (explicit provider)
-func detectModel(cmd *cli.Command) (assistant.GenerativeModel, error) {
+//
+// A specified model that is not available falls back to a provider's
+// default model (see modelByName).
+func detectModel(ctx context.Context, cmd *cli.Command) (assistant.GenerativeModel, error) {
 	conf, err := config.Load()
 	if errors.Is(err, config.ErrConfigFileNotFound) {
 		return DefaultModel(cmd)
@@ -223,10 +225,15 @@ func detectModel(cmd *cli.Command) (assistant.GenerativeModel, error) {
 		return DefaultModel(cmd)
 	}
 
-	return modelByName(cmd, modelSpec)
+	return modelByName(ctx, cmd, modelSpec)
 }
 
-func modelByName(cmd *cli.Command, name string) (assistant.GenerativeModel, error) {
+// modelByName returns the model for the given model specification.
+//
+// If the model is not available (e.g. it was removed from aico), it falls
+// back to a provider's default model as resolveModelSpec does, and reports
+// the fallback on stderr and in the log.
+func modelByName(ctx context.Context, cmd *cli.Command, name string) (assistant.GenerativeModel, error) {
 	conf, err := config.Load()
 	if errors.Is(err, config.ErrConfigFileNotFound) {
 		return DefaultModel(cmd)
@@ -236,13 +243,19 @@ func modelByName(cmd *cli.Command, name string) (assistant.GenerativeModel, erro
 		// model: per-model settings would be dropped without notice.
 		return nil, fmt.Errorf("load config: %w", err)
 	}
-	provider, modelName, found := detectProviderByModelSpec(name, conf.DefaultProvider)
-	if !found {
-		return DefaultModel(cmd)
+	provider, modelName, fellBack, err := resolveModelSpec(name, conf.DefaultProvider)
+	if err != nil {
+		return nil, fmt.Errorf("resolve model %q: %w", name, err)
+	}
+	if fellBack {
+		fallback := QualifiedName(provider, modelName)
+		fmt.Fprintf(cmd.Root().ErrWriter, "warning: model %q is not available; using %q instead\n", name, fallback)
+		logging.LoggerFrom(ctx).Warn("requested model is not available; using the provider default instead",
+			"requested", name, "fallback", fallback)
 	}
 	entry, ok := providerByName(provider)
 	if !ok {
-		return DefaultModel(cmd)
+		return nil, fmt.Errorf("unknown provider %q", provider)
 	}
 	model, err := entry.newModel(modelName, cmd.String(entry.apiKeyFlag))
 	if err != nil {
@@ -349,21 +362,46 @@ func detectProviderByModelSpec(spec string, defaultProvider string) (provider st
 	return "", "", false
 }
 
+// resolveModelSpec resolves a model specification like
+// detectProviderByModelSpec, but falls back to a provider's default model
+// when the model is not available, reporting it with fellBack.
+//
+// The fallback provider is the one named in the spec, or else
+// defaultProvider, or else Anthropic. An unknown provider is an error.
+func resolveModelSpec(spec, defaultProvider string) (provider, modelName string, fellBack bool, err error) {
+	if provider, modelName, found := detectProviderByModelSpec(spec, defaultProvider); found {
+		return provider, modelName, false, nil
+	}
+	provider = ParseModelSpec(spec).Provider
+	if provider == "" {
+		provider = defaultProvider
+	}
+	if provider == "" {
+		provider = anthropic.ProviderName
+	}
+	entry, ok := providerByName(provider)
+	if !ok {
+		return "", "", false, fmt.Errorf("unknown provider %q", provider)
+	}
+	return entry.name, entry.defaultModel, true, nil
+}
+
 // providerEntry describes how to look up and construct models of one provider.
 type providerEntry struct {
-	name       string
-	apiKeyFlag string
-	describe   func(modelName string) (desc string, found bool)
-	newModel   func(modelName, apiKey string) (assistant.GenerativeModel, error)
-	aliases    func() map[string]string
+	name         string
+	apiKeyFlag   string
+	describe     func(modelName string) (desc string, found bool)
+	newModel     func(modelName, apiKey string) (assistant.GenerativeModel, error)
+	aliases      func() map[string]string
+	defaultModel string
 }
 
 // providers lists the supported providers in search order.
 var providers = []providerEntry{
-	{anthropic.ProviderName, flagAPIKeyAnthropic.Name, anthropic.DescribeModel, anthropic.NewGenerativeModel, anthropic.Aliases},
-	{openai.ProviderName, flagAPIKeyOpenAI.Name, openai.DescribeModel, openai.NewGenerativeModel, openai.Aliases},
-	{groq.ProviderName, flagAPIKeyGroq.Name, groq.DescribeModel, groq.NewGenerativeModel, groq.Aliases},
-	{cerebras.ProviderName, flagAPIKeyCerebras.Name, cerebras.DescribeModel, cerebras.NewGenerativeModel, cerebras.Aliases},
+	{anthropic.ProviderName, flagAPIKeyAnthropic.Name, anthropic.DescribeModel, anthropic.NewGenerativeModel, anthropic.Aliases, anthropic.DefaultModelName},
+	{openai.ProviderName, flagAPIKeyOpenAI.Name, openai.DescribeModel, openai.NewGenerativeModel, openai.Aliases, openai.DefaultModelName},
+	{groq.ProviderName, flagAPIKeyGroq.Name, groq.DescribeModel, groq.NewGenerativeModel, groq.Aliases, groq.DefaultModelName},
+	{cerebras.ProviderName, flagAPIKeyCerebras.Name, cerebras.DescribeModel, cerebras.NewGenerativeModel, cerebras.Aliases, cerebras.DefaultModelName},
 }
 
 func providerByName(name string) (providerEntry, bool) {

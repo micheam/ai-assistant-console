@@ -267,7 +267,7 @@ func defaultLogfilePath() string {
 
 const (
 	// DefaultModel is the default model to use
-	DefaultModel = anthropic.ModelNameClaudeHaiku5_5
+	DefaultModel = anthropic.DefaultModelName
 
 	// ApplicationFQN is the fully qualified name of the application
 	ApplicationFQN = "com.micheam.aico"

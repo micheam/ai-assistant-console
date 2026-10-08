@@ -13,6 +13,10 @@ import (
 const endpoint = "https://api.openai.com/v1/chat/completions"
 const ProviderName = "openai"
 
+// DefaultModelName is the model used when a requested model of this
+// provider is not available.
+const DefaultModelName = "gpt-6-luna"
+
 // AvailableModels returns a list of available models
 func AvailableModels() []assistant.ModelDescriptor {
 	return []assistant.ModelDescriptor{
