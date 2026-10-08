@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
 
     steps:
     - name: Checkout
@@ -37,7 +38,13 @@ jobs:
     - name: Prepare release body
       id: release_body
       env:
-        AICO_ANTHROPIC_API_KEY: ${{ secrets.AICO_ANTHROPIC_API_KEY }}
+        # Workload identity federation: the SDK exchanges the GitHub OIDC
+        # token in ANTHROPIC_IDENTITY_TOKEN_FILE for a short-lived access token.
+        ANTHROPIC_FEDERATION_RULE_ID: ${{ vars.ANTHROPIC_FEDERATION_RULE_ID }}
+        ANTHROPIC_ORGANIZATION_ID: ${{ vars.ANTHROPIC_ORGANIZATION_ID }}
+        ANTHROPIC_SERVICE_ACCOUNT_ID: ${{ vars.ANTHROPIC_SERVICE_ACCOUNT_ID }}
+        ANTHROPIC_WORKSPACE_ID: ${{ vars.ANTHROPIC_WORKSPACE_ID }}
+        ANTHROPIC_IDENTITY_TOKEN_FILE: ${{ runner.temp }}/anthropic-identity-token
       run: |
         sudo apt-get update && sudo apt-get install -y jq
         commits=$(./script/prepare_release_body.sh)
@@ -49,6 +56,11 @@ jobs:
         prompt='入力のコミット一覧から、このリリースの要点を日本語の1文（60文字以内）で書いてください。一覧に書かれていない理由や影響は推測しないでください。'
         summary=""
         if [ -n "$commits" ]; then
+          # GitHub's OIDC token expires in about five minutes; fetch it right
+          # before use.
+          curl -sS -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://api.anthropic.com" \
+            | jq -r .value > "$ANTHROPIC_IDENTITY_TOKEN_FILE" || true
           summary=$(echo "$commits" | timeout 120 ./aico-linux-amd64 --no-stream -m anthropic:claude-haiku-5-5 --system "$system" "$prompt") || summary=""
           if [ "$(echo "$summary" | wc -l)" -ne 1 ]; then
             summary=""
