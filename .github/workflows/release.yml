@@ -26,15 +26,6 @@ jobs:
       id: tag
       run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
-    - name: Prepare release body
-      id: release_body
-      run: |
-        sudo apt-get update && sudo apt-get install -y jq
-        release_body=$(./script/prepare_release_body.sh)
-        echo "body<<EOF" >> $GITHUB_OUTPUT
-        echo "$release_body" >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
-
     - name: Build binaries
       run: |
         # Build for multiple platforms
@@ -42,6 +33,37 @@ jobs:
         GOOS=linux GOARCH=arm64 go build -ldflags "-X main.version=${{ steps.tag.outputs.tag }}" -o aico-linux-arm64 ./cmd/aico
         GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.version=${{ steps.tag.outputs.tag }}" -o aico-darwin-amd64 ./cmd/aico
         GOOS=darwin GOARCH=arm64 go build -ldflags "-X main.version=${{ steps.tag.outputs.tag }}" -o aico-darwin-arm64 ./cmd/aico
+
+    - name: Prepare release body
+      id: release_body
+      env:
+        AICO_ANTHROPIC_API_KEY: ${{ secrets.AICO_ANTHROPIC_API_KEY }}
+      run: |
+        sudo apt-get update && sudo apt-get install -y jq
+        commits=$(./script/prepare_release_body.sh)
+
+        # Summarize the release in one line with the aico binary being released.
+        # The release goes out with the commit list alone if this fails or the
+        # output is not a single line.
+        system='あなたはリリースノートの一行要約を書く担当です。出力は要約の1文だけです。前置き、見直しの過程、見出し、箇条書き、Markdown の装飾は出力しないでください。'
+        prompt='入力のコミット一覧から、このリリースの要点を日本語の1文（60文字以内）で書いてください。一覧に書かれていない理由や影響は推測しないでください。'
+        summary=""
+        if [ -n "$commits" ]; then
+          summary=$(echo "$commits" | timeout 120 ./aico-linux-amd64 --no-stream -m anthropic:claude-haiku-5-5 --system "$system" "$prompt") || summary=""
+          if [ "$(echo "$summary" | wc -l)" -ne 1 ]; then
+            summary=""
+          fi
+        fi
+
+        {
+          echo "body<<EOF"
+          if [ -n "$summary" ]; then
+            echo "$summary"
+            echo
+          fi
+          echo "$commits"
+          echo "EOF"
+        } >> "$GITHUB_OUTPUT"
 
     - name: Create tar.gz archives
       run: |
