@@ -500,7 +500,7 @@ func detectSessionMode(cmd *cli.Command) (SessionMode, error) {
 // doGenerate regardless of session mode, so it works the same way whether
 // starting a new session or resuming an existing one.
 func loadSession(ctx context.Context, cmd *cli.Command) (*assistant.Session, error) {
-	conf, err := config.Load()
+	conf, err := config.LoadOrDefault()
 	if err != nil {
 		return nil, fmt.Errorf("can't load config: %w", err)
 	}

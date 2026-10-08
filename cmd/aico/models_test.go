@@ -1,10 +1,19 @@
 package main
 
 import (
+	"context"
+	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/urfave/cli/v3"
+
+	"micheam.com/aico/internal/assistant"
+	"micheam.com/aico/internal/config"
+	"micheam.com/aico/internal/providers/anthropic"
+	"micheam.com/aico/internal/providers/openai"
 )
 
 func TestParseModelSpec(t *testing.T) {
@@ -185,6 +194,55 @@ func TestDetectProviderByModelSpec(t *testing.T) {
 			assert.Equal(t, tt.wantProvider, provider, "provider mismatch")
 			assert.Equal(t, tt.wantModelName, modelName, "modelName mismatch")
 			assert.Equal(t, tt.wantFound, found, "found mismatch")
+		})
+	}
+}
+
+func TestDetectModel_WithoutConfigFile(t *testing.T) {
+	t.Setenv(config.EnvKeyConfigPath, filepath.Join(t.TempDir(), "config.toml")) // non-existent file
+
+	tests := []struct {
+		name         string
+		args         []string
+		wantProvider string
+		wantName     string
+	}{
+		{
+			name:         "--model is honored",
+			args:         []string{"--model", "openai:gpt-6-luna"},
+			wantProvider: openai.ProviderName,
+			wantName:     "gpt-6-luna",
+		},
+		{
+			name:         "default model when --model is not given",
+			wantProvider: anthropic.ProviderName,
+			wantName:     anthropic.DefaultModelName,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var got assistant.GenerativeModel
+			app := &cli.Command{
+				Name: "aico",
+				// Throwaway flags named like the package-level ones, so that
+				// neither values nor env sources leak into this test.
+				Flags: []cli.Flag{
+					&cli.StringFlag{Name: flagModel.Name},
+					&cli.StringFlag{Name: flagAPIKeyOpenAI.Name},
+					&cli.StringFlag{Name: flagAPIKeyAnthropic.Name},
+				},
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					var err error
+					got, err = detectModel(ctx, cmd)
+					return err
+				},
+			}
+			args := append([]string{"aico", "--openai-api-key", "dummy", "--anthropic-api-key", "dummy"}, tt.args...)
+
+			require.NoError(t, app.Run(context.Background(), args))
+			assert.Equal(t, tt.wantProvider, got.Provider())
+			assert.Equal(t, tt.wantName, got.Name())
 		})
 	}
 }

@@ -209,10 +209,7 @@ func DefaultModel(cmd *cli.Command) (assistant.GenerativeModel, error) {
 // A specified model that is not available falls back to a provider's
 // default model (see modelByName).
 func detectModel(ctx context.Context, cmd *cli.Command) (assistant.GenerativeModel, error) {
-	conf, err := config.Load()
-	if errors.Is(err, config.ErrConfigFileNotFound) {
-		return DefaultModel(cmd)
-	}
+	conf, err := config.LoadOrDefault()
 	if err != nil {
 		return nil, fmt.Errorf("load config: %w", err)
 	}
@@ -234,10 +231,7 @@ func detectModel(ctx context.Context, cmd *cli.Command) (assistant.GenerativeMod
 // back to a provider's default model as resolveModelSpec does, and reports
 // the fallback on stderr and in the log.
 func modelByName(ctx context.Context, cmd *cli.Command, name string) (assistant.GenerativeModel, error) {
-	conf, err := config.Load()
-	if errors.Is(err, config.ErrConfigFileNotFound) {
-		return DefaultModel(cmd)
-	}
+	conf, err := config.LoadOrDefault()
 	if err != nil {
 		// A malformed config must not silently degrade to the default
 		// model: per-model settings would be dropped without notice.

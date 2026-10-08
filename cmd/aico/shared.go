@@ -47,7 +47,7 @@ func readLines(r io.Reader) ([]string, error) {
 
 // initializeLogger initializes a logger from command-line flags and returns it with a cleanup function.
 func initializeLogger(ctx context.Context, cmd *cli.Command) (*logging.Logger, func(), error) {
-	conf, err := loadConfig(ctx, cmd)
+	conf, err := config.LoadOrDefault()
 	if err != nil {
 		return nil, nil, fmt.Errorf("load config: %w", err)
 	}

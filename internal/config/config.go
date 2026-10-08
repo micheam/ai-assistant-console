@@ -291,6 +291,22 @@ func Load() (*Config, error) {
 	return load(ConfigFilePath())
 }
 
+// LoadOrDefault loads the configuration like [Load], but returns
+// [DefaultConfig] when the config file does not exist.
+//
+// The default configuration is not written to disk. Any other error, such
+// as a malformed config file, is returned as is.
+func LoadOrDefault() (*Config, error) {
+	conf, err := Load()
+	if errors.Is(err, ErrConfigFileNotFound) {
+		return DefaultConfig(), nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return conf, nil
+}
+
 // InitAndLoad initializes the configuration for the application
 func InitAndLoad() (*Config, error) {
 	config, err := Load()

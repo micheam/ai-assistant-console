@@ -2,6 +2,8 @@ package config
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -134,6 +136,41 @@ func TestModelSettings_ResolveEffort(t *testing.T) {
 			require.Equal(t, tt.want, got)
 		})
 	}
+}
+
+func TestLoadOrDefault(t *testing.T) {
+	t.Run("returns the default config without creating the file when it does not exist", func(t *testing.T) {
+		path := filepath.Join(t.TempDir(), "config.toml")
+		t.Setenv(EnvKeyConfigPath, path)
+
+		conf, err := LoadOrDefault()
+
+		require.NoError(t, err)
+		require.Equal(t, DefaultConfig(), conf)
+		require.NoFileExists(t, path)
+	})
+
+	t.Run("loads the config file when it exists", func(t *testing.T) {
+		path := filepath.Join(t.TempDir(), "config.toml")
+		require.NoError(t, os.WriteFile(path, []byte(`model = "gpt-6-luna"`), 0644))
+		t.Setenv(EnvKeyConfigPath, path)
+
+		conf, err := LoadOrDefault()
+
+		require.NoError(t, err)
+		require.Equal(t, "gpt-6-luna", conf.Model)
+		require.Equal(t, path, conf.Location())
+	})
+
+	t.Run("returns an error for a malformed config file", func(t *testing.T) {
+		path := filepath.Join(t.TempDir(), "config.toml")
+		require.NoError(t, os.WriteFile(path, []byte(`model = `), 0644))
+		t.Setenv(EnvKeyConfigPath, path)
+
+		_, err := LoadOrDefault()
+
+		require.Error(t, err)
+	})
 }
 
 func TestDefaultConfig_EncodeOmitsModels(t *testing.T) {
