@@ -72,6 +72,9 @@ type Config struct {
 	// here get any settings; everything else runs on provider defaults.
 	Models map[string]ModelSettings `toml:"models,omitempty"`
 
+	// Complete holds the [complete] section: profiles for code completion.
+	Complete CompleteConfig `toml:"complete,omitempty"`
+
 	// SessionDir is the directory to store session files
 	//
 	// If omitted, the default session directory will be used.
@@ -218,6 +221,9 @@ func loadFromReader(r io.Reader) (*Config, error) {
 		if err := s.validate(); err != nil {
 			return nil, fmt.Errorf("models.%q: %w", name, err)
 		}
+	}
+	if err := config.Complete.validate(); err != nil {
+		return nil, fmt.Errorf("complete: %w", err)
 	}
 	return &config, nil
 }

@@ -67,6 +67,8 @@ func run(args []string) error {
 			CmdModels,
 			CmdPersona,
 			CmdSession,
+			CmdComplete,
+			CmdServe,
 		},
 	}
 	return app.Run(context.Background(), args)

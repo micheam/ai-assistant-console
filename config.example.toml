@@ -70,3 +70,28 @@ message = "You're aico, my personal AI assistant.You're here to help me with my 
 # [persona.writer]
 # description = "Creative Writer"
 # message = "You're a creative writing assistant. Help me craft engaging stories and content."
+
+# Code completion profiles
+# Used by `aico serve` to provide inline code completion to editors (vim-aico).
+# Each profile names one completion backend; run `aico complete profiles` to list them.
+#
+#   endpoint         - full URL of the llama-server /infill endpoint (required)
+#   model            - sent as the request's model field (optional)
+#   api_key_env      - name of the environment variable holding the API key
+#   n_predict        - max tokens per completion; the only cap on a
+#                      single-line suggestion                 (default: 128)
+#   t_max_prompt_ms  - time budget for prompt processing    (default: 500)
+#   t_max_predict_ms - stops generation at the next newline
+#                      once this time is exceeded            (default: 1000)
+#   prefix_lines     - lines before the cursor sent by the editor (default: 256)
+#   suffix_lines     - lines after the cursor sent by the editor  (default: 64)
+#   candidates       - suggestions generated per request        (default: 1)
+#
+# default_profile may be omitted when exactly one profile is defined.
+#
+# [complete]
+# default_profile = "local"
+#
+# [complete.profiles.local]
+# endpoint = "http://127.0.0.1:8012/infill"
+# model = "qwen2.5-coder-7b"
